@@ -6,6 +6,7 @@
 
 namespace Lost
 {
+    using System.Collections.Generic;
     using System.IO;
     using UnityEditor;
     using UnityEditor.VersionControl;
@@ -50,12 +51,14 @@ namespace Lost
         [MenuItem("Lost/Tools/Generate P4Ignore file")]
         public static void GenerateP4IgnoreIfDoesNotExist()
         {
+            string p4IgnoreFileTemplate = FindLostFile("p4ignore.txt");
+
             if (Data.GenerateP4IgnoreIfDoesNotExist && File.Exists(Data.P4IgnoreFileName) == false)
             {
-                if (File.Exists(Data.TemplateP4IgnoreLocation))
+                if (File.Exists(p4IgnoreFileTemplate))
                 {
                     Logger.LogWarning("Generating P4Ignore File {0}.  Make sure to check it in!", Data.P4IgnoreFileName);
-                    CreateFile(File.ReadAllText(Data.TemplateP4IgnoreLocation), Data.P4IgnoreFileName, true);
+                    CreateFile(File.ReadAllText(p4IgnoreFileTemplate), Data.P4IgnoreFileName, true);
                 }
                 else
                 {
@@ -122,15 +125,43 @@ namespace Lost
 
             try
             {
-                CopyFile(Data.TemplateNewBehaviourLocation, Path.Combine(templateFilesDirectory, "81-C# Script-NewBehaviourScript.cs.txt"), false);
-                CopyFile(Data.TemplateNewEditorTestLocation, Path.Combine(templateFilesDirectory, "83-Editor Test C# Script-NewEditorTest.cs.txt"), false);
-                CopyFile(Data.TemplateNewStatMachineLocation, Path.Combine(templateFilesDirectory, "86-C# Script-NewStateMachineBehaviourScript.cs.txt"), false);
-                CopyFile(Data.TemplateNewSubStateMachineLocation, Path.Combine(templateFilesDirectory, "86-C# Script-NewSubStateMachineBehaviourScript.cs.txt"), false);
+                var files = new Dictionary<string, string>
+                { 
+                    { "NewBehaviourScript.cs.txt",                "81-C# Script-NewBehaviourScript.cs.txt" },
+                    { "NewEditorTest.cs.txt",                     "83-Editor Test C# Script-NewEditorTest.cs.txt" },
+                    { "NewStateMachineBehaviourScript.cs.txt",    "86-C# Script-NewStateMachineBehaviourScript.cs.txt" },
+                    { "NewSubStateMachineBehaviourScript.cs.txt", "86-C# Script-NewSubStateMachineBehaviourScript.cs.txt" }
+                };
+
+                foreach (var keyValuePair in files)
+                {
+                    string sourceFile = FindLostFile(keyValuePair.Key);
+                    string destinationFile = Path.Combine(templateFilesDirectory, keyValuePair.Value);
+                    CopyFile(sourceFile, destinationFile, false);
+                }
             }
             catch
             {
                 Logger.LogError("Unable to overwrite template files!  Try running Unity in Administrator mode.");
             }
+        }
+
+        private static string FindLostFile(string fileName)
+        {
+            foreach (var filePath in Directory.GetFiles(".", "*", SearchOption.AllDirectories))
+            {
+                if (Path.GetFileName(filePath) == fileName)
+                {
+                    // making sure this file lives in the Lost folder
+                    var newFilePath = filePath.Replace("\\", "/");
+                    if (newFilePath.Contains("/Lost/"))
+                    {
+                        return newFilePath;
+                    }
+                }
+            }
+
+            return null;
         }
 
         [MenuItem("Lost/Tools/Convert all C# files to project line endings")]
