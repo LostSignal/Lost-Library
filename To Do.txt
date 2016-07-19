@@ -1,0 +1,111 @@
+-------------------------------------------------------------------------------
+-- Current To Do
+-------------------------------------------------------------------------------
+
+ * CloudBuild Helper needs to account for AwsAssetBundleUploader.jar's new file location
+ 
+ * Add MonoBehaviour extension .Delay(float, Action), which fires up a coroutine
+ 
+ * Move dialog folder into experimental
+   ** Or create a really nice dialog system based off of Shane's work
+ 
+ * Remove my logging system and just use default Unity
+
+ * Make sure everything is 100% StyleCoped
+   ** Using the Lost StyleCop settings
+   
+ * Pooling System
+   ** Using GetInstanceId for the hashing mechanism
+      
+ * Scroll List Pooling/Virtualization system
+   ** Needs a DataSource
+   ** Needs a Prefab
+   ** Needs custom function to apply the data to the prefab
+
+ * Editor GUI Table Rendering
+   ** Move items up/down
+   ** Remove/Add items
+
+ * Playfab Manager
+   ** Auto login with device
+   ** Account Creation + Device Linking
+   ** AssetBundle Uploader to Playfab
+   
+ * Dialog Manager
+      
+ * Loggly Integration
+   ** Loggly (https://www.loggly.com/blog/logging-in-unity3d/)
+   ** Use of SQLite4Unity for data storage
+   
+ * Segment Analytics 
+   ** Forward Analytics to Playfab and Unity (if UNITY_ANALYTICS is defined)
+   ** Make sure Screen events exist   
+   ** DebugBuild (true/false)
+   ** BuildType (Editor, Dev, Staging, Live)
+   ** SessionTracking (with timeout)
+      *** Make it a nice simple class (so if we want game/round tracking it's easily reusable)
+   ** Easy extensions for adding data to every analytics call
+   
+ * V2 of PlantGenerator System
+   ** Store plant definitions as ScriptableObjects
+
+-------------------------------------------------------------------------------
+-- Future To Do
+-------------------------------------------------------------------------------
+ 
+ * WeakPrefab System
+   ** Keeps refernece to Asset GUID
+   ** Auto updates Resource Path string (if changes)
+      OR
+   ** Auto updates AssetBundle / AssetBundle Path string (if changes)
+   ** Custom Editor so easy to drag drop
+   ** Possible keep actual reference in editor, but not on target
+   ** Print warning if a WeakPrefab doesn't point to a Resources file or a file in an AssetBundle
+ 
+ * Prefab Placer System (Help alieviate not having nested prefabs)
+   ** Make a PrefabPlacer<T> that takes a GameObject/Component
+   ** Can I make a bunch of mesh filters, that point to all the meshes in the prefab?
+   ** Will the system work with RectTransforms?
+   
+ * AssetBundleManager Rewrite
+   ** Default to using hash in file name
+   ** Resolve funtion (So can check streaming assets before going to web)
+      *** Also, this allows support for using Playfab content system
+   ** Only uploads Asset bundles that don't already exist in Playfab
+   ** Has actual Error reporting on which bundles are failing with messages
+   ** Has download count and progress, and estimated finish time
+
+ * UnityDateTime PropertyDrawer
+ 
+ * App Settings (Relys on Unity Cloud Build PreExport step)
+   ** String Obfuscation Type
+      *** For things like API keys so not so easy to find
+   ** BuildType { Editor, Dev, Staging, Live }
+   ** Generate git/p4ignore files (set p4ignore environment variable)
+   ** Override C# Template Files
+   ** Warnings as Errors
+   ** Defines Editor (store in PlayerSettings or gmcs.rsp/smcs.rsp?)
+   ** Logging Verbosity Settings
+   ** Show App Version
+   ** Move all Systems (Loggly, Segment, Etc) to be configurable through AppSettings
+      *** Also means they'll be definable for Editor/Dev/Staging/Live
+   ** Override Bundle Id
+   ** Disable Bitcode
+   ** AssetBundle Generation and Uploading
+ 
+ * Simple Code Cleaning tools
+   ** Soft Tabs
+   ** New Lines (Implemented)
+   ** Extra Lines
+   ** Lines after curly braces
+
+ * What New!  Our own App version checking system.  With Dialog box
+   ** Menu system needs a bool check (IsNewAppVersion?)
+   ** Should Rate App?
+
+ * After playing the game enough, ask the user if they want to rate it
+   ** Automatic app open tracking
+   ** Need to verify that Platform.Instance.RateApp() works
+   
+ * Localiazation
+ 
