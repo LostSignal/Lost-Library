@@ -34,7 +34,7 @@ namespace Lost
         {
             var cloudBuildManifest = Lost.CloudBuildManifest.Find();
             PlayerSettings.bundleVersion = string.Format("{0}.{1}", PlayerSettings.bundleVersion, cloudBuildManifest.ScmCommitId);
-            Logger.LogInfo("PlayerSettings.bundleVersion: {0}", PlayerSettings.bundleVersion);
+            Debug.LogFormat("PlayerSettings.bundleVersion: {0}", PlayerSettings.bundleVersion);
         }
 
         public static void WriteBundleVersionToVersionResourceFile()

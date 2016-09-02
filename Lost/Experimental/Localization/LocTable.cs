@@ -52,15 +52,15 @@ namespace Lost
         {
             if (newId == NullId)
             {
-                Logger.LogError(this, "LocTable.AddNewText(newId, newText) was given a null id of {0}!", NullId);
+                Debug.LogErrorFormat(this, "LocTable.AddNewText(newId, newText) was given a null id of {0}!", NullId);
             }
             else if (newText == null)
             {
-                Logger.LogError(this, "LocTable.AddNewText(newId, newText) was given a null newText!");
+                Debug.LogErrorFormat(this, "LocTable.AddNewText(newId, newText) was given a null newText!");
             }
             else if (this.GetIndex(newId) != -1)
             {
-                Logger.LogError(this, "LocTable.AddNewText(newId, newText) already contains id {0}!", newId);
+                Debug.LogErrorFormat(this, "LocTable.AddNewText(newId, newText) already contains id {0}!", newId);
             }
             else
             {
@@ -77,15 +77,15 @@ namespace Lost
         {
             if (id == NullId)
             {
-                Logger.LogError(this, "LocTable.UpdateText(id, newText) was given a null id of {0}!", NullId);
+                Debug.LogErrorFormat(this, "LocTable.UpdateText(id, newText) was given a null id of {0}!", NullId);
             }
             else if (newText == null)
             {
-                Logger.LogError(this, "LocTable.AddNewText(id, newText) was given a null newText!");
+                Debug.LogError("LocTable.AddNewText(id, newText) was given a null newText!", this);
             }
             else if (this.GetIndex(id) == -1)
             {
-                Logger.LogError(this, "LocTable.UpdateText(id, newText) was given an unknown id {0}!", id);
+                Debug.LogErrorFormat(this, "LocTable.UpdateText(id, newText) was given an unknown id {0}!", id);
             }
             else
             {
@@ -97,11 +97,11 @@ namespace Lost
         {
             if (id == NullId)
             {
-                Logger.LogError(this, "LocTable.OverrideLastEdited(id, dateTime) was given a null id of {0}!", NullId);
+                Debug.LogErrorFormat(this, "LocTable.OverrideLastEdited(id, dateTime) was given a null id of {0}!", NullId);
             }
             else if (this.GetIndex(id) == -1)
             {
-                Logger.LogError(this, "LocTable.OverrideLastEdited(id, dateTime) was given an unknown id {0}!", id);
+                Debug.LogErrorFormat(this, "LocTable.OverrideLastEdited(id, dateTime) was given an unknown id {0}!", id);
             }
             else
             {
@@ -122,7 +122,7 @@ namespace Lost
 
             if (index == -1)
             {
-                Logger.LogError(this, "LocTable.GetText(id) was given an unknown id {0}", id);
+                Debug.LogErrorFormat(this, "LocTable.GetText(id) was given an unknown id {0}", id);
                 return null;
             }
             else

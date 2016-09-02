@@ -4,6 +4,7 @@ namespace Lost
     using System;
     using System.IO;
     using System.Net;
+    using UnityEngine;
 
     public class AssetBundleFTPUploader
     {
@@ -13,14 +14,14 @@ namespace Lost
             var assetBundleDirectory = new DirectoryInfo(assetBundleDirectoryPath);
 
             // making sure the given folder exists
-            Logger.LogInfo("Creating FTP Directory: {0}", ftpUrl);
+            Debug.LogFormat("Creating FTP Directory: {0}", ftpUrl);
             CreateFolderOnFTP(ftpUrl, username, password);
 
             // figuring out which directories to create
             foreach (var directory in assetBundleDirectory.GetDirectories("*", SearchOption.AllDirectories))
             {
                 var newFtpDirectory = Path.Combine(ftpUrl, directory.FullName.Substring(assetBundleDirectoryPath.Length + 1)).Replace("\\", "/");
-                Logger.LogInfo("Creating FTP Directory: {0}", newFtpDirectory);
+                Debug.LogFormat("Creating FTP Directory: {0}", newFtpDirectory);
 
                 CreateFolderOnFTP(newFtpDirectory, username, password);
             }
@@ -28,7 +29,7 @@ namespace Lost
             foreach (var file in assetBundleDirectory.GetFiles("*", SearchOption.AllDirectories))
             {
                 var newFtpFile = Path.Combine(ftpUrl, file.FullName.Substring(assetBundleDirectoryPath.Length + 1)).Replace("\\", "/");
-                Logger.LogInfo("Creating New FTP File: {0}", newFtpFile);
+                Debug.LogFormat("Creating New FTP File: {0}", newFtpFile);
 
                 UploadToFTP(newFtpFile, file.FullName, username, password);
             }

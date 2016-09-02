@@ -29,7 +29,7 @@ namespace Lost
                 
                 if (rootSingleton != null)
                 {
-                    Logger.LogWarning("Destroy rouge singleton objects.");
+                    Debug.LogWarning("Destroy rouge singleton objects.");
                     rootSingleton.DestroyAllRecursively();
                 }
             }

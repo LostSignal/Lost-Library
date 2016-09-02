@@ -18,7 +18,7 @@ namespace Lost
         {
             if (obj == null)
             {
-                Logger.LogError("ObjectTracker tried to register a NULL object!");
+                Debug.LogError("ObjectTracker tried to register a NULL object!");
                 return;
             }
 
@@ -30,7 +30,7 @@ namespace Lost
             {
                 if (Debug.isDebugBuild && objectList.Contains(obj))
                 {
-                    Logger.LogError(obj as UnityEngine.Object, "ObjectTracker had an object of type {0} added multiple times!", objectType.Name);
+                    Debug.LogErrorFormat(obj as UnityEngine.Object, "ObjectTracker had an object of type {0} added multiple times!", objectType.Name);
                 }
                 else
                 {
@@ -47,7 +47,7 @@ namespace Lost
         {
             if (obj == null)
             {
-                Logger.LogError("ObjectTracker tried to deregister a NULL object!");
+                Debug.LogError("ObjectTracker tried to deregister a NULL object!");
                 return;
             }
 
@@ -63,7 +63,7 @@ namespace Lost
 
             if (success == false)
             {
-                Logger.LogError(obj as UnityEngine.Object, "ObjectTracker tried to remove object of type {0} before adding it!", objectType.Name);
+                Debug.LogErrorFormat(obj as UnityEngine.Object, "ObjectTracker tried to remove object of type {0} before adding it!", objectType.Name);
             }
         }
         

@@ -22,7 +22,7 @@ namespace Lost
 
             if (this.currentDialog != null && object.ReferenceEquals(dialog, this.currentDialog.DialogPrefab))
             {
-                Logger.LogError(dialog, "Same Dialog was shows twice in a row!");
+                Debug.LogError("Same Dialog was shows twice in a row!", dialog);
                 return this.currentDialog;
             }
 

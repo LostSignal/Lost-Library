@@ -15,7 +15,7 @@ namespace Lost
         public static void SelectAllChildMeshesWithNoMeshCollider(MenuCommand command)
         {
             Vector3 pos = Selection.activeGameObject.transform.position;
-            Logger.LogInfo(Selection.activeGameObject, "{0}'s world position is {1}, {2}, {3}", Selection.activeGameObject.name, pos.x, pos.y, pos.z);
+            Debug.LogFormat(Selection.activeGameObject, "{0}'s world position is {1}, {2}, {3}", Selection.activeGameObject.name, pos.x, pos.y, pos.z);
         }
     }
 }

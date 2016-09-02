@@ -35,7 +35,7 @@ namespace Lost
 
             if (string.IsNullOrEmpty(www.error) == false)
             {
-                Logger.LogError("WWW Error: " + www.error);
+                Debug.LogErrorFormat("WWW Error: {0}", www.error);
             }
 
             // throw exception if we time out / bad connection
@@ -63,7 +63,7 @@ namespace Lost
 
             if (string.IsNullOrEmpty(www.error) == false)
             {
-                Logger.LogError("WWW Error: " + www.error);
+                Debug.LogErrorFormat("WWW Error: {0}", www.error);
             }
 
             // throw exception if we time out / bad connection

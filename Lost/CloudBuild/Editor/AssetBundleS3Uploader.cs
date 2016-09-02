@@ -13,7 +13,7 @@ namespace Lost
     {
         public static void UploadDirectoryToS3WithJavaUploader(string accessKey, string screteKey, string bucket, string folder, string key)
         {
-            Logger.LogInfo("Environment.OSVersion: {0}", Environment.OSVersion);
+            UnityEngine.Debug.LogFormat("Environment.OSVersion: {0}", Environment.OSVersion);
 
             // making sure the key ends with a '/' character
             if (string.IsNullOrEmpty(key) == false)
@@ -38,7 +38,7 @@ namespace Lost
 
             if (string.IsNullOrEmpty(output) == false)
             {
-                Logger.LogInfo(output);
+                UnityEngine.Debug.Log(output);
             }
 
             // getting the standard error
@@ -46,7 +46,7 @@ namespace Lost
 
             if (string.IsNullOrEmpty(error) == false)
             {
-                Logger.LogError(error);
+                UnityEngine.Debug.LogError(error);
             }
 
             // waiting for exit
@@ -55,7 +55,7 @@ namespace Lost
 
         public static void UploadDirectoryToS3WithAWSCLI(string accessKey, string screteKey, string region, string folder, string bucket, string key)
         {
-            Logger.LogInfo("Environment.OSVersion: {0}", Environment.OSVersion);
+            UnityEngine.Debug.LogFormat("Environment.OSVersion: {0}", Environment.OSVersion);
 
             // making sure the key ends with a '/' character
             if (string.IsNullOrEmpty(key) == false)
@@ -85,7 +85,7 @@ namespace Lost
             
             if (string.IsNullOrEmpty(output) == false)
             {
-                Logger.LogInfo(output);
+                UnityEngine.Debug.Log(output);
             }
             
             // getting the standard error
@@ -93,7 +93,7 @@ namespace Lost
             
             if (string.IsNullOrEmpty(error) == false)
             {
-                Logger.LogError(error);
+                UnityEngine.Debug.LogError(error);
             }
             
             // waiting for exit

@@ -56,7 +56,7 @@ namespace Lost
                 if (childSingleton != null && childSingleton.Length != 0)
                 {
                     instance = childSingleton[0];
-                    Logger.LogError(instance, "Singleton {0} already had an instance!  Taking the first one we found.", typeof(T).Name);
+                    Debug.LogErrorFormat(instance, "Singleton {0} already had an instance!  Taking the first one we found.", typeof(T).Name);
                 }
                 else
                 {
@@ -82,7 +82,7 @@ namespace Lost
         {
             if (instance != null && instance != this)
             {
-                Logger.LogError(instance, "Singleton GameObject {0} has been created multiple times!", typeof(T).Name);
+                Debug.LogErrorFormat(instance, "Singleton GameObject {0} has been created multiple times!", typeof(T).Name);
             }
         }
     }

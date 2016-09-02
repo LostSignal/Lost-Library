@@ -57,12 +57,12 @@ namespace Lost
             {
                 if (File.Exists(p4IgnoreFileTemplate))
                 {
-                    Logger.LogWarning("Generating P4Ignore File {0}.  Make sure to check it in!", Data.P4IgnoreFileName);
+                    Debug.LogWarningFormat("Generating P4Ignore File {0}.  Make sure to check it in!", Data.P4IgnoreFileName);
                     CreateFile(File.ReadAllText(p4IgnoreFileTemplate), Data.P4IgnoreFileName, true);
                 }
                 else
                 {
-                    Logger.LogError("Unable to create file {0}.  Template P4Ignore location does not exist!", Data.P4IgnoreFileName);
+                    Debug.LogErrorFormat("Unable to create file {0}.  Template P4Ignore location does not exist!", Data.P4IgnoreFileName);
                 }
             }
         }
@@ -82,7 +82,7 @@ namespace Lost
             {
                 EditorPrefs.SetString(p4IngnoreEditorPref, Data.P4IgnoreFileName);
 
-                Logger.LogInfo("Setting the P4IGNORE environment variable to {0}", Data.P4IgnoreFileName);
+                Debug.LogFormat("Setting the P4IGNORE environment variable to {0}", Data.P4IgnoreFileName);
                 
                 #if UNITY_EDITOR_WIN
 
@@ -119,7 +119,7 @@ namespace Lost
             
             if (Directory.Exists(templateFilesDirectory) == false)
             {
-                Logger.LogError("Unable to override template files, couldn't find unity template directory.");
+                Debug.LogError("Unable to override template files, couldn't find unity template directory.");
                 return;
             }
 
@@ -142,7 +142,7 @@ namespace Lost
             }
             catch
             {
-                Logger.LogError("Unable to overwrite template files!  Try running Unity in Administrator mode.");
+                Debug.LogError("Unable to overwrite template files!  Try running Unity in Administrator mode.");
             }
         }
 
@@ -195,7 +195,7 @@ namespace Lost
         {
             if (File.Exists(sourceFile) == false)
             {
-                Logger.LogError("Unable to copy file {0} to {1}.  Source file does not exist!", sourceFile, destinationFile);
+                Debug.LogErrorFormat("Unable to copy file {0} to {1}.  Source file does not exist!", sourceFile, destinationFile);
             }
 
             string fileContents = ConvertLineEndings(File.ReadAllText(sourceFile));
@@ -238,7 +238,7 @@ namespace Lost
             }
             else
             {
-                Logger.LogError("Unable to convert line endings, unknown line ending type found: " + LineEndings.Unix);
+                Debug.LogErrorFormat("Unable to convert line endings, unknown line ending type found: {0}", LineEndings.Unix);
             }
 
             return inputText;

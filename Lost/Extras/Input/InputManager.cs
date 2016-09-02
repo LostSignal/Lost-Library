@@ -209,7 +209,7 @@ namespace Lost
                 }
                 else
                 {
-                    Logger.LogError(this, "UpdateMouseInput found an invalid InputButton type!!!");
+                    Debug.LogError("UpdateMouseInput found an invalid InputButton type!!!", this);
                 }
             }
         }

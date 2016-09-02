@@ -41,7 +41,7 @@ namespace Lost
         {
             this.endTime = DateTime.Now;
             TimeSpan span = this.endTime.Subtract(this.startTime);
-            Logger.LogInfo("{0} took {1} milliseconds", this.message, span.TotalMilliseconds);
+            UnityEngine.Debug.LogFormat("{0} took {1} milliseconds", this.message, span.TotalMilliseconds);
         }
 
         private void Initialize(string message)

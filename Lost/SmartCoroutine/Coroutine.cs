@@ -73,8 +73,17 @@ namespace Lost
                     yield break;
                 }
 
-                if (coroutine.MoveNext() == false)
+                try
                 {
+                    if (coroutine.MoveNext() == false)
+                    {
+                        this.IsDone = true;
+                        yield break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this.Exception = ex;
                     this.IsDone = true;
                     yield break;
                 }
@@ -84,7 +93,7 @@ namespace Lost
                 {
                     this.Exception = new CoroutineTimeoutException();
                     this.DidTimeout = true;
-
+                    this.IsDone = true;
                     yield break;
                 }
 

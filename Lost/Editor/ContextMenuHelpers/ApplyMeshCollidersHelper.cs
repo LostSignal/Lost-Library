@@ -32,7 +32,7 @@ namespace Lost
         //// [MenuItem("Testing123/Testing456")]
         //// public static void Something(MenuCommand command)
         //// {
-        ////     Lost.Logger.LogInfo("Something");
+        ////     Debug.Log("Something");
         //// }
         //// 
         //// [ContextMenu("Another Context Menu")]

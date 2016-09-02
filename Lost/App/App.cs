@@ -36,7 +36,7 @@ namespace Lost
         {
             if (current != null)
             {
-                Logger.LogError(current, "App.Current already set!");
+                Debug.LogError("App.Current already set!", current);
                 return;
             }
 

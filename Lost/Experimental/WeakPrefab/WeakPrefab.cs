@@ -35,7 +35,7 @@ namespace Lost
 
                     if (this.prefab == null)
                     {
-                        Logger.LogError("Found WeakPrefab that points to bad location {0}!", this.prefabLocation);
+                        Debug.LogErrorFormat("Found WeakPrefab that points to bad location {0}!", this.prefabLocation);
                         this.ownesPrefab = false;
                         this.prefabLocation = null;
                     }

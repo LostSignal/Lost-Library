@@ -20,7 +20,7 @@ namespace Lost
         private void OnFocus()
         {
             // TODO [bgish] - Do initialization (Getting Defines from settigns, and getting defines from gmcs file)
-            Logger.LogInfo("Got Focus!");
+            Debug.Log("Got Focus!");
         }
 
         void OnGUI()
