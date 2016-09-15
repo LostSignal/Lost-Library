@@ -143,9 +143,9 @@ namespace Lost
             return Do<GetPlayerSegmentsRequest, GetPlayerSegmentsResult>(request, PlayFabClientAPI.GetPlayerSegments);
         }
 
-        public static IEnumerator<LogEventResult> Do(LogEventRequest request)
+        public static IEnumerator<WriteEventResponse> Do(WriteClientPlayerEventRequest request)
         {
-            return Do<LogEventRequest, LogEventResult>(request, PlayFabClientAPI.LogEvent);
+            return Do<WriteClientPlayerEventRequest, WriteEventResponse>(request, PlayFabClientAPI.WritePlayerEvent);
         }
 
         #region Title Data Related Functions
@@ -188,14 +188,14 @@ namespace Lost
             return Do<GetFriendLeaderboardRequest, GetLeaderboardResult>(request, PlayFabClientAPI.GetFriendLeaderboard);
         }
 
-        public static IEnumerator<GetLeaderboardAroundCurrentUserResult> Do(GetLeaderboardAroundCurrentUserRequest request)
+        public static IEnumerator<GetLeaderboardAroundPlayerResult> Do(GetLeaderboardAroundPlayerRequest request)
         {
-            return Do<GetLeaderboardAroundCurrentUserRequest, GetLeaderboardAroundCurrentUserResult>(request, PlayFabClientAPI.GetLeaderboardAroundCurrentUser);
+            return Do<GetLeaderboardAroundPlayerRequest, GetLeaderboardAroundPlayerResult>(request, PlayFabClientAPI.GetLeaderboardAroundPlayer);
         }
         
-        public static IEnumerator<GetFriendLeaderboardAroundCurrentUserResult> Do(GetFriendLeaderboardAroundCurrentUserRequest request)
+        public static IEnumerator<GetFriendLeaderboardAroundPlayerResult> Do(GetFriendLeaderboardAroundPlayerRequest request)
         {
-            return Do<GetFriendLeaderboardAroundCurrentUserRequest, GetFriendLeaderboardAroundCurrentUserResult>(request, PlayFabClientAPI.GetFriendLeaderboardAroundCurrentUser);
+            return Do<GetFriendLeaderboardAroundPlayerRequest, GetFriendLeaderboardAroundPlayerResult>(request, PlayFabClientAPI.GetFriendLeaderboardAroundPlayer);
         }
 
         #endregion
