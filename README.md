@@ -1,6 +1,10 @@
 # Lost
 A helpful Unity framework that ranges from Singletons, Input Abstraction, Unity Cloud build helpers, Smart Coroutines, App Initialization and more.
 
+# Dependencies
+* PlayFab Unity SDK (https://api.playfab.com/sdks/unity)
+* Text Mesh Pro (https://www.assetstore.unity3d.com/en/#!/content/17662)
+
 # License
 
 The MIT License (MIT)
