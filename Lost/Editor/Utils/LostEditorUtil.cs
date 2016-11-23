@@ -6,40 +6,62 @@
 
 namespace Lost
 {
-    using System.Collections;
     using System.Collections.Generic;
-    using System.IO;
-
     using UnityEngine;
     using UnityEditor;
 
-    /// <summary>
-    /// 
-    /// </summary>
     public static class LostEditorUtil
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
+        private static Dictionary<Color, Texture2D> colorCache = new Dictionary<Color, Texture2D>();
+        private static Texture2D upTexture;
+        private static Texture2D downTexture;
+        private static Texture2D deleteTexture;
+
+        public static Texture2D UpTexture
+        {
+            get
+            {
+                if (!upTexture)
+                {
+                    upTexture = Resources.Load<Texture2D>("LostIcons/Up");
+                }
+
+                return upTexture;
+            }
+        }
+        
+        public static Texture2D DownTexture
+        {
+            get
+            {
+                if (!downTexture)
+                {
+                    downTexture = Resources.Load<Texture2D>("LostIcons/Down");
+                }
+
+                return downTexture;
+            }
+        }
+
+        public static Texture2D DeleteTexture
+        {
+            get
+            {
+                if (!deleteTexture)
+                {
+                    deleteTexture = Resources.Load<Texture2D>("LostIcons/Delete");
+                }
+
+                return deleteTexture;
+            }
+        }
+        
         public static bool IsProTheme()
         {
             return EditorGUIUtility.isProSkin;
         }
 
-        //TODO it seems this cache isn't working, double check at a later time
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private static Dictionary<Color, Texture2D> colorCache = new Dictionary<Color, Texture2D>();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="col"></param>
-        /// <returns></returns>
-        public static Texture2D MakeTexture(Color col)
+        public static Texture2D MakeColorTexture(Color col)
         {
             if (colorCache.ContainsKey(col))
             {
@@ -57,32 +79,6 @@ namespace Lost
                 colorCache[col] = result;
                 return result;
             }
-        }
-
-        /// <summary>
-        /// http://wiki.unity3d.com/index.php?title=CreateScriptableObjectAsset
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public static void CreateScriptableObject<T>(string defaultName) where T : ScriptableObject
-        {
-            T asset = ScriptableObject.CreateInstance<T>();
-            string path = AssetDatabase.GetAssetPath(Selection.activeObject);
-
-            if (path == string.Empty)
-            {
-                path = "Assets";
-            }
-            else if (Path.GetExtension(path) != string.Empty)
-            {
-                path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
-            }
-
-            string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + defaultName + ".asset");
-            AssetDatabase.CreateAsset(asset, assetPathAndName);
-            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(asset));
-            AssetDatabase.SaveAssets();
-            EditorUtility.FocusProjectWindow();
-            Selection.activeObject = asset;
         }
     }
 }

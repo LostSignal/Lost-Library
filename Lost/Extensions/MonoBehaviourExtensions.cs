@@ -6,8 +6,10 @@
 
 namespace Lost
 {
+    using System;
+    using System.Collections;
     using UnityEngine;
-    
+
     public static class MonoBehaviourExtensions
     {
         public static T GetOrAddComponent<T>(this MonoBehaviour behaviour) where T : Component
@@ -25,6 +27,17 @@ namespace Lost
 
             Gizmos.DrawWireCube(lhs.gameObject.transform.position + new Vector3(offset.x, offset.y, 0), worldUnits);
             #endif
+        }
+
+        public static void DelayExecute(this MonoBehaviour lhs, float delayInSeconds, Action action)
+        {
+            lhs.StartCoroutine(DelayExecuteCoroutine(delayInSeconds, action));
+        }
+
+        private static IEnumerator DelayExecuteCoroutine(float delayInSeconds, Action action)
+        {
+            yield return new WaitForSeconds(delayInSeconds);
+            action.InvokeIfNotNull();
         }
     }
 }

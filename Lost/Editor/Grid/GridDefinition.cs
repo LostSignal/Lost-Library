@@ -6,15 +6,28 @@
 
 namespace Lost
 {
+    using System;
     using System.Collections.Generic;
+
+    [Flags]
+    public enum GridButton
+    {
+        None = 0,
+        Delete = 1,
+        MoveUp = 2,
+        MoveDown = 4,
+        All = 7
+    }
 
     public class GridDefinition
     {
         private List<Column> columns = new List<Column>();
-        
+
         public GridDefinition()
         {
             this.DrawHeader = true;
+            this.AlternateColors = false;
+            this.RowButtons = GridButton.None;
         }
 
         public int ColumnCount
@@ -23,6 +36,20 @@ namespace Lost
         }
 
         public bool DrawHeader { get; set; }
+
+        public bool AlternateColors { get; set; }
+        
+        public GridButton RowButtons { get; set; }
+
+        public int RowButtonCount
+        {
+            get
+            {
+                return ((this.RowButtons & GridButton.Delete) != 0 ? 1 : 0) +
+                       ((this.RowButtons & GridButton.MoveDown) != 0 ? 1 : 0) +
+                       ((this.RowButtons & GridButton.MoveUp) != 0 ? 1 : 0);
+            }
+        }
 
         public Column this[int index]
         {
@@ -42,10 +69,10 @@ namespace Lost
                 this.Width = width;
                 this.Tooltip = tooltip;
             }
-
+            
             public string Name { get; private set; }
 
-            public int Width { get; private set; }
+            public int Width { get; set; }
 
             public string Tooltip { get; private set; }
         }

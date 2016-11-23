@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="SingletonGameObject.cs" company="Lost Signal LLC">
+// <copyright file="SingletonDialogResource.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -8,7 +8,7 @@ namespace Lost
 {
     using UnityEngine;
 
-    public abstract class SingletonGameObject<T> : MonoBehaviour where T : MonoBehaviour
+    public abstract class SingletonDialogResource<T> : Dialog where T : Dialog
     {
         private static object instanceLock = new object();
         private static T instance = null;
@@ -48,7 +48,7 @@ namespace Lost
                 {
                     return;
                 }
-                
+
                 T[] objects = GameObject.FindObjectsOfType<T>();
                 string className = typeof(T).Name;
 
@@ -59,11 +59,17 @@ namespace Lost
                 else
                 {
                     // constructing the singleton object
-                    GameObject singleton = new GameObject(className, typeof(T));
-                    singleton.transform.parent = SingletonUtil.GetSingletonContainer();
-                    singleton.transform.Reset();
+                    instance = GameObject.Instantiate<T>(Resources.Load<T>(className));
 
-                    instance = singleton.GetComponent<T>();
+                    if (instance == null)
+                    {
+                        Debug.LogErrorFormat("Couldn't load Dialog {0}.  Is there a resource named \"{0}\" with a component of type {0} in the project?", className);
+                        return;
+                    }
+
+                    instance.name = className;
+                    instance.transform.SetParent(SingletonUtil.GetSingletonContainer());
+                    instance.transform.Reset();
                 }
             }
         }
@@ -71,11 +77,13 @@ namespace Lost
         /// <summary>
         /// Called when object starts up, makes sure only one instance is created.
         /// </summary>
-        protected virtual void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             if (instance != null && instance != this)
             {
-                Debug.LogErrorFormat(instance, "Singleton GameObject {0} has been created multiple times!", typeof(T).Name);
+                Debug.LogErrorFormat(instance, "Singleton Dialog Resource {0} has been created multiple times!", typeof(T).Name);
             }
         }
     }

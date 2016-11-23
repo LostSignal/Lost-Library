@@ -236,16 +236,25 @@ namespace Lost
             #if UNITY_EDITOR
             if (SimulateAssetBundleInEditor)
             {
-                string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(assetBundleName, assetName);
-                if (assetPaths.Length == 0)
+                // NOTE [bgish]: testing if it's a full asset path, if so use LoadAssetAtPath instead.  Might be worth using this function in the else as well at a later date.
+                if (assetName.Contains("/"))
                 {
-                    Debug.LogError("There is no asset with name \"" + assetName + "\" in " + assetBundleName);
-                    return null;
+                    UnityEngine.Object target = AssetDatabase.LoadAssetAtPath(assetName, type);
+                    operation = new AssetBundleLoadAssetOperationSimulation(target);
                 }
+                else
+                {
+                    string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(assetBundleName, assetName);
+                    if (assetPaths.Length == 0)
+                    {
+                        Debug.LogError("There is no asset with name \"" + assetName + "\" in " + assetBundleName);
+                        return null;
+                    }
 
-                // @TODO: Now we only get the main object from the first asset. Should consider type also.
-                UnityEngine.Object target = AssetDatabase.LoadMainAssetAtPath(assetPaths[0]);
-                operation = new AssetBundleLoadAssetOperationSimulation(target);
+                    // @TODO: Now we only get the main object from the first asset. Should consider type also.
+                    UnityEngine.Object target = AssetDatabase.LoadMainAssetAtPath(assetPaths[0]);
+                    operation = new AssetBundleLoadAssetOperationSimulation(target);
+                }
             }
             else
             #endif

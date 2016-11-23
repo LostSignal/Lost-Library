@@ -67,11 +67,18 @@ namespace Lost
             }
         }
 
-        public static IEnumerator<LoginResult> LoginWithDeviceId(bool createAccount)
+        public static IEnumerator<LoginResult> LoginWithDeviceId(bool createAccount, GetPlayerCombinedInfoRequestParams infoRequest = null)
         {
             #if UNITY_EDITOR
-            
-            return Do<LoginWithCustomIDRequest, LoginResult>(new LoginWithCustomIDRequest { CreateAccount = createAccount, CustomId = DeviceId }, PlayFabClientAPI.LoginWithCustomID);
+
+            return Do<LoginWithCustomIDRequest, LoginResult>(
+                new LoginWithCustomIDRequest
+                {
+                    CreateAccount = createAccount,
+                    CustomId = DeviceId,
+                    InfoRequestParameters = infoRequest
+                }, 
+                PlayFabClientAPI.LoginWithCustomID);
             
             #elif UNITY_ANDROID
 
@@ -82,7 +89,8 @@ namespace Lost
                     AndroidDeviceId = DeviceId,
                     AndroidDevice = UnityEngine.SystemInfo.deviceModel,
                     OS = UnityEngine.SystemInfo.operatingSystem,
-                }, 
+                    InfoRequestParameters = infoRequest,
+                },
                 PlayFabClientAPI.LoginWithAndroidDeviceID);
             
             #elif UNITY_IOS
@@ -94,7 +102,8 @@ namespace Lost
                     DeviceId = DeviceId,
                     DeviceModel = UnityEngine.SystemInfo.deviceModel,
                     OS = UnityEngine.SystemInfo.operatingSystem,
-                }, 
+                    InfoRequestParameters = infoRequest,
+                },
                 PlayFabClientAPI.LoginWithIOSDeviceID);
             
             #endif

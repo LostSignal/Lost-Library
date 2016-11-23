@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace IdioWords
+namespace Lost
 {
     using UnityEngine;
     using UnityEngine.UI;
@@ -16,6 +16,7 @@ namespace IdioWords
         [Header("Scroller Movement")]
         [SerializeField] private float scrollerSpeed = 2.0f;
         [SerializeField] private float kickInVelocity = 200.0f;
+        [SerializeField] private bool isVertical = false;
 
         [Header("Dot Properties")]
         [SerializeField] private Transform dotContainer;
@@ -26,6 +27,13 @@ namespace IdioWords
         #pragma warning restore 0649
 
         private ScrollRect scrollRect;
+
+        private GameObject closestChild;
+
+        public GameObject  ClosestChild
+        {
+            get { return this.closestChild; }
+        }
 
         public int ClosestChildIndex
         {
@@ -65,7 +73,7 @@ namespace IdioWords
         public void InitializeDots()
         {
             // making sure it hasn't already been initialized
-            if (this.dotContainer.transform.childCount > 0)
+            if (this.dotContainer != null && this.dotContainer.transform.childCount > 0)
             {
                 return;
             }
@@ -97,7 +105,7 @@ namespace IdioWords
         {
             return this.scrollRect.transform.position - this.scrollRect.content.transform.GetChild(childIndex).position;
         }
-        
+
         private void Update()
         {
             // making sure we have something to scroll
@@ -109,8 +117,22 @@ namespace IdioWords
             // checking if the minimum speed is met before we start moving it ourselves
             if (this.scrollRect.velocity.sqrMagnitude < (this.kickInVelocity * this.kickInVelocity))
             {
-                float distance = this.GetDistanceVector(this.ClosestChildIndex).x;
-                this.scrollRect.content.transform.position += new Vector3(distance, 0, 0) * (Time.deltaTime * this.scrollerSpeed);
+                if (this.isVertical)
+                {
+                    float distance = this.GetDistanceVector(this.ClosestChildIndex).y;
+                    this.scrollRect.content.transform.position += new Vector3(0, distance, 0) * (Time.deltaTime * this.scrollerSpeed);
+
+                    this.closestChild = this.scrollRect.content.GetChild(this.ClosestChildIndex).gameObject;
+
+                }
+                else
+                {
+                    float distance = this.GetDistanceVector(this.ClosestChildIndex).x;
+                    this.scrollRect.content.transform.position += new Vector3(distance, 0, 0) * (Time.deltaTime * this.scrollerSpeed);
+
+                    this.closestChild = this.scrollRect.content.GetChild(this.ClosestChildIndex).gameObject;
+
+                }
             }
 
             // updating the dots

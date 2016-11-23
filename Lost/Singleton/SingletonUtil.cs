@@ -42,19 +42,7 @@ namespace Lost
         {
             if (singletonRoot == null)
             {
-                singletonRoot = GameObject.Find("/" + RootSingletonName);
-            }
-
-            if (singletonRoot == null)
-            {
-                singletonRoot = new GameObject(RootSingletonName);
-                singletonRoot.transform.position = Vector3.zero;
-                singletonRoot.transform.rotation = Quaternion.identity;
-                singletonRoot.transform.localScale = Vector3.one;
-
-                //// BUG For some reason a singleton can't receive a GameObject.SendMessage if you set the HideFlags.DontSave
-                //// singletonRoot.hideFlags = HideFlags.NotEditable | HideFlags.DontSave;
-
+                singletonRoot = GameObject.Find("/" + RootSingletonName) ?? new GameObject(RootSingletonName);
                 GameObject.DontDestroyOnLoad(singletonRoot);
             }
 

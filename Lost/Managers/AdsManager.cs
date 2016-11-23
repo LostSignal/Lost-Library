@@ -57,7 +57,7 @@ namespace Lost
 
                 options.resultCallback = new System.Action<ShowResult>(result => 
                 {
-                    Debug.Log(result.ToString(), this);  // ShowResult.Finished, ShowResult.Skipped or ShowResult.Failed
+                    UnityEngine.Debug.Log(result.ToString(), this);  // ShowResult.Finished, ShowResult.Skipped or ShowResult.Failed
                 });
                 
                 Advertisement.Show(null, options);

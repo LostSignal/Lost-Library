@@ -9,7 +9,7 @@ namespace Lost
     using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
-    
+
     public class Grid
     {
         public static readonly int RowHeight = 20;
@@ -17,10 +17,13 @@ namespace Lost
 
         private static GUIStyle columnHeaderGuiStyle = null;
         private static GUIStyle rowGuiStyle = null;
-
         private static List<Color> backgroundColors = new List<Color>();
+
         private GridDefinition gridDefinition;
         private int currentColumnIndex = 0;
+        private int currentRowIndex = 0;
+        private float totalWidth;
+        private int rowButtonCount;
 
         static Grid()
         {
@@ -41,14 +44,68 @@ namespace Lost
         public Grid(GridDefinition gridDefinition)
         {
             this.gridDefinition = gridDefinition;
+            this.rowButtonCount = this.gridDefinition.RowButtonCount;
         }
 
+        public GridButton RowButtonPressed { get; private set; }
+
+        private static GUIStyle ColumnHeaderGuiStyle
+        {
+            get
+            {
+                if (columnHeaderGuiStyle == null)
+                {
+                    columnHeaderGuiStyle = new GUIStyle(GUI.skin.box);
+                    columnHeaderGuiStyle.padding = new RectOffset(0, 0, 3, 3);
+                    columnHeaderGuiStyle.margin = new RectOffset(0, 0, 0, 0);
+                    columnHeaderGuiStyle.alignment = TextAnchor.LowerCenter;
+                    columnHeaderGuiStyle.stretchWidth = true;
+
+                    if (LostEditorUtil.IsProTheme())
+                    {
+                        columnHeaderGuiStyle.normal.textColor = Color.white;
+                    }
+                    else
+                    {
+                        columnHeaderGuiStyle.normal.background = LostEditorUtil.MakeColorTexture(new Color(0.7f, 0.7f, 0.7f));
+                        columnHeaderGuiStyle.normal.textColor = Color.black;
+                    }
+                }
+
+                return columnHeaderGuiStyle;
+            }
+        }
+
+        private static GUIStyle RowGuiStyle
+        {
+            get
+            {
+                if (rowGuiStyle == null)
+                {
+                    rowGuiStyle = new GUIStyle();
+                    rowGuiStyle.padding = new RectOffset(0, 0, 0, 0);
+                    rowGuiStyle.margin = new RectOffset(0, 0, 1, 1);
+                }
+
+                return rowGuiStyle;
+            }
+        }
+        
+        private int RowButtonsWidth
+        {
+            get { return this.rowButtonCount == 0 ? 0 : (5 + (this.rowButtonCount * 27)); }
+        }
+        
         public void BeginGrid()
         {
+            this.totalWidth = this.GetTotalCellWidth();
+
             if (this.gridDefinition.DrawHeader)
             {
                 this.DrawHeader();
             }
+
+            this.currentRowIndex = 0;
         }
 
         public void EndGrid()
@@ -84,19 +141,10 @@ namespace Lost
         public void BeginRow()
         {
             this.currentColumnIndex = 0;
+                                        
+            RowGuiStyle.normal.background = LostEditorUtil.MakeColorTexture(this.GetCurrentRowColor());
 
-            float totalWidth = this.GetTotalCellWidth();
-                            
-            if (rowGuiStyle == null)
-            {
-                rowGuiStyle = new GUIStyle();
-                rowGuiStyle.padding = new RectOffset(0, 0, 0, 0);
-                rowGuiStyle.margin = new RectOffset(0, 0, 1, 1);
-            }
-
-            rowGuiStyle.normal.background = LostEditorUtil.MakeTexture(this.GetCurrentRowColor());
-
-            EditorGUILayout.BeginHorizontal(rowGuiStyle, GUILayout.Height(RowHeight), GUILayout.Width(totalWidth));
+            EditorGUILayout.BeginHorizontal(RowGuiStyle, GUILayout.Height(RowHeight), GUILayout.Width(this.totalWidth));
         
             //// public BeginGridRowHelper(float width, int height, Color rowColor, out Rect position)
             //// {
@@ -131,10 +179,22 @@ namespace Lost
             ////         }
             ////     }
             //// }
-        
+
+            this.RowButtonPressed = this.DrawRowButtons();
+
             EditorGUILayout.EndHorizontal();
+            this.currentRowIndex++;
         }
+
+        #region Button Drawing
         
+        public bool DrawAddButton()
+        {
+            return GUILayout.Button("+", GUILayout.Width(this.totalWidth - 5));
+        }
+
+        #endregion
+
         #region Cell Drawing
 
         public void DrawLabel(string value)
@@ -143,6 +203,13 @@ namespace Lost
             GUILayout.Space(5);
             EditorGUILayout.LabelField(value, GUILayout.Width(column.Width - 10));
             GUILayout.Space(1);
+        }
+
+        public void DrawReadOnlyString(string stringValue)
+        {
+            GUI.enabled = false;
+            this.DrawString(stringValue);
+            GUI.enabled = true;
         }
 
         public string DrawString(string stringValue)
@@ -179,6 +246,13 @@ namespace Lost
             return newValue;
         }
 
+        public void DrawReadOnlyFloat(float floatValue)
+        {
+            GUI.enabled = false;
+            this.DrawFloat(floatValue);
+            GUI.enabled = true;
+        }
+
         public float DrawFloat(float floatValue)
         {
             return this.DrawFloat(floatValue, float.MinValue, float.MaxValue);
@@ -193,6 +267,13 @@ namespace Lost
             GUILayout.Space(1);
 
             return Mathf.Clamp(newValue, minValue, maxValue);
+        }
+
+        public void DrawReadOnlyInt(int intValue)
+        {
+            GUI.enabled = false;
+            this.DrawInt(intValue);
+            GUI.enabled = true;
         }
 
         public int DrawInt(int intValue)
@@ -231,7 +312,7 @@ namespace Lost
             var column = this.GetNextColumn();
 
             GUILayout.Space(5);
-            var newValue = (Sprite)EditorGUILayout.ObjectField(value, typeof(Sprite), allowSceneObjects, GUILayout.Width(column.Width - 10));
+            var newValue = (Sprite)EditorGUILayout.ObjectField(GUIContent.none, value, typeof(Sprite), allowSceneObjects, GUILayout.Width(column.Width - 10));
             GUILayout.Space(1);
 
             return newValue;
@@ -253,7 +334,7 @@ namespace Lost
             var column = this.GetNextColumn();
 
             GUILayout.Space(5);
-            var newValue = EditorGUILayout.ObjectField(GUIContent.none, value, typeof(T), allowSceneObjects, GUILayout.Width(column.Width - 10)) as T;
+            var newValue = EditorGUILayout.ObjectField(GUIContent.none, value, typeof(T), allowSceneObjects, GUILayout.Width(column.Width - 10), GUILayout.Height(16)) as T;
             GUILayout.Space(1);
 
             return newValue;
@@ -280,25 +361,6 @@ namespace Lost
         
         private void DrawHeader()
         {
-            if (columnHeaderGuiStyle == null)
-            {
-                columnHeaderGuiStyle = new GUIStyle(GUI.skin.box);
-                columnHeaderGuiStyle.padding = new RectOffset(0, 0, 3, 3);
-                columnHeaderGuiStyle.margin = new RectOffset(0, 0, 0, 0);
-                columnHeaderGuiStyle.alignment = TextAnchor.LowerCenter;
-                columnHeaderGuiStyle.stretchWidth = true;
-
-                if (LostEditorUtil.IsProTheme())
-                {
-                    columnHeaderGuiStyle.normal.textColor = Color.white;
-                }
-                else
-                {
-                    columnHeaderGuiStyle.normal.background = LostEditorUtil.MakeTexture(new Color(0.7f, 0.7f, 0.7f));
-                    columnHeaderGuiStyle.normal.textColor = Color.black;
-                }
-            }
-
             using (new BeginHorizontalHelper())
             {
                 for (int i = 0; i < this.gridDefinition.ColumnCount; i++)
@@ -314,7 +376,15 @@ namespace Lost
                             tooltip = column.Name;
                         }
 
-                        EditorGUILayout.LabelField(new GUIContent(column.Name, tooltip), columnHeaderGuiStyle);
+                        EditorGUILayout.LabelField(new GUIContent(column.Name, tooltip), ColumnHeaderGuiStyle);
+                    }
+                }
+
+                if (this.rowButtonCount != 0)
+                {
+                    using (new BeginHorizontalHelper(GUILayout.MaxWidth(this.RowButtonsWidth), GUILayout.MinWidth(this.RowButtonsWidth)))
+                    {
+                        EditorGUILayout.LabelField(string.Empty, ColumnHeaderGuiStyle);
                     }
                 }
             }
@@ -322,23 +392,49 @@ namespace Lost
 
         private Color GetCurrentRowColor()
         {
-            if (LostEditorUtil.IsProTheme())
+            if (this.gridDefinition.AlternateColors)
             {
-                return new Color(0.298f, 0.298f, 0.298f);
+                return backgroundColors[this.currentRowIndex % backgroundColors.Count];
             }
             else
             {
-                return new Color(0.867f, 0.867f, 0.867f);
+                return LostEditorUtil.IsProTheme() ? new Color(0.298f, 0.298f, 0.298f) : new Color(0.867f, 0.867f, 0.867f);
             }
-
-            // return backgroundColors[i % backgroundColors.Count];
         }
 
         private GridDefinition.Column GetNextColumn()
         {
-            int currentIndex = this.currentColumnIndex;
-            this.currentColumnIndex++;
-            return this.gridDefinition[currentIndex];
+            return this.gridDefinition[this.currentColumnIndex++];
+        }
+
+        private GridButton DrawRowButtons()
+        {
+            // early out if nothing to draw
+            if (this.rowButtonCount == 0)
+            {
+                return GridButton.None;
+            }
+
+            GUILayout.Space(5);
+
+            if ((this.gridDefinition.RowButtons & GridButton.Delete) != 0 && GUILayout.Button(LostEditorUtil.DeleteTexture))
+            {
+                return GridButton.Delete;
+            }
+
+            if ((this.gridDefinition.RowButtons & GridButton.MoveUp) != 0 && GUILayout.Button(LostEditorUtil.UpTexture))
+            {
+                return GridButton.MoveUp;
+            }
+
+            if ((this.gridDefinition.RowButtons & GridButton.MoveDown) != 0 && GUILayout.Button(LostEditorUtil.DownTexture))
+            {
+                return GridButton.MoveDown;
+            }
+            
+            GUILayout.Space(this.rowButtonCount == 1 ? 3 : 4);  // HACK [bgish]: to make 1 button look perfect
+
+            return GridButton.None;
         }
 
         private float GetTotalCellWidth()
@@ -349,6 +445,8 @@ namespace Lost
             {
                 total += this.gridDefinition[i].Width;
             }
+
+            total += this.RowButtonsWidth;
 
             return total;
         }
