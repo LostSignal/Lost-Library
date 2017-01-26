@@ -7,23 +7,32 @@
 namespace Lost
 {
     using System.Collections;
+    using System.Linq;
     using UnityEngine;
     using UnityEngine.UI;
-    
+
     [RequireComponent(typeof(Animator))]
     [RequireComponent(typeof(HDCanvas))]
     [RequireComponent(typeof(GraphicRaycaster))]
     public class Dialog : MonoBehaviour
     {
-        private static readonly int HideHash = Animator.StringToHash("Hide");
+        private static readonly int HiddenHash = Animator.StringToHash("Hidden");
+        private static readonly int ShownHash = Animator.StringToHash("Shown");
         private static readonly int ShowHash = Animator.StringToHash("Show");
-
+        
         #pragma warning disable 0649
         [Tooltip("This dialog should swallow up all input so you can't click behind it.")]
         [SerializeField] private bool blockInput = true;
 
         [Tooltip("If you tap anywhere outside the dialog, then it will dismiss it.")]
         [SerializeField] private bool tapOutsideToDismiss;
+
+        [Tooltip("If true, then Hide() and Show() won't work while dialog is transitioning.")]
+        [SerializeField] private bool dontChangeStateWhileTransitioning;
+
+        [Header("Back Button")]
+        [SerializeField] private bool registerForBackButton = true;
+        [SerializeField] private bool hideOnBackButtonPressed = true;
         #pragma warning restore 0649
         
         private bool isHibernateMonitorRunning = false;
@@ -33,33 +42,53 @@ namespace Lost
         private InputBlocker blocker;
         private Animator animator;
         private HDCanvas hdCanvas;
+        private Canvas canvas;
+        private bool isShowing;
         
+        public Animator Animator
+        {
+            get { return this.animator; }
+        }
+
+        public bool HideOnBackButtonPressed
+        {
+            get { return this.hideOnBackButtonPressed; }
+        }
+
+        public bool RegisterForBackButton
+        {
+            get { return this.registerForBackButton; }
+        }
+
         public bool IsShowing
         {
-            get { return this.dialogStateMachine.IsShowing; }
+            get { return this.isShowing; }
         }
 
         public bool IsShown
         {
-            get { return this.dialogStateMachine.IsShown; }
+            get { return this.isShowing && this.dialogStateMachine.IsInShownState; }
+        }
+
+        public bool IsHidding
+        {
+            get { return this.isShowing == false; }
         }
 
         public bool IsHidden
         {
-            get { return this.dialogStateMachine.IsHidden; }
+            get { return this.isShowing == false && this.dialogStateMachine.IsInHiddenState; }
         }
 
+        public bool IsTransitioning
+        {
+            get { return this.IsShown == false && this.IsHidden == false;  }
+        }
+        
         public IEnumerator ShowAndWait()
         {
             this.Show();
-
-            // waiting for it to start showing
-            while (this.IsShowing == false)
-            {
-                yield return null;
-            }
-
-            // while we are showing... keep waiting
+            
             while (this.IsHidden == false)
             {
                 yield return null;
@@ -68,34 +97,53 @@ namespace Lost
 
         public virtual void Show()
         {
-            if (this.dialogStateMachine.IsShowing == false)
+            // early out if we're not suppose to change state while transitioning
+            if (this.dontChangeStateWhileTransitioning && this.IsTransitioning)
             {
-                // making sure everything's turned on
-                this.SetActive(true);
-                
-                // setting the show trigger
-                this.animator.SetTrigger(ShowHash);
+                return;
+            }
 
+            if (this.isShowing == false)
+            {
+                this.isShowing = true;
+                this.animator.SetBool(ShowHash, true);
+                this.SetActive(true);
                 this.OnShow();
+
+                DialogManager.Instance.AddDialog(this);
             }
         }
 
         public virtual void Hide()
         {
-            if (this.dialogStateMachine.IsHidding == false)
+            // early out if we're not suppose to change state while transitioning
+            if (this.dontChangeStateWhileTransitioning && this.IsTransitioning)
+            {
+                return;
+            }
+
+            if (this.isShowing)
             {
                 this.StartHibernateMonitorCoroutine();
-                
-                // setting the hide trigger
-                this.animator.SetTrigger(HideHash);
-
+                this.isShowing = false;
+                this.animator.SetBool(ShowHash, false);
                 this.OnHide();
+
+                DialogManager.Instance.RemoveDialog(this);
+            }
+        }
+
+        public virtual void OnBackButtonPressed()
+        {
+            if (this.HideOnBackButtonPressed)
+            {
+                this.Hide();
             }
         }
 
         public void Toggle()
         {
-            if (this.dialogStateMachine.IsShowing)
+            if (this.isShowing)
             {
                 this.Hide();
             }
@@ -105,9 +153,16 @@ namespace Lost
             }
         }
 
+        public void SetSortingLayerAndOrder(string layerName, int order = 0)
+        {
+            this.canvas.sortingLayerName = layerName;
+            this.canvas.sortingOrder = order;
+        }
+
         protected virtual void Awake()
-        {            
+        {
             this.hdCanvas = this.GetComponent<HDCanvas>();
+            this.canvas = this.GetComponent<Canvas>();
             this.animator = this.GetComponent<Animator>();
             this.dialogStateMachine = this.animator.GetBehaviour<DialogStateMachine>();
             this.graphicRaycaster = this.GetComponent<GraphicRaycaster>();
@@ -116,12 +171,14 @@ namespace Lost
             this.hdCanvas.hideFlags = HideFlags.HideInInspector;
             this.graphicRaycaster.hideFlags = HideFlags.HideInInspector;
             
-            // TODO [bgish]: would be nice if we could also test if Hide and Show Triggers exist on this.animator as well
             // making sure the animator is set up properly
-            Debug.Assert(this.dialogStateMachine != null, "Dialog doesn't have a DialogStateMachine behaviour attached.", this);
-            Debug.Assert(this.animator.HasState(0, ShowHash), "Dialog doesn't have a Show state.", this);
-            Debug.Assert(this.animator.HasState(0, HideHash), "Dialog doesn't have a Hide state.", this);
+            Debug.AssertFormat(this.dialogStateMachine != null, this, "Dialog {0} doesn't have a DialogStateMachine behaviour attached.", this.gameObject.name);
+            Debug.AssertFormat(this.animator.HasState(0, ShownHash), this, "Dialog {0} doesn't have a \"Shown\" state.", this.gameObject.name);
+            Debug.AssertFormat(this.animator.HasState(0, HiddenHash), this, "Dialog {0} doesn't have a \"Hidden\" state.", this.gameObject.name);
 
+            var showingParameter = this.animator.parameters.FirstOrDefault(x => x.nameHash == ShowHash);
+            Debug.Assert(showingParameter != null, "Dialog doesn't have a \"Show\" Bool parameter.", this);
+            
             // making sure the content object exists
             Transform contentTransform = this.gameObject.transform.FindChild("Content");
             Debug.Assert(contentTransform != null, "Dialog doesn't contain a Content child object.", this);
@@ -166,7 +223,7 @@ namespace Lost
 
         private IEnumerator HibernateMonitorCoroutine()
         {
-            while (this.dialogStateMachine.IsHidden == false)
+            while (this.IsHidden == false)
             {
                 yield return null;
             }

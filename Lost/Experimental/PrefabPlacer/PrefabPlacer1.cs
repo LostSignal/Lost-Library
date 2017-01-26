@@ -15,7 +15,7 @@
 ////     {
 ////         if (this.prefabInstance != null)
 ////         {
-////             DestroyImmediate(prefabInstance);
+////             Pooler.DestroyImmediate(prefabInstance);
 ////             this.prefabInstance = null;
 ////         }
 ////     }
@@ -29,7 +29,7 @@
 ////     {
 ////         if (this.prefabInstance == null && this.Prefab != null)
 ////         {
-////             this.prefabInstance = Instantiate<GameObject>(this.Prefab);
+////             this.prefabInstance = Pooler.Instantiate<GameObject>(this.Prefab);
 ////             this.prefabInstance.hideFlags = HideFlags.HideAndDontSave;
 ////             this.prefabInstance.transform.SetParent(this.transform);
 ////             this.prefabInstance.transform.localPosition = Vector3.zero;

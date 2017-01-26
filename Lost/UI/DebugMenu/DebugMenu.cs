@@ -23,7 +23,7 @@ namespace Lost
 
         public void AddItem(string name, UnityAction customAction)
         {
-            var newItem = GameObject.Instantiate<DebugMenuItem>(this.debugMenuItemPrefab);
+            var newItem = Pooler.Instantiate<DebugMenuItem>(this.debugMenuItemPrefab);
             newItem.transform.SetParent(this.contentTransform);
             newItem.transform.Reset();
             newItem.Initialize(name, customAction, this.Hide);
@@ -35,7 +35,7 @@ namespace Lost
             {
                 if (menuItem.Name == name)
                 {
-                    GameObject.Destroy(menuItem.gameObject);
+                    Pooler.Destroy(menuItem.gameObject);
                 }
             }
         }

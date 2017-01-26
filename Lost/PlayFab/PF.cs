@@ -1,4 +1,11 @@
-﻿
+﻿//-----------------------------------------------------------------------
+// <copyright file="PF.cs" company="Lost Signal LLC">
+//     Copyright (c) Lost Signal LLC. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
+
+#if USE_PLAYFAB_SDK
+
 namespace Lost
 {
     using System;
@@ -6,33 +13,26 @@ namespace Lost
     using PlayFab;
     using PlayFab.ClientModels;
     using PlayFab.Events;
+    using PlayFab.SharedModels;
+    using UnityEngine;
 
     public static class PF
     {
-        //private static PlayFabEvents playfabEvents;
-        private static UserAccountInfo userAccountInfo = null;
+        private const string DeviceIdKey = "DeviceId";
+        private static string deviceId;
 
         static PF()
         {
-            // TODO register for Logged In event and get the userAccountInfo once you have a successful login
-            // PlayFab.Events.PlayFabEvents.Init();
-            // PlayFab.Events.PlayFabEvents.PlayFabResultEvent<LoginResult> += ;
-
-            //playfabEvents = PlayFabEvents.Init();
-            //playfabEvents.OnLoginResultEvent += PlayfabEvents_OnLoginResultEvent;
+            PlayfabEvents = PlayFabEvents.Init();
+            PlayfabEvents.OnLoginResultEvent += PlayfabEvents_OnLoginResultEvent;
         }
 
-        //private static void PlayfabEvents_OnLoginResultEvent(LoginResult result)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public static PlayFabEvents PlayfabEvents { get; private set; }
 
-        public static string DeviceId
-        {
-            // TODO [bgish]: instead of using this, should make a new guid and store the file locally and use that
-            get { return UnityEngine.SystemInfo.deviceUniqueIdentifier;  }
-        }
+        public static UserAccountInfo UserAccountInfo { get; private set; }
 
+        public static LoginResult LoginResult { get; private set; }
+        
         public static bool IsLoggedIn
         {
             get { return PlayFabClientAPI.IsClientLoggedIn(); }
@@ -40,36 +40,72 @@ namespace Lost
 
         public static string Id
         {
-            get { return userAccountInfo != null ? userAccountInfo.PlayFabId : null; }
+            get { return UserAccountInfo != null ? UserAccountInfo.PlayFabId : null; }
         }
 
         public static string FacebookId
         {
-            get { return userAccountInfo != null && userAccountInfo.FacebookInfo != null ? userAccountInfo.FacebookInfo.FacebookId : null; }
+            get { return UserAccountInfo != null && UserAccountInfo.FacebookInfo != null ? UserAccountInfo.FacebookInfo.FacebookId : null; }
         }
 
         public static bool IsFacebookLinked
         {
-            get { return string.IsNullOrEmpty(FacebookId); }
+            get { return string.IsNullOrEmpty(FacebookId) == false; }
+        }
+
+        #region Login and linking with device id
+
+        public static string DeviceId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(deviceId))
+                {
+                    string playerPrefsDeviceId = PlayerPrefs.GetString(DeviceIdKey, null);
+
+                    if (string.IsNullOrEmpty(playerPrefsDeviceId))
+                    {
+                        deviceId = Guid.NewGuid().ToString();
+                        PlayerPrefs.SetString(DeviceIdKey, deviceId);
+                        PlayerPrefs.Save();
+                    }
+                    else
+                    {
+                        deviceId = playerPrefsDeviceId;
+                    }
+                }
+
+                return deviceId;
+            }
         }
 
         public static bool IsDeviceLinked
         {
             get
             {
-                #if UNITY_EDITOR
-                return userAccountInfo != null && userAccountInfo.CustomIdInfo != null && userAccountInfo.CustomIdInfo.CustomId == DeviceId;
+                #if UNITY_EDITOR || UNITY_STANDALONE
+                return UserAccountInfo != null && UserAccountInfo.CustomIdInfo != null && UserAccountInfo.CustomIdInfo.CustomId == DeviceId;
                 #elif UNITY_IOS
-                return userAccountInfo != null && userAccountInfo.IosDeviceInfo != null && userAccountInfo.IosDeviceInfo.IosDeviceId == DeviceId;
+                return UserAccountInfo != null && UserAccountInfo.IosDeviceInfo != null && UserAccountInfo.IosDeviceInfo.IosDeviceId == DeviceId;
                 #elif UNITY_ANDROID
-                return userAccountInfo != null && userAccountInfo.AndroidDeviceInfo != null && userAccountInfo.AndroidDeviceInfo.AndroidDeviceId == DeviceId;
+                return UserAccountInfo != null && UserAccountInfo.AndroidDeviceInfo != null && UserAccountInfo.AndroidDeviceInfo.AndroidDeviceId == DeviceId;
                 #endif
             }
+        }
+        
+        public static void ResetDeviceId()
+        {
+            PlayerPrefs.DeleteKey(DeviceIdKey);
+            PlayerPrefs.Save();
         }
 
         public static IEnumerator<LoginResult> LoginWithDeviceId(bool createAccount, GetPlayerCombinedInfoRequestParams infoRequest = null)
         {
-            #if UNITY_EDITOR
+            // making sure we get User Account Info at login
+            infoRequest = infoRequest ?? new GetPlayerCombinedInfoRequestParams();
+            infoRequest.GetUserAccountInfo = true;
+
+            #if UNITY_EDITOR || UNITY_STANDALONE
 
             return Do<LoginWithCustomIDRequest, LoginResult>(
                 new LoginWithCustomIDRequest
@@ -108,14 +144,114 @@ namespace Lost
             
             #endif
         }
+        
+        public static IEnumerator<PlayFabResultCommon> LinkDeviceId()
+        {
+            #if UNITY_EDITOR || UNITY_STANDALONE
+            
+            var coroutine = Do<LinkCustomIDRequest, LinkCustomIDResult>(new LinkCustomIDRequest { CustomId = DeviceId }, PlayFabClientAPI.LinkCustomID);
+            
+            #elif UNITY_ANDROID 
+            
+            var coroutine = Do<LinkAndroidDeviceIDRequest, LinkAndroidDeviceIDResult>(
+                new LinkAndroidDeviceIDRequest
+                {
+                    AndroidDeviceId = DeviceId,
+                    AndroidDevice = UnityEngine.SystemInfo.deviceModel,
+                    OS = UnityEngine.SystemInfo.operatingSystem,
+                }, 
+                PlayFabClientAPI.LinkAndroidDeviceID);
+            
+            #elif UNITY_IOS
 
-        // LinkDeviceId
-        // UnlinkDeviceId
+            var coroutine = Do<LinkIOSDeviceIDRequest, LinkIOSDeviceIDResult>(
+                new LinkIOSDeviceIDRequest
+                {
+                    DeviceId = DeviceId,
+                    DeviceModel = UnityEngine.SystemInfo.deviceModel,
+                    OS = UnityEngine.SystemInfo.operatingSystem,
+                }, 
+                PlayFabClientAPI.LinkIOSDeviceID);
 
-        // LoginWithFacebook
-        // LinkFacebook
-        // UnlinkFacebook
-        // GetFacebookFriends: Get PlayFab Friends list (cache it), then get FB Friends (from FB SDK), then GetPlayFabIDsFromFacebookIDs and only return ones you haven't added yet
+            #endif
+            
+            while (coroutine.MoveNext())
+            {
+                yield return coroutine.Current as PlayFabResultCommon;
+            }
+        }
+        
+        public static IEnumerator<PlayFabResultCommon> UnlinkDeviceId()
+        {
+            #if UNITY_EDITOR || UNITY_STANDALONE
+            
+            var coroutine = Do<UnlinkCustomIDRequest, UnlinkCustomIDResult>(new UnlinkCustomIDRequest { CustomId = DeviceId }, PlayFabClientAPI.UnlinkCustomID);
+            
+            #elif UNITY_ANDROID 
+            
+            var coroutine = Do<UnlinkAndroidDeviceIDRequest, UnlinkAndroidDeviceIDResult>(new UnlinkAndroidDeviceIDRequest { AndroidDeviceId = DeviceId }, PlayFabClientAPI.UnlinkAndroidDeviceID);
+            
+            #elif UNITY_IOS
+            
+            var coroutine = Do<UnlinkIOSDeviceIDRequest, UnlinkIOSDeviceIDResult>(new UnlinkIOSDeviceIDRequest { DeviceId = DeviceId }, PlayFabClientAPI.UnlinkIOSDeviceID);
+            
+            #endif
+            
+            while (coroutine.MoveNext())
+            {
+                yield return coroutine.Current as PlayFabResultCommon;
+            }
+        }
+
+        #endregion
+
+        #region Login and linking with Facebook
+
+        public static IEnumerator<LoginResult> LoginWithFacebook(bool createAccount, GetPlayerCombinedInfoRequestParams infoRequest = null)
+        {
+            IEnumerator<string> getAccessTokenCoroutine = GetFacebookAccessToken();
+            string accessToken = null;
+
+            while (getAccessTokenCoroutine.MoveNext())
+            {
+                accessToken = getAccessTokenCoroutine.Current;
+            }
+
+            // making sure we get User Account Info at login
+            infoRequest = infoRequest ?? new GetPlayerCombinedInfoRequestParams();
+            infoRequest.GetUserAccountInfo = true;
+
+            var facebookLoginRequest = new LoginWithFacebookRequest
+            {
+                AccessToken = accessToken,
+                CreateAccount = createAccount,
+                InfoRequestParameters = infoRequest,
+            };
+
+            return Do<LoginWithFacebookRequest, LoginResult>(facebookLoginRequest, PlayFabClientAPI.LoginWithFacebook);
+        }
+
+        public static IEnumerator<LinkFacebookAccountResult> LinkFacebook()
+        {
+            IEnumerator<string> getAccessTokenCoroutine = GetFacebookAccessToken();
+            string accessToken = null;
+
+            while (getAccessTokenCoroutine.MoveNext())
+            {
+                accessToken = getAccessTokenCoroutine.Current;
+            }
+
+            var request = new LinkFacebookAccountRequest { AccessToken = accessToken };
+
+            return Do<LinkFacebookAccountRequest, LinkFacebookAccountResult>(request, PlayFabClientAPI.LinkFacebookAccount);
+        }
+
+        public static IEnumerator<UnlinkFacebookAccountResult> UnlinkFacebook()
+        {
+            return Do<UnlinkFacebookAccountRequest, UnlinkFacebookAccountResult>(new UnlinkFacebookAccountRequest(), PlayFabClientAPI.UnlinkFacebookAccount);
+        }
+
+        #endregion
 
         public static IEnumerator<UpdateUserTitleDisplayNameResult> Do(UpdateUserTitleDisplayNameRequest request)
         {
@@ -156,6 +292,20 @@ namespace Lost
         {
             return Do<WriteClientPlayerEventRequest, WriteEventResponse>(request, PlayFabClientAPI.WritePlayerEvent);
         }
+
+        #region User Data Related Functions
+
+        public static IEnumerator<GetUserDataResult> Do(GetUserDataRequest request)
+        {
+            return Do<GetUserDataRequest, GetUserDataResult>(request, PlayFabClientAPI.GetUserData);
+        }
+
+        public static IEnumerator<UpdateUserDataResult> Do(UpdateUserDataRequest request)
+        {
+            return Do<UpdateUserDataRequest, UpdateUserDataResult>(request, PlayFabClientAPI.UpdateUserData);
+        }
+
+        #endregion
 
         #region Title Data Related Functions
 
@@ -211,9 +361,9 @@ namespace Lost
 
         #region Purchasing Related Functions
 
-        public static IEnumerator<PurchaseItemResult> Do(PurchaseItemRequest request)
+        public static IEnumerator<GetStoreItemsResult> Do(GetStoreItemsRequest request)
         {
-            return Do<PurchaseItemRequest, PurchaseItemResult>(request, PlayFabClientAPI.PurchaseItem);
+            return Do<GetStoreItemsRequest, GetStoreItemsResult>(request, PlayFabClientAPI.GetStoreItems);
         }
 
         public static IEnumerator<ConfirmPurchaseResult> Do(ConfirmPurchaseRequest request)
@@ -281,5 +431,68 @@ namespace Lost
 
             yield return result;
         }
+
+        private static void PlayfabEvents_OnLoginResultEvent(LoginResult result)
+        {
+            LoginResult = result;
+            UserAccountInfo = result.InfoResultPayload.AccountInfo;
+        }
+
+        private static IEnumerator<string> GetFacebookAccessToken()
+        {
+            #if !USE_FACEBOOK_SDK
+
+            throw new FacebookException("USE_FACEBOOK_SDK is not defined!  Check your AppSettings.");
+            
+            #else
+
+            if (Facebook.Unity.FB.IsInitialized == false)
+            {
+                bool initializationFinished = false;
+                Facebook.Unity.FB.Init(() => { initializationFinished = true; });
+            
+                // waiting for FB to initialize
+                while (initializationFinished == false)
+                {
+                    yield return null;
+                }
+            }
+            
+            if (Facebook.Unity.FB.IsInitialized == false)
+            {
+                throw new FacebookException("Initialization Failed!");
+            }
+            else if (Facebook.Unity.FB.IsLoggedIn == false)
+            {
+                Facebook.Unity.ILoginResult facebookLoginResult = null;
+                Facebook.Unity.FB.LogInWithReadPermissions(new[] { "public_profile", "email", "user_friends" }, (loginResult) => { facebookLoginResult = loginResult; });
+            
+                // waiting for FB login to complete
+                while (facebookLoginResult == null)
+                {
+                    yield return null;
+                }
+
+                // checking for errors
+                if (facebookLoginResult.Cancelled)
+                {
+                    throw new FacebookException("User Canceled");
+                }
+                else if (facebookLoginResult.AccessToken == null)
+                {
+                    throw new FacebookException("AccessToken is Null!");
+                }
+                else if (string.IsNullOrEmpty(facebookLoginResult.AccessToken.TokenString))
+                {
+                    throw new FacebookException("TokenString is Null! or Empty!");
+                }
+            }
+
+            yield return Facebook.Unity.AccessToken.CurrentAccessToken.TokenString;
+            
+            #endif
+        }
     }
 }
+
+#endif

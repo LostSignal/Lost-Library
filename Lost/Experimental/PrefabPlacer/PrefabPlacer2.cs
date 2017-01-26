@@ -13,7 +13,7 @@
 ////     {
 ////         if (Application.isPlaying == false && this.prefabInstance == null && this.Prefab != null)
 ////         {
-////             this.prefabInstance = Instantiate<GameObject>(this.Prefab);
+////             this.prefabInstance = Pooler.Instantiate<GameObject>(this.Prefab);
 ////             this.prefabInstance.hideFlags = HideFlags.HideAndDontSave;
 ////             this.prefabInstance.transform.SetParent(this.transform);
 ////             this.prefabInstance.transform.localPosition = Vector3.zero;
@@ -25,7 +25,7 @@
 ////     {
 ////         if (Application.isPlaying)
 ////         {
-////             var instance = Instantiate<GameObject>(this.Prefab);
+////             var instance = Pooler.Instantiate<GameObject>(this.Prefab);
 ////             instance.name = this.name;
 ////             instance.transform.SetParent(this.transform.parent);
 ////             instance.transform.localPosition = this.transform.localPosition;
@@ -33,7 +33,7 @@
 ////             instance.transform.localScale = this.transform.localScale;
 //// 
 ////             int index = this.transform.GetSiblingIndex();
-////             DestroyImmediate(this.gameObject);
+////             Pooler.DestroyImmediate(this.gameObject);
 ////             instance.transform.SetSiblingIndex(index);
 ////         }
 ////     }

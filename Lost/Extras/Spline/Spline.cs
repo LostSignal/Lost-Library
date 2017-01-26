@@ -1,7 +1,6 @@
 ﻿
 namespace Lost
 {
-    using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
 
@@ -67,7 +66,7 @@ namespace Lost
                 float currentLength = desiredLength - this.currentSplineLength;
                 float childLength = this.children[i].Length;
 
-                if (currentLength < childLength)
+                if (currentLength <= childLength)
                 {
                     return Interpolate(this.children[i], this.children[i].Next, currentLength / childLength);
                 }
@@ -86,6 +85,18 @@ namespace Lost
         {
             if (Application.isPlaying == false)
             {
+                // creating two spline point children if none exist in editor mode
+                if (this.GetComponentsInChildren<SplinePoint>().Length == 0)
+                {
+                    var p1 = new GameObject("SplinePoint (0)", typeof(SplinePoint));
+                    p1.transform.SetParent(this.transform);
+                    p1.transform.localPosition = Vector3.zero;
+
+                    var p2 = new GameObject("SplinePoint (1)", typeof(SplinePoint));
+                    p2.transform.SetParent(this.transform);
+                    p2.transform.localPosition = Vector3.one;
+                }
+
                 return;
             }
 

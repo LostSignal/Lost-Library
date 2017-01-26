@@ -83,7 +83,7 @@ namespace Lost
             {
                 for (int i = 0; i < this.ChildCount; i++)
                 {
-                    var newDot = GameObject.Instantiate<GameObject>(this.dotPrefab);
+                    var newDot = Pooler.Instantiate(this.dotPrefab);
                     newDot.transform.SetParent(this.dotContainer);
                     newDot.transform.localScale = new Vector3(this.minScale, this.minScale, this.minScale);
                     newDot.transform.localPosition = Vector3.zero;

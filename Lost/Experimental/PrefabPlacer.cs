@@ -26,7 +26,7 @@ namespace Lost
         {
             if (this.prefabInstance != null)
             {
-                GameObject.DestroyImmediate(this.prefabInstance);
+                Pooler.DestroyImmediate(this.prefabInstance);
                 this.prefabInstance = null;
             }
         }
@@ -40,14 +40,14 @@ namespace Lost
         {
             if (this.prefabInstance == null && this.prefab != null)
             {
-                this.prefabInstance = GameObject.Instantiate<GameObject>(this.prefab);
+                this.prefabInstance = Pooler.Instantiate(this.prefab);
                 this.prefabInstance.hideFlags = HideFlags.HideAndDontSave;
                 this.prefabInstance.transform.SetParent(this.transform);
                 this.prefabInstance.transform.localPosition = Vector3.zero;
             }
         }
     }
-    
+
     //// public GameObject Prefab;
     //// private GameObject prefabInstance;
     //// private GameObject currentSelection;
@@ -57,7 +57,7 @@ namespace Lost
     //// {
     ////     if (Application.isPlaying == false && this.prefabInstance == null && this.Prefab != null)
     ////     {
-    ////         this.prefabInstance = Instantiate<GameObject>(this.Prefab);
+    ////         this.prefabInstance = Pooler.Instantiate<GameObject>(this.Prefab);
     ////         this.prefabInstance.hideFlags = HideFlags.HideAndDontSave;
     ////         this.prefabInstance.transform.SetParent(this.transform);
     ////         this.prefabInstance.transform.localPosition = Vector3.zero;
@@ -69,7 +69,7 @@ namespace Lost
     //// {
     ////     if (Application.isPlaying)
     ////     {
-    ////         var instance = Instantiate<GameObject>(this.Prefab);
+    ////         var instance = Pooler.Instantiate<GameObject>(this.Prefab);
     ////         instance.name = this.name;
     ////         instance.transform.SetParent(this.transform.parent);
     ////         instance.transform.localPosition = this.transform.localPosition;
@@ -77,7 +77,7 @@ namespace Lost
     ////         instance.transform.localScale = this.transform.localScale;
     //// 
     ////         int index = this.transform.GetSiblingIndex();
-    ////         DestroyImmediate(this.gameObject);
+    ////         Pooler.DestroyImmediate(this.gameObject);
     ////         instance.transform.SetSiblingIndex(index);
     ////     }
     //// }

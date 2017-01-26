@@ -144,7 +144,7 @@ namespace Lost.PlantGenerator
             {
                 for (int i = 0; i < branches.Length; i++)
                 {
-                    DestroyImmediate(branches[i].gameObject);
+                    Pooler.DestroyImmediate(branches[i].gameObject);
                 }
             }
 
@@ -259,7 +259,7 @@ namespace Lost.PlantGenerator
                         return;
                     }
 
-                    GameObject newBranch = (GameObject)Instantiate(prototypePlant);
+                    GameObject newBranch = Pooler.Instantiate(prototypePlant);
 
                     // setting up the base rotation
                     float baseRotation = 360 * ((float)j / (float)branchTypeCount);

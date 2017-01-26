@@ -6,7 +6,6 @@
 
 namespace Lost
 {
-    using TMPro;
     using UnityEngine;
     using UnityEngine.Events;
     using UnityEngine.UI;
@@ -15,7 +14,7 @@ namespace Lost
     {
         #pragma warning disable 0649
         [SerializeField] private Button button;
-        [SerializeField] private TextMeshProUGUI text;
+        [SerializeField] private Text text;
         #pragma warning restore 0649
 
         public string Name

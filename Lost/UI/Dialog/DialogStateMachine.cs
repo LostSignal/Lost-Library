@@ -10,69 +10,39 @@ namespace Lost
 
     public class DialogStateMachine : StateMachineBehaviour
     {
-        private static readonly int ShowHash = Animator.StringToHash("Show");
-        private static readonly int HideHash = Animator.StringToHash("Hide");
-
-        private float transitionFinishTime;
+        private static readonly int ShownHash = Animator.StringToHash("Shown");
+        private static readonly int HiddenHash = Animator.StringToHash("Hidden");
+        
         private State state;
 
-        public bool IsShowing
-        {
-            get { return this.state == State.Showing || this.state == State.Shown; }
-        }
-
-        public bool IsShown
+        public bool IsInShownState
         {
             get { return this.state == State.Shown; }
         }
 
-        public bool IsHidding
-        {
-            get { return this.state == State.Hiding || this.state == State.Hidden; }
-        }
-
-        public bool IsHidden
+        public bool IsInHiddenState
         {
             get { return this.state == State.Hidden; }
         }
         
-        public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-        {
-            if (stateInfo.shortNameHash == ShowHash)
-            {
-                this.state = State.Showing;
-                this.transitionFinishTime = Time.time + stateInfo.length;
-            }
-            else if (stateInfo.shortNameHash == HideHash)
-            {
-                this.state = State.Hiding;
-                this.transitionFinishTime = Time.time + stateInfo.length;
-            }
-        }
-        
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            if (Time.time > this.transitionFinishTime)
+            base.OnStateUpdate(animator, stateInfo, layerIndex);
+        
+            if (stateInfo.shortNameHash == ShownHash)
             {
-                this.transitionFinishTime = float.MaxValue;
-
-                if (this.state == State.Hiding)
-                {
-                    this.state = State.Hidden;
-                }
-                else if (this.state == State.Showing)
-                {
-                    this.state = State.Shown;
-                }
+                this.state = State.Shown;
+            }
+            else if (stateInfo.shortNameHash == HiddenHash)
+            {
+                this.state = State.Hidden;
             }
         }
 
         private enum State
         {
             Hidden,
-            Shown,
-            Showing,
-            Hiding,
+            Shown
         }
     }
 }
