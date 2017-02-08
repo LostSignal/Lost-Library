@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if USE_PLAYFAB_SDK && USE_FACEBOOK_SDK
+#if USE_PLAYFAB_SDK
 
 namespace Lost
 {
