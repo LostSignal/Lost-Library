@@ -11,7 +11,7 @@ namespace Lost
 
     public class AssetBundleS3Uploader
     {
-        public static void UploadDirectoryToS3WithJavaUploader(string accessKey, string screteKey, string bucket, string folder, string key)
+        public static void UploadDirectoryToS3WithJavaUploader(string accessKey, string secretKey, string bucket, string folder, string key)
         {
             UnityEngine.Debug.LogFormat("Environment.OSVersion: {0}", Environment.OSVersion);
 
@@ -22,7 +22,7 @@ namespace Lost
             }
 
             var executable = "java";
-            var arguments = string.Format("-jar AssetBundleUploader.jar {0} {1} {2} {3} {4}", accessKey, screteKey, bucket, folder, key);
+            var arguments = string.Format("-jar AssetBundleUploader.jar {0} {1} {2} {3} {4}", accessKey, secretKey, bucket, folder, key);
             var startInfo = new ProcessStartInfo(executable, arguments);
 
             // redirecting standard error/out

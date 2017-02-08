@@ -8,22 +8,19 @@ namespace Lost
 {
     using System;
     using System.IO;
-    using System.Text;
     using UnityEngine;
     
+    [Flags]
     public enum DevicePlatform
     {
-        Windows,           // UNITY_STANDALONE_WIN
-        WindowsUniversal,  // UNITY_WSA_10_0
-        XboxOne,           // UNITY_XBOXONE
-
-        iOS,               // UNITY_IPHONE
-        Android,           // UNITY_ANDROID
-
-        WebGL,             // UNITY_WEBGL
-        
-        Mac,               // UNITY_STANDALONE_OSX
-        Linux,             // UNITY_STANDALONE_LINUX
+        iOS               = 1 << 0,  // UNITY_IPHONE
+        Android           = 1 << 1,  // UNITY_ANDROID
+        Windows           = 1 << 2,  // UNITY_STANDALONE_WIN
+        Mac               = 1 << 3,  // UNITY_STANDALONE_OSX
+        Linux             = 1 << 4,  // UNITY_STANDALONE_LINUX
+        WindowsUniversal  = 1 << 5,  // UNITY_WSA_10_0
+        XboxOne           = 1 << 6,  // UNITY_XBOXONE
+        WebGL             = 1 << 7,  // UNITY_WEBGL
     }
 
     //// TODO add events for pen and mouse detected, that way if someone uses a pen

@@ -35,7 +35,7 @@ namespace Lost
             fileContents = fileContents.Replace("#COMPANY_NAME#", companyName);
             fileContents = fileContents.Replace("#NAMESPACE#", nameSpace);
             
-            File.WriteAllText(assetPath, fileContents);
+            File.WriteAllText(assetPath, AppSettingsHelper.ConvertLineEndings(fileContents));
             AssetDatabase.Refresh();
         }
     }

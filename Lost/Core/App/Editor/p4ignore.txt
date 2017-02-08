@@ -41,6 +41,20 @@ obj
 
 StyleCop.Cache
 
+
+# ======================= #
+# Warnings As Errors File #
+# ======================= #
+
+# Windows
+Assets\mcs.rsp
+Assets\mcs.rsp.meta
+
+# Mac
+Assets/mcs.rsp
+Assets/mcs.rsp.meta
+
+
 # ============ #
 # OS generated #
 # ============ #

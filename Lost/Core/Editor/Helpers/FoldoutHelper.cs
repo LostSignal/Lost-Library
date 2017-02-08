@@ -16,15 +16,30 @@ namespace Lost
         private static Dictionary<int, bool> foldouts = new Dictionary<int, bool>();
         private static GUIStyle titleGuiStyle = null;
 
-        public FoldoutHelper(int foldoutId, string title, float width, out bool visible)
+        public FoldoutHelper(int foldoutId, string title, float width, out bool visible, bool defaultVisible = false)
         {
             // making sure this foldoutId is in the list
             if (foldouts.ContainsKey(foldoutId) == false)
             {
-                foldouts.Add(foldoutId, true);
+                foldouts.Add(foldoutId, defaultVisible);
             }
 
             Rect position = EditorGUILayout.BeginVertical("box", GUILayout.Width(width));
+
+            this.DrawTitle(position, foldoutId, title);
+
+            visible = foldouts[foldoutId];
+        }
+
+        public FoldoutHelper(int foldoutId, string title, out bool visible, bool defaultVisible = false)
+        {
+            // making sure this foldoutId is in the list
+            if (foldouts.ContainsKey(foldoutId) == false)
+            {
+                foldouts.Add(foldoutId, defaultVisible);
+            }
+
+            Rect position = EditorGUILayout.BeginVertical("box");
 
             this.DrawTitle(position, foldoutId, title);
 

@@ -25,6 +25,7 @@ namespace Lost
         {
             PlayfabEvents = PlayFabEvents.Init();
             PlayfabEvents.OnLoginResultEvent += PlayfabEvents_OnLoginResultEvent;
+            PlayFabSettings.TitleId = AppSettings.ActiveConfig.PlayfabTitleId;
         }
 
         public static PlayFabEvents PlayfabEvents { get; private set; }

@@ -16,7 +16,7 @@ namespace Lost
     {
         private Dictionary<string, bool> scenes;
 
-        [MenuItem("Lost/Wizards/Build Lighting Helper")]
+        [MenuItem("Lost/Tools/Build Lighting Helper")]
         private static void ShowWindow()
         {
             EditorWindow.GetWindow<BuildLightingHelper>(false, "Build Lighting");
