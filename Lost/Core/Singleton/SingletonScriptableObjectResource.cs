@@ -52,7 +52,12 @@ namespace Lost
                 string className = typeof(T).Name;
 
                 // loading the scriptable object using the class name
-                instance = GameObject.Instantiate<T>(Resources.Load<T>(className));
+                var resource = Resources.Load<T>(className);
+
+                if (resource != null)
+                {
+                    instance = GameObject.Instantiate<T>(resource);
+                }
 
                 if (instance == null)
                 {

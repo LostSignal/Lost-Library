@@ -20,6 +20,11 @@ namespace Lost
         [InitializeOnLoadMethod]
         public static void InitializeProjectSettings()
         {
+            if (AppSettings.Instance == null)
+            {
+                return; 
+            }
+
             // making sure ForceText is on if this project uses source control
             if (AppSettings.Instance.SourceControl != SourceControlType.None && EditorSettings.serializationMode != SerializationMode.ForceText)
             {
