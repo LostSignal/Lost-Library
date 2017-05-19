@@ -19,6 +19,11 @@ namespace Lost
             return Instantiate(prefab, null, false);
         }
 
+        public static UnityEngine.GameObject Instantiate(UnityEngine.GameObject prefab, Transform parent)
+        {
+            return Instantiate(prefab, parent, false);
+        }
+
         public static UnityEngine.GameObject Instantiate(UnityEngine.GameObject prefab, Transform parent, bool instantiateInWorldSpace)
         {
             int instanceId = prefab.GetInstanceID();
@@ -47,6 +52,13 @@ namespace Lost
             {
                 return GameObject.Instantiate<T>(prefab);
             }
+        }
+
+        public static T Instantiate<T>(T prefab, Transform parent) where T : UnityEngine.MonoBehaviour
+        {
+            var result = Instantiate(prefab);
+            result.transform.SetParent(parent);
+            return result;
         }
 
         public static void Destroy(GameObject gameObject)

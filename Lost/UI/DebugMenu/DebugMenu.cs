@@ -11,16 +11,11 @@ namespace Lost
 
     public class DebugMenu : SingletonDialogResource<DebugMenu>
     {
-        private const float HoldTime = 2.0f;
-
         #pragma warning disable 0649
         [SerializeField] private DebugMenuItem debugMenuItemPrefab;
         [SerializeField] private RectTransform contentTransform;
         #pragma warning restore 0649
-
-        private float threeFingerHoldTime = 0.0f;
-        private float spaceHoldTime = 0.0f;
-
+        
         public void AddItem(string name, UnityAction customAction)
         {
             var newItem = Pooler.Instantiate<DebugMenuItem>(this.debugMenuItemPrefab);
@@ -37,48 +32,6 @@ namespace Lost
                 {
                     Pooler.Destroy(menuItem.gameObject);
                 }
-            }
-        }
-        
-        private void Update()
-        {
-            this.CheckForFingers();
-            this.CheckForSpaceBar();
-        }
-
-        private void CheckForFingers()
-        {
-            if (UnityEngine.Input.touchCount == 3)
-            {
-                this.threeFingerHoldTime += Time.unscaledDeltaTime;
-
-                if (this.threeFingerHoldTime > HoldTime)
-                {
-                    this.threeFingerHoldTime = 0.0f;
-                    this.Show();
-                }
-            }
-            else
-            {
-                this.threeFingerHoldTime = 0.0f;
-            }
-        }
-
-        private void CheckForSpaceBar()
-        {
-            if (UnityEngine.Input.GetKey(KeyCode.Space))
-            {
-                this.spaceHoldTime += Time.unscaledDeltaTime;
-
-                if (this.spaceHoldTime > HoldTime)
-                {
-                    this.spaceHoldTime = 0.0f;
-                    this.Show();
-                }
-            }
-            else
-            {
-                this.spaceHoldTime = 0.0f;
             }
         }
     }

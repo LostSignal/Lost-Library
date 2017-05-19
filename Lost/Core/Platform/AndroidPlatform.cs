@@ -64,7 +64,7 @@ namespace Lost
 
         public override void RateApp()
         {
-            Application.OpenURL(string.Format("market://details?id={0}", Application.bundleIdentifier));
+            Application.OpenURL(string.Format("market://details?id={0}", Application.identifier));
         }
 
         public override void Vibrate(long milliseconds)

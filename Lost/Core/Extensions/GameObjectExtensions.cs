@@ -22,7 +22,19 @@ namespace Lost
 
             return component;
         }
-        
+
+        public static Component GetOrAddComponent(this GameObject gameObject, System.Type componentType)
+        {
+            var component = gameObject.GetComponent(componentType);
+
+            if (component == null)
+            {
+                component = gameObject.AddComponent(componentType);
+            }
+
+            return component;
+        }
+
         public static List<T> GetOrAddComponents<T>(this GameObject gameObject, int count) where T : Component
         {
             List<T> results = new List<T>(gameObject.GetComponents<T>());
@@ -39,7 +51,7 @@ namespace Lost
         
         public static GameObject GetChild(this GameObject gameObject, string name)
         {
-            Transform childTransform = gameObject.transform.FindChild(name);
+            Transform childTransform = gameObject.transform.Find(name);
             return childTransform == null ? null : childTransform.gameObject;
         }
 
@@ -55,35 +67,31 @@ namespace Lost
         /// <returns>The newly created or the found child.</returns>
         public static GameObject GetOrCreateChild(this GameObject gameObject, string name, params System.Type[] components)
         {
-            Transform childTransform = gameObject.transform.FindChild(name);
-            GameObject childGameObject = null;
+            Transform childTransform = gameObject.transform.Find(name);
 
             // getting/creating a ball object
             if (childTransform == null)
             {
-                childGameObject = new GameObject(name);
-                childGameObject.transform.parent = gameObject.transform;
-                childGameObject.transform.localPosition = Vector3.zero;
-                childGameObject.transform.localRotation = Quaternion.identity;
-                childGameObject.transform.localScale = Vector3.one;
+                var childGameObject = components == null || components.Length == 0 ? new GameObject(name) : new GameObject(name, components);
+                childGameObject.transform.SetParent(gameObject.transform);
+                childGameObject.transform.Reset();
+
+                return childGameObject;
             }
             else
             {
-                childGameObject = childTransform.gameObject;
-            }
+                var childGameObject = childTransform.gameObject;
 
-            if (components != null)
-            {
-                for (int i = 0; i < components.Length; i++)
+                if (components != null)
                 {
-                    if (childGameObject.GetComponent(components[i]) == false)
+                    foreach (var component in components)
                     {
-                        childGameObject.AddComponent(components[i]);
+                        childGameObject.GetOrAddComponent(component);
                     }
                 }
-            }
 
-            return childGameObject;
+                return childGameObject;
+            }
         }
         
         public static void SetLayerRecursively(this GameObject gameObject, string layerName)

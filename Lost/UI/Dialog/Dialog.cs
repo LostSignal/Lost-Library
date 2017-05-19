@@ -16,8 +16,7 @@ namespace Lost
     [RequireComponent(typeof(GraphicRaycaster))]
     public class Dialog : MonoBehaviour
     {
-        private static readonly int HiddenHash = Animator.StringToHash("Hidden");
-        private static readonly int ShownHash = Animator.StringToHash("Shown");
+        private static readonly int HideHash = Animator.StringToHash("Hide");
         private static readonly int ShowHash = Animator.StringToHash("Show");
         
         #pragma warning disable 0649
@@ -33,6 +32,7 @@ namespace Lost
         [Header("Back Button")]
         [SerializeField] private bool registerForBackButton = true;
         [SerializeField] private bool hideOnBackButtonPressed = true;
+        [SerializeField] private Dialog showDialogOnBackButtonPressed;
         #pragma warning restore 0649
         
         private bool isHibernateMonitorRunning = false;
@@ -77,7 +77,7 @@ namespace Lost
 
         public bool IsHidden
         {
-            get { return this.isShowing == false && this.dialogStateMachine.IsInHiddenState; }
+            get { return this.isShowing == false && this.dialogStateMachine.IsInHideState; }
         }
 
         public bool IsTransitioning
@@ -97,6 +97,12 @@ namespace Lost
 
         public virtual void Show()
         {
+            // makes sure that we point to a valid camera
+            if (!this.canvas.worldCamera)
+            {
+                this.canvas.worldCamera = Camera.main;
+            }
+
             // early out if we're not suppose to change state while transitioning
             if (this.dontChangeStateWhileTransitioning && this.IsTransitioning)
             {
@@ -105,6 +111,11 @@ namespace Lost
 
             if (this.isShowing == false)
             {
+                if (this.animator == null)
+                {
+                    Debug.LogErrorFormat(this, "Dialog {0} has a null animator.  Did you forget to call base.Awake()?", this.gameObject.name);
+                }
+
                 this.isShowing = true;
                 this.animator.SetBool(ShowHash, true);
                 this.SetActive(true);
@@ -139,6 +150,11 @@ namespace Lost
             {
                 this.Hide();
             }
+
+            if (this.showDialogOnBackButtonPressed != null)
+            {
+                this.showDialogOnBackButtonPressed.Show();
+            }
         }
 
         public void Toggle()
@@ -170,38 +186,49 @@ namespace Lost
             // cleaning up the editor UI a little bit
             this.hdCanvas.hideFlags = HideFlags.HideInInspector;
             this.graphicRaycaster.hideFlags = HideFlags.HideInInspector;
-            
+
             // making sure the animator is set up properly
-            Debug.AssertFormat(this.dialogStateMachine != null, this, "Dialog {0} doesn't have a DialogStateMachine behaviour attached.", this.gameObject.name);
-            Debug.AssertFormat(this.animator.HasState(0, ShownHash), this, "Dialog {0} doesn't have a \"Shown\" state.", this.gameObject.name);
-            Debug.AssertFormat(this.animator.HasState(0, HiddenHash), this, "Dialog {0} doesn't have a \"Hidden\" state.", this.gameObject.name);
+            Debug.AssertFormat(this.dialogStateMachine != null, this, "Dialog {0} doesn't have a DialogStateMachine behavior attached.", this.gameObject.name);
+            Debug.AssertFormat(this.animator.HasState(0, ShowHash), this, "Dialog {0} doesn't have a \"Show\" state.", this.gameObject.name);
+            Debug.AssertFormat(this.animator.HasState(0, HideHash), this, "Dialog {0} doesn't have a \"Hide\" state.", this.gameObject.name);
 
             var showingParameter = this.animator.parameters.FirstOrDefault(x => x.nameHash == ShowHash);
             Debug.Assert(showingParameter != null, "Dialog doesn't have a \"Show\" Bool parameter.", this);
-            
+
             // making sure the content object exists
-            Transform contentTransform = this.gameObject.transform.FindChild("Content");
+            Transform contentTransform = this.gameObject.transform.Find("Content");
             Debug.Assert(contentTransform != null, "Dialog doesn't contain a Content child object.", this);
 
             this.contentRectTransform = contentTransform.GetComponent<RectTransform>();
             Debug.Assert(this.contentRectTransform != null, "Dialog's Content child object doesn't contain a RectTransform component.", this);
 
-            // making sure the blocker object exists
+            // NOTE [bgish]:  Determining if we should create the input blocker.  Also, it's a
+            //                coroutine because unity doesn't like creating object in the Awake
             if (this.blockInput || this.tapOutsideToDismiss)
             {
-                GameObject blockerObject = this.gameObject.GetOrCreateChild("Blocker", typeof(InputBlocker));
-                this.blocker = blockerObject.GetComponent<InputBlocker>();
-                this.blocker.gameObject.transform.SetAsFirstSibling();
-
-                if (this.tapOutsideToDismiss)
-                {
-                    this.blocker.OnClick.AddListener(this.Hide);
-                    this.contentRectTransform.gameObject.AddComponent<GraphicRaycaster>();
-                }
+                CoroutineRunner.Start(this.CreateInputBlocker());
             }
 
             // default everything to inactive and wait for someone to call Show()
             this.SetActive(false);
+        }
+
+        private IEnumerator CreateInputBlocker()
+        {
+            yield return new WaitForEndOfFrame();
+
+            // NOTE [bgish]: Must pass in InputBlocker, or else it will have a Standard Transform and the RequireComponent attributes wont work when adding the InputBlocker later
+            GameObject blockerObject = this.gameObject.GetOrCreateChild("Blocker", typeof(InputBlocker));
+            this.blocker = blockerObject.GetComponent<InputBlocker>();
+            this.blocker.gameObject.transform.SetAsFirstSibling();
+
+            if (this.tapOutsideToDismiss)
+            {
+                this.blocker.OnClick.AddListener(this.Hide);
+                this.contentRectTransform.gameObject.AddComponent<GraphicRaycaster>();
+            }
+            
+            this.blocker.gameObject.SetActive(this.enabled);
         }
 
         protected virtual void OnShow()
@@ -234,6 +261,7 @@ namespace Lost
 
         private void SetActive(bool active)
         {
+            this.enabled = active;
             this.hdCanvas.enabled = active;
             this.animator.enabled = active;
             this.graphicRaycaster.enabled = active;

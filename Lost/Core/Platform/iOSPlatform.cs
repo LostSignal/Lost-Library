@@ -54,7 +54,7 @@ namespace Lost
 
         public override void RateApp()
         {
-            Application.OpenURL(string.Format("itms-apps://itunes.apple.com/app/{0}", Application.bundleIdentifier));
+            Application.OpenURL(string.Format("itms-apps://itunes.apple.com/app/{0}", Application.identifier));
         }
 
         public override void Vibrate(long milliseconds)

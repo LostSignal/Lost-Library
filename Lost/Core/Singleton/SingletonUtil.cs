@@ -53,7 +53,7 @@ namespace Lost
         {
             var containerTransform = GetSingletonContainer();
 
-            var child = containerTransform.FindChild(childName);
+            var child = containerTransform.Find(childName);
 
             if (child == null)
             {

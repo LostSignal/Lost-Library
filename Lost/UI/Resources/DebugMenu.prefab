@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 114000010041196312}
   - component: {fileID: 114000011375466380}
   - component: {fileID: 114000010209625714}
+  - component: {fileID: 114686849741790264}
   m_Layer: 0
   m_Name: DebugMenu
   m_TagString: Untagged
@@ -60,7 +61,7 @@ Animator:
   m_GameObject: {fileID: 1000011782452470}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: d5eedd0a2e9d6244993ec5f6a8abb93f, type: 2}
+  m_Controller: {fileID: 9100000, guid: 5d339ada76ee0b34abe4825441211638, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -95,6 +96,7 @@ MonoBehaviour:
   dontChangeStateWhileTransitioning: 0
   registerForBackButton: 1
   hideOnBackButtonPressed: 1
+  showDialogOnBackButtonPressed: {fileID: 0}
   debugMenuItemPrefab: {fileID: 114000011063488522, guid: 57586116b25fc314296e4a3405e34c2b,
     type: 2}
   contentTransform: {fileID: 224000012680516270}
@@ -197,6 +199,17 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
+--- !u!114 &114686849741790264
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000011782452470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b239c5591187eca49ad73d954f21bbdf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!222 &222000012906193186
 CanvasRenderer:
   m_ObjectHideFlags: 1
@@ -213,7 +226,7 @@ Canvas:
   serializedVersion: 2
   m_RenderMode: 1
   m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
+  m_PlaneDistance: 10
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0

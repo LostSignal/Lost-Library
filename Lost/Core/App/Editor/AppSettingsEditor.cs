@@ -20,7 +20,12 @@ namespace Lost
         private static Grid oneColumnGrid;
         private static Grid twoColumnGrid;
         private static Grid twoColumnGridWithHeader;
-
+        
+        public static void UpdateProjectDefines()
+        {
+            UpdateProjectDefines(AppSettings.Instance, true);
+        }
+        
         public void OnEnable()
         {
             if (oneColumnGrid == null)
@@ -69,16 +74,16 @@ namespace Lost
             
             GUILayout.Label("");
 
-            this.DrawProjectSettings(foldoutId + 0, appSettings);
-            this.DrawSupportedPlatforms(foldoutId + 1, appSettings);
-            this.DrawLostDefines(foldoutId + 2, appSettings);
-            this.DrawProjectDefines(foldoutId + 3, appSettings);
-            this.DrawSourceControlSettings(foldoutId + 4, appSettings);
-            this.DrawCloudBuildSettings(foldoutId + 5, appSettings);
+            DrawProjectSettings(foldoutId + 0, appSettings);
+            DrawSupportedPlatforms(foldoutId + 1, appSettings);
+            DrawLostDefines(foldoutId + 2, appSettings);
+            DrawProjectDefines(foldoutId + 3, appSettings);
+            DrawSourceControlSettings(foldoutId + 4, appSettings);
+            DrawCloudBuildSettings(foldoutId + 5, appSettings);
 
             if (appSettings.BuildConfigs.Count > 0)
             {
-                this.DrawBuildConfigs(foldoutId + 6, appSettings);
+                DrawBuildConfigs(foldoutId + 6, appSettings);
             }
 
             if (GUILayout.Button("Add Config"))
@@ -91,9 +96,9 @@ namespace Lost
             using (new GuiBackgroundHelper(Color.red))
             {
                 // only showing the update defines button if they actually need updating
-                if (this.UpdateProjectDefines(appSettings, false) && GUILayout.Button("Update Defines"))
+                if (UpdateProjectDefines(appSettings, false) && GUILayout.Button("Update Defines"))
                 {
-                    this.UpdateProjectDefines(appSettings, true);
+                    UpdateProjectDefines(appSettings, true);
                 }
             }
             
@@ -103,8 +108,8 @@ namespace Lost
                 EditorUtility.SetDirty(appSettings);
             }
         }
-        
-        private void DrawProjectSettings(int foldoutId, AppSettings appSettings)
+
+        private static void DrawProjectSettings(int foldoutId, AppSettings appSettings)
         {
             bool isVisible = false;
 
@@ -163,7 +168,7 @@ namespace Lost
             }
         }
 
-        private void DrawSupportedPlatforms(int foldoutId, AppSettings appSettings)
+        private static void DrawSupportedPlatforms(int foldoutId, AppSettings appSettings)
         {
             bool isVisible = false;
 
@@ -195,7 +200,7 @@ namespace Lost
             }
         }
 
-        private void DrawLostDefines(int foldoutId, AppSettings appSettings)
+        private static void DrawLostDefines(int foldoutId, AppSettings appSettings)
         {
             bool isVisible = false;
 
@@ -220,7 +225,7 @@ namespace Lost
             }
         }
 
-        private void DrawProjectDefines(int foldoutId, AppSettings appSettings)
+        private static void DrawProjectDefines(int foldoutId, AppSettings appSettings)
         {
             bool isVisible = false;
 
@@ -270,7 +275,7 @@ namespace Lost
             }
         }
 
-        private void DrawSourceControlSettings(int foldoutId, AppSettings appSettings)
+        private static void DrawSourceControlSettings(int foldoutId, AppSettings appSettings)
         {
             bool isVisible = false;
 
@@ -291,12 +296,12 @@ namespace Lost
 
                 if (appSettings.SourceControl == SourceControlType.Perforce)
                 {
-                    this.DrawPerforceSettings(labelWidth, appSettings);
+                    DrawPerforceSettings(labelWidth, appSettings);
                 }
             }
         }
 
-        private void DrawPerforceSettings(int labelWidth, AppSettings appSettings)
+        private static void DrawPerforceSettings(int labelWidth, AppSettings appSettings)
         {
             using (new BeginHorizontalHelper())
             {
@@ -353,7 +358,7 @@ namespace Lost
             GUILayout.Label("");
         }
 
-        private void DrawCloudBuildSettings(int foldoutId, AppSettings appSettings)
+        private static void DrawCloudBuildSettings(int foldoutId, AppSettings appSettings)
         {
             bool isVisible = false;
 
@@ -404,12 +409,12 @@ namespace Lost
             }
         }
         
-        private void DrawBuildConfigs(int foldoutId, AppSettings appSettings)
+        private static void DrawBuildConfigs(int foldoutId, AppSettings appSettings)
         {
             GUILayout.Label("");
             GUILayout.Label("Build Configs");
 
-            this.ValidateBuildConfigs(appSettings);
+            ValidateBuildConfigs(appSettings);
 
             int index = 0;
             foreach (var config in appSettings.BuildConfigs)
@@ -461,14 +466,14 @@ namespace Lost
                         }
                     }
 
-                    this.DrawBuildConfig(config);
+                    DrawBuildConfig(config);
                 }
                 
                 index++;
             }
         }
 
-        private void DrawBuildConfig(AppSettings.BuildConfig config)
+        private static void DrawBuildConfig(AppSettings.BuildConfig config)
         {
             #if USE_PLAYFAB_SDK || USE_PLAYFAB_ANDROID_SDK
             GUILayout.Label("");
@@ -529,7 +534,7 @@ namespace Lost
             }
         }
         
-        private void ValidateBuildConfigs(AppSettings appSettings)
+        private static void ValidateBuildConfigs(AppSettings appSettings)
         {
             // making sure a config is set active
             if (appSettings.BuildConfigs.Count > 0 && appSettings.BuildConfigs.All(x => x.IsActive == false))
@@ -571,7 +576,7 @@ namespace Lost
             }
         }
 
-        private bool UpdateProjectDefines(AppSettings appSettings, bool performUpdate)
+        private static bool UpdateProjectDefines(AppSettings appSettings, bool performUpdate)
         {
             List<AppSettings.Define> defines = new List<AppSettings.Define>();
             defines.AddRange(appSettings.LostDefines);
@@ -594,7 +599,7 @@ namespace Lost
                     continue;
                 }
 
-                var buildTargetGroup = this.GetBuildTargetGroup(supportedPlatform);
+                var buildTargetGroup = GetBuildTargetGroup(supportedPlatform);
                 var currentDefines = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup).Split(';').ToList();
                 var needsUpdating = false;
 
@@ -626,8 +631,8 @@ namespace Lost
 
             return false;
         }
-        
-        private BuildTargetGroup GetBuildTargetGroup(DevicePlatform devicePlatform)
+
+        private static BuildTargetGroup GetBuildTargetGroup(DevicePlatform devicePlatform)
         {
             switch (devicePlatform)
             {

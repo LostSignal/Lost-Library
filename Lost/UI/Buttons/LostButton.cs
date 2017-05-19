@@ -13,15 +13,30 @@ namespace Lost
 
     public class LostButton : Button
     {
-        private SelectionState lostButtonSelectionState = SelectionState.Normal;
-        private List<ButtonAction> buttonActions = new List<ButtonAction>();
+        private SelectionState selectionState = SelectionState.Normal;
+        private List<UIAction> actions = new List<UIAction>();
         private bool isFirstStateChange = true;
+        private RectTransform rectTransform;
+
+        public RectTransform RectTransform
+        {
+            get
+            {
+                if (!this.rectTransform)
+                {
+                    this.rectTransform = this.GetComponent<RectTransform>();
+                }
+
+                return this.rectTransform;
+            }
+        }
         
         protected override void Awake()
         {
             base.Awake();
-            this.buttonActions.AddRange(this.GetComponentsInChildren<ButtonAction>());
-            this.buttonActions.Sort((x, y) => { return x.Order.CompareTo(y.Order); });
+            
+            this.actions.AddRange(this.GetComponentsInChildren<UIAction>());
+            this.actions.Sort((x, y) => { return x.Order.CompareTo(y.Order); });
         }
         
         protected override void DoStateTransition(SelectionState state, bool instant)
@@ -35,10 +50,10 @@ namespace Lost
             }
             #endif
             
-            if (this.lostButtonSelectionState != state)
+            if (this.selectionState != state)
             {
-                this.UpdateButtonActions(this.lostButtonSelectionState, state);
-                this.lostButtonSelectionState = state;
+                this.UpdateButtonActions(this.selectionState, state);
+                this.selectionState = state;
             }
         }
         
@@ -48,14 +63,14 @@ namespace Lost
             if (this.isFirstStateChange == false)
             {
                 // revert the old button actions
-                foreach (var action in this.buttonActions.Where(x => (int)x.State == (int)oldState))
+                foreach (var action in this.actions.Where(x => (int)x.State == (int)oldState))
                 {
                     action.Revert();
                 }
             }
             
             // apply the new button actions
-            foreach (var action in this.buttonActions.Where(x => (int)x.State == (int)newState))
+            foreach (var action in this.actions.Where(x => (int)x.State == (int)newState))
             {
                 action.Apply();
             }

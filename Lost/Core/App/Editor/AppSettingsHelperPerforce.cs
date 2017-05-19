@@ -17,6 +17,8 @@ namespace Lost
 
         public static void CreateOrOverwriteP4IgnoreFile()
         {
+            AppSettings appSettings = GetAppSettings();
+
             string templateFileName = "p4ignore.txt";
             string p4IgnoreFileTemplate = FindLostFile(templateFileName);
             
@@ -29,13 +31,13 @@ namespace Lost
             // checking if the P4Ignore file already exists
             if (File.Exists(AppSettings.Instance.P4IgnoreFileName) == false)
             {
-                CreateFile(File.ReadAllText(p4IgnoreFileTemplate), AppSettings.Instance.P4IgnoreFileName, true);
+                CreateFile(File.ReadAllText(p4IgnoreFileTemplate), AppSettings.Instance.P4IgnoreFileName, true, appSettings.ProjectLineEndings);
             }
             else
             {
                 try
                 {
-                    CopyFile(p4IgnoreFileTemplate, AppSettings.Instance.P4IgnoreFileName, true);
+                    CopyFile(p4IgnoreFileTemplate, AppSettings.Instance.P4IgnoreFileName, true, appSettings.ProjectLineEndings);
                 }
                 catch
                 {

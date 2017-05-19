@@ -18,6 +18,8 @@ namespace Lost
 
     public static class PF
     {
+        public delegate void Action<T1, T2, T3, T4, T5>(T1 arg, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
+
         private const string DeviceIdKey = "DeviceId";
         private static string deviceId;
 
@@ -100,7 +102,7 @@ namespace Lost
             PlayerPrefs.Save();
         }
 
-        public static IEnumerator<LoginResult> LoginWithDeviceId(bool createAccount, GetPlayerCombinedInfoRequestParams infoRequest = null)
+        public static UnityTask<LoginResult> LoginWithDeviceId(bool createAccount, GetPlayerCombinedInfoRequestParams infoRequest = null)
         {
             // making sure we get User Account Info at login
             infoRequest = infoRequest ?? new GetPlayerCombinedInfoRequestParams();
@@ -146,69 +148,21 @@ namespace Lost
             #endif
         }
         
-        public static IEnumerator<PlayFabResultCommon> LinkDeviceId()
+        public static UnityTask<PlayFabResultCommon> LinkDeviceId()
         {
-            #if UNITY_EDITOR || UNITY_STANDALONE
-            
-            var coroutine = Do<LinkCustomIDRequest, LinkCustomIDResult>(new LinkCustomIDRequest { CustomId = DeviceId }, PlayFabClientAPI.LinkCustomID);
-            
-            #elif UNITY_ANDROID 
-            
-            var coroutine = Do<LinkAndroidDeviceIDRequest, LinkAndroidDeviceIDResult>(
-                new LinkAndroidDeviceIDRequest
-                {
-                    AndroidDeviceId = DeviceId,
-                    AndroidDevice = UnityEngine.SystemInfo.deviceModel,
-                    OS = UnityEngine.SystemInfo.operatingSystem,
-                }, 
-                PlayFabClientAPI.LinkAndroidDeviceID);
-            
-            #elif UNITY_IOS
-
-            var coroutine = Do<LinkIOSDeviceIDRequest, LinkIOSDeviceIDResult>(
-                new LinkIOSDeviceIDRequest
-                {
-                    DeviceId = DeviceId,
-                    DeviceModel = UnityEngine.SystemInfo.deviceModel,
-                    OS = UnityEngine.SystemInfo.operatingSystem,
-                }, 
-                PlayFabClientAPI.LinkIOSDeviceID);
-
-            #endif
-            
-            while (coroutine.MoveNext())
-            {
-                yield return coroutine.Current as PlayFabResultCommon;
-            }
+            return UnityTask<PlayFabResultCommon>.Run(LinkDeviceIdIterator());
         }
         
-        public static IEnumerator<PlayFabResultCommon> UnlinkDeviceId()
+        public static UnityTask<PlayFabResultCommon> UnlinkDeviceId()
         {
-            #if UNITY_EDITOR || UNITY_STANDALONE
-            
-            var coroutine = Do<UnlinkCustomIDRequest, UnlinkCustomIDResult>(new UnlinkCustomIDRequest { CustomId = DeviceId }, PlayFabClientAPI.UnlinkCustomID);
-            
-            #elif UNITY_ANDROID 
-            
-            var coroutine = Do<UnlinkAndroidDeviceIDRequest, UnlinkAndroidDeviceIDResult>(new UnlinkAndroidDeviceIDRequest { AndroidDeviceId = DeviceId }, PlayFabClientAPI.UnlinkAndroidDeviceID);
-            
-            #elif UNITY_IOS
-            
-            var coroutine = Do<UnlinkIOSDeviceIDRequest, UnlinkIOSDeviceIDResult>(new UnlinkIOSDeviceIDRequest { DeviceId = DeviceId }, PlayFabClientAPI.UnlinkIOSDeviceID);
-            
-            #endif
-            
-            while (coroutine.MoveNext())
-            {
-                yield return coroutine.Current as PlayFabResultCommon;
-            }
+            return UnityTask<PlayFabResultCommon>.Run(UnlinkDeviceIdIterator());
         }
 
         #endregion
 
         #region Login and linking with Facebook
 
-        public static IEnumerator<LoginResult> LoginWithFacebook(bool createAccount, GetPlayerCombinedInfoRequestParams infoRequest = null)
+        public static UnityTask<LoginResult> LoginWithFacebook(bool createAccount, GetPlayerCombinedInfoRequestParams infoRequest = null)
         {
             IEnumerator<string> getAccessTokenCoroutine = GetFacebookAccessToken();
             string accessToken = null;
@@ -232,7 +186,7 @@ namespace Lost
             return Do<LoginWithFacebookRequest, LoginResult>(facebookLoginRequest, PlayFabClientAPI.LoginWithFacebook);
         }
 
-        public static IEnumerator<LinkFacebookAccountResult> LinkFacebook()
+        public static UnityTask<LinkFacebookAccountResult> LinkFacebook()
         {
             IEnumerator<string> getAccessTokenCoroutine = GetFacebookAccessToken();
             string accessToken = null;
@@ -247,61 +201,61 @@ namespace Lost
             return Do<LinkFacebookAccountRequest, LinkFacebookAccountResult>(request, PlayFabClientAPI.LinkFacebookAccount);
         }
 
-        public static IEnumerator<UnlinkFacebookAccountResult> UnlinkFacebook()
+        public static UnityTask<UnlinkFacebookAccountResult> UnlinkFacebook()
         {
             return Do<UnlinkFacebookAccountRequest, UnlinkFacebookAccountResult>(new UnlinkFacebookAccountRequest(), PlayFabClientAPI.UnlinkFacebookAccount);
         }
 
         #endregion
 
-        public static IEnumerator<UpdateUserTitleDisplayNameResult> Do(UpdateUserTitleDisplayNameRequest request)
+        public static UnityTask<UpdateUserTitleDisplayNameResult> Do(UpdateUserTitleDisplayNameRequest request)
         {
             return Do<UpdateUserTitleDisplayNameRequest, UpdateUserTitleDisplayNameResult>(request, PlayFabClientAPI.UpdateUserTitleDisplayName);
         }
 
-        public static IEnumerator<ExecuteCloudScriptResult> Do(ExecuteCloudScriptRequest request)
+        public static UnityTask<ExecuteCloudScriptResult> Do(ExecuteCloudScriptRequest request)
         {
             return Do<ExecuteCloudScriptRequest, ExecuteCloudScriptResult>(request, PlayFabClientAPI.ExecuteCloudScript);
         }
 
-        public static IEnumerator<GetAccountInfoResult> Do(GetAccountInfoRequest request)
+        public static UnityTask<GetAccountInfoResult> Do(GetAccountInfoRequest request)
         {
             return Do<GetAccountInfoRequest, GetAccountInfoResult>(request, PlayFabClientAPI.GetAccountInfo);
         }
 
-        public static IEnumerator<GetContentDownloadUrlResult> Do(GetContentDownloadUrlRequest request)
+        public static UnityTask<GetContentDownloadUrlResult> Do(GetContentDownloadUrlRequest request)
         {
             return Do<GetContentDownloadUrlRequest, GetContentDownloadUrlResult>(request, PlayFabClientAPI.GetContentDownloadUrl);
         }
         
-        public static IEnumerator<GetUserInventoryResult> Do(GetUserInventoryRequest request)
+        public static UnityTask<GetUserInventoryResult> Do(GetUserInventoryRequest request)
         {
             return Do<GetUserInventoryRequest, GetUserInventoryResult>(request, PlayFabClientAPI.GetUserInventory);
         }
         
-        public static IEnumerator<GetPlayerCombinedInfoResult> Do(GetPlayerCombinedInfoRequest request)
+        public static UnityTask<GetPlayerCombinedInfoResult> Do(GetPlayerCombinedInfoRequest request)
         {
             return Do<GetPlayerCombinedInfoRequest, GetPlayerCombinedInfoResult>(request, PlayFabClientAPI.GetPlayerCombinedInfo);
         }
 
-        public static IEnumerator<GetPlayerSegmentsResult> Do(GetPlayerSegmentsRequest request)
+        public static UnityTask<GetPlayerSegmentsResult> Do(GetPlayerSegmentsRequest request)
         {
             return Do<GetPlayerSegmentsRequest, GetPlayerSegmentsResult>(request, PlayFabClientAPI.GetPlayerSegments);
         }
 
-        public static IEnumerator<WriteEventResponse> Do(WriteClientPlayerEventRequest request)
+        public static UnityTask<WriteEventResponse> Do(WriteClientPlayerEventRequest request)
         {
             return Do<WriteClientPlayerEventRequest, WriteEventResponse>(request, PlayFabClientAPI.WritePlayerEvent);
         }
 
         #region User Data Related Functions
 
-        public static IEnumerator<GetUserDataResult> Do(GetUserDataRequest request)
+        public static UnityTask<GetUserDataResult> Do(GetUserDataRequest request)
         {
             return Do<GetUserDataRequest, GetUserDataResult>(request, PlayFabClientAPI.GetUserData);
         }
 
-        public static IEnumerator<UpdateUserDataResult> Do(UpdateUserDataRequest request)
+        public static UnityTask<UpdateUserDataResult> Do(UpdateUserDataRequest request)
         {
             return Do<UpdateUserDataRequest, UpdateUserDataResult>(request, PlayFabClientAPI.UpdateUserData);
         }
@@ -310,12 +264,12 @@ namespace Lost
 
         #region Title Data Related Functions
 
-        public static IEnumerator<GetTitleDataResult> Do(GetTitleDataRequest request)
+        public static UnityTask<GetTitleDataResult> Do(GetTitleDataRequest request)
         {
             return Do<GetTitleDataRequest, GetTitleDataResult>(request, PlayFabClientAPI.GetTitleData);
         }
 
-        public static IEnumerator<GetTitleNewsResult> Do(GetTitleNewsRequest request)
+        public static UnityTask<GetTitleNewsResult> Do(GetTitleNewsRequest request)
         {
             return Do<GetTitleNewsRequest, GetTitleNewsResult>(request, PlayFabClientAPI.GetTitleNews);
         }
@@ -324,12 +278,12 @@ namespace Lost
 
         #region Push Notification Related Functions
 
-        public static IEnumerator<AndroidDevicePushNotificationRegistrationResult> Do(AndroidDevicePushNotificationRegistrationRequest request)
+        public static UnityTask<AndroidDevicePushNotificationRegistrationResult> Do(AndroidDevicePushNotificationRegistrationRequest request)
         {
             return Do<AndroidDevicePushNotificationRegistrationRequest, AndroidDevicePushNotificationRegistrationResult>(request, PlayFabClientAPI.AndroidDevicePushNotificationRegistration);
         }
 
-        public static IEnumerator<RegisterForIOSPushNotificationResult> Do(RegisterForIOSPushNotificationRequest request)
+        public static UnityTask<RegisterForIOSPushNotificationResult> Do(RegisterForIOSPushNotificationRequest request)
         {
             return Do<RegisterForIOSPushNotificationRequest, RegisterForIOSPushNotificationResult>(request, PlayFabClientAPI.RegisterForIOSPushNotification);
         }
@@ -338,22 +292,22 @@ namespace Lost
 
         #region Leaderboard Related Functions
 
-        public static IEnumerator<GetLeaderboardResult> Do(GetLeaderboardRequest request)
+        public static UnityTask<GetLeaderboardResult> Do(GetLeaderboardRequest request)
         {
             return Do<GetLeaderboardRequest, GetLeaderboardResult>(request, PlayFabClientAPI.GetLeaderboard);
         }
 
-        public static IEnumerator<GetLeaderboardResult> Do(GetFriendLeaderboardRequest request)
+        public static UnityTask<GetLeaderboardResult> Do(GetFriendLeaderboardRequest request)
         {
             return Do<GetFriendLeaderboardRequest, GetLeaderboardResult>(request, PlayFabClientAPI.GetFriendLeaderboard);
         }
 
-        public static IEnumerator<GetLeaderboardAroundPlayerResult> Do(GetLeaderboardAroundPlayerRequest request)
+        public static UnityTask<GetLeaderboardAroundPlayerResult> Do(GetLeaderboardAroundPlayerRequest request)
         {
             return Do<GetLeaderboardAroundPlayerRequest, GetLeaderboardAroundPlayerResult>(request, PlayFabClientAPI.GetLeaderboardAroundPlayer);
         }
         
-        public static IEnumerator<GetFriendLeaderboardAroundPlayerResult> Do(GetFriendLeaderboardAroundPlayerRequest request)
+        public static UnityTask<GetFriendLeaderboardAroundPlayerResult> Do(GetFriendLeaderboardAroundPlayerRequest request)
         {
             return Do<GetFriendLeaderboardAroundPlayerRequest, GetFriendLeaderboardAroundPlayerResult>(request, PlayFabClientAPI.GetFriendLeaderboardAroundPlayer);
         }
@@ -362,27 +316,27 @@ namespace Lost
 
         #region Purchasing Related Functions
 
-        public static IEnumerator<GetStoreItemsResult> Do(GetStoreItemsRequest request)
+        public static UnityTask<GetStoreItemsResult> Do(GetStoreItemsRequest request)
         {
             return Do<GetStoreItemsRequest, GetStoreItemsResult>(request, PlayFabClientAPI.GetStoreItems);
         }
 
-        public static IEnumerator<ConfirmPurchaseResult> Do(ConfirmPurchaseRequest request)
+        public static UnityTask<ConfirmPurchaseResult> Do(ConfirmPurchaseRequest request)
         {
             return Do<ConfirmPurchaseRequest, ConfirmPurchaseResult>(request, PlayFabClientAPI.ConfirmPurchase);
         }
 
-        public static IEnumerator<ValidateIOSReceiptResult> Do(ValidateIOSReceiptRequest request)
+        public static UnityTask<ValidateIOSReceiptResult> Do(ValidateIOSReceiptRequest request)
         {
             return Do<ValidateIOSReceiptRequest, ValidateIOSReceiptResult>(request, PlayFabClientAPI.ValidateIOSReceipt);
         }
 
-        public static IEnumerator<ValidateGooglePlayPurchaseResult> Do(ValidateGooglePlayPurchaseRequest request)
+        public static UnityTask<ValidateGooglePlayPurchaseResult> Do(ValidateGooglePlayPurchaseRequest request)
         {
             return Do<ValidateGooglePlayPurchaseRequest, ValidateGooglePlayPurchaseResult>(request, PlayFabClientAPI.ValidateGooglePlayPurchase);
         }
         
-        public static IEnumerator<ValidateAmazonReceiptResult> Do(ValidateAmazonReceiptRequest request)
+        public static UnityTask<ValidateAmazonReceiptResult> Do(ValidateAmazonReceiptRequest request)
         {
             return Do<ValidateAmazonReceiptRequest, ValidateAmazonReceiptResult>(request, PlayFabClientAPI.ValidateAmazonIAPReceipt);
         }
@@ -391,19 +345,19 @@ namespace Lost
 
         #region Friends Related Functions
 
-        public static IEnumerator<AddFriendResult> Do(AddFriendRequest request)
+        public static UnityTask<AddFriendResult> Do(AddFriendRequest request)
         {
             // should update the cached list after it's done
             return Do<AddFriendRequest, AddFriendResult>(request, PlayFabClientAPI.AddFriend);
         }
 
-        public static IEnumerator<RemoveFriendResult> Do(RemoveFriendRequest request)
+        public static UnityTask<RemoveFriendResult> Do(RemoveFriendRequest request)
         {
             // should update the cached list after it's done
             return Do<RemoveFriendRequest, RemoveFriendResult>(request, PlayFabClientAPI.RemoveFriend);
         }
 
-        public static IEnumerator<GetFriendsListResult> Do(GetFriendsListRequest request)
+        public static UnityTask<GetFriendsListResult> Do(GetFriendsListRequest request)
         {
             // TODO [bgish] - should really cache this, and update friends list whenever add/remove.  If cached, then return the list instead of call this
             return Do<GetFriendsListRequest, GetFriendsListResult>(request, PlayFabClientAPI.GetFriendsList);
@@ -411,14 +365,21 @@ namespace Lost
 
         #endregion
         
-        private static IEnumerator<Result> Do<Request, Result>(Request request, Action<Request, Action<Result>, Action<PlayFabError>, object> playfabFunction)
+        private static UnityTask<Result> Do<Request, Result>(Request request, Action<Request, Action<Result>, Action<PlayFabError>, object, Dictionary<string, string>> playfabFunction)
+            where Request : class
+            where Result : class
+        {
+            return UnityTask<Result>.Run(DoIterator(request, playfabFunction));
+        }
+        
+        private static IEnumerator<Result> DoIterator<Request, Result>(Request request, Action<Request, Action<Result>, Action<PlayFabError>, object, Dictionary<string, string>> playfabFunction)
             where Request : class
             where Result : class
         {
             Result result = null;
             PlayFabError error = null;
 
-            playfabFunction.Invoke(request, (r) => { result = r; }, (e) => { error = e; }, null);
+            playfabFunction.Invoke(request, (r) => { result = r; }, (e) => { error = e; }, null, null);
 
             while (result == null && error == null)
             {
@@ -432,13 +393,7 @@ namespace Lost
 
             yield return result;
         }
-
-        private static void PlayfabEvents_OnLoginResultEvent(LoginResult result)
-        {
-            LoginResult = result;
-            UserAccountInfo = result.InfoResultPayload.AccountInfo;
-        }
-
+                
         private static IEnumerator<string> GetFacebookAccessToken()
         {
             #if !USE_FACEBOOK_SDK
@@ -492,6 +447,70 @@ namespace Lost
             yield return Facebook.Unity.AccessToken.CurrentAccessToken.TokenString;
             
             #endif
+        }
+                
+        private static IEnumerator<PlayFabResultCommon> LinkDeviceIdIterator()
+        {
+            #if UNITY_EDITOR || UNITY_STANDALONE
+
+            var coroutine = DoIterator<LinkCustomIDRequest, LinkCustomIDResult>(new LinkCustomIDRequest { CustomId = DeviceId }, PlayFabClientAPI.LinkCustomID);
+            
+            #elif UNITY_ANDROID 
+            
+            var coroutine = DoIterator<LinkAndroidDeviceIDRequest, LinkAndroidDeviceIDResult>(
+                new LinkAndroidDeviceIDRequest
+                {
+                    AndroidDeviceId = DeviceId,
+                    AndroidDevice = UnityEngine.SystemInfo.deviceModel,
+                    OS = UnityEngine.SystemInfo.operatingSystem,
+                }, 
+                PlayFabClientAPI.LinkAndroidDeviceID);
+            
+            #elif UNITY_IOS
+
+            var coroutine = DoIterator<LinkIOSDeviceIDRequest, LinkIOSDeviceIDResult>(
+                new LinkIOSDeviceIDRequest
+                {
+                    DeviceId = DeviceId,
+                    DeviceModel = UnityEngine.SystemInfo.deviceModel,
+                    OS = UnityEngine.SystemInfo.operatingSystem,
+                }, 
+                PlayFabClientAPI.LinkIOSDeviceID);
+
+            #endif
+            
+            while (coroutine.MoveNext())
+            {
+                yield return coroutine.Current as PlayFabResultCommon;
+            }
+        }
+
+        private static IEnumerator<PlayFabResultCommon> UnlinkDeviceIdIterator()
+        {
+            #if UNITY_EDITOR || UNITY_STANDALONE
+            
+            var coroutine = Do<UnlinkCustomIDRequest, UnlinkCustomIDResult>(new UnlinkCustomIDRequest { CustomId = DeviceId }, PlayFabClientAPI.UnlinkCustomID);
+            
+            #elif UNITY_ANDROID 
+            
+            var coroutine = Do<UnlinkAndroidDeviceIDRequest, UnlinkAndroidDeviceIDResult>(new UnlinkAndroidDeviceIDRequest { AndroidDeviceId = DeviceId }, PlayFabClientAPI.UnlinkAndroidDeviceID);
+            
+            #elif UNITY_IOS
+            
+            var coroutine = Do<UnlinkIOSDeviceIDRequest, UnlinkIOSDeviceIDResult>(new UnlinkIOSDeviceIDRequest { DeviceId = DeviceId }, PlayFabClientAPI.UnlinkIOSDeviceID);
+            
+            #endif
+            
+            while (coroutine.MoveNext())
+            {
+                yield return coroutine.Current as PlayFabResultCommon;
+            }
+        }
+        
+        private static void PlayfabEvents_OnLoginResultEvent(LoginResult result)
+        {
+            LoginResult = result;
+            UserAccountInfo = result.InfoResultPayload.AccountInfo;
         }
     }
 }

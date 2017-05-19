@@ -43,6 +43,11 @@ namespace Lost
             this.Setup();
         }
 
+        private void Reset()
+        {
+            this.Setup();
+        }
+
         private void CacheComponents()
         {
             if (this.canvas == null)
@@ -56,14 +61,7 @@ namespace Lost
                 this.canvasScaler.hideFlags = HideFlags.HideInInspector;
             }
         }
-
-        #if UNITY_EDITOR
-        private void Update()
-        {
-            this.Setup();
-        }
-        #endif
-
+        
         private void Setup()
         {
             this.CacheComponents();

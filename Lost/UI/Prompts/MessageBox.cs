@@ -75,7 +75,7 @@ namespace Lost
         {
             // TODO [bgish]: If "in use", then wait till it becomes available
 
-            this.SetLeftRightText(title, body, "Yes", "No");
+            this.SetLeftRightText(title, body, "No", "Yes");
             this.Show();
 
             // waiting for it to start showing
@@ -92,11 +92,11 @@ namespace Lost
 
             if (this.result == LeftRightResult.Left)
             {
-                yield return YesNoResult.Yes;
+                yield return YesNoResult.No;
             }
             else if (this.result == LeftRightResult.Right)
             {
-                yield return YesNoResult.No;
+                yield return YesNoResult.Yes;
             }
             else
             {
@@ -107,6 +107,16 @@ namespace Lost
         public IEnumerator<LeftRightResult> Show(string title, string body, string leftButtonText, string rightButtonText)
         {
             // TODO [bgish]: If "in use", then wait till it becomes available
+            
+            if (string.IsNullOrEmpty(leftButtonText) == false && this.leftButtonText == null)
+            {
+                Debug.LogErrorFormat(this, "Unable to set MessageBox left button to {0} besause LeftButtonText object is null.", leftButtonText);
+            }
+
+            if (string.IsNullOrEmpty(rightButtonText) == false && this.rightButtonText == null)
+            {
+                Debug.LogErrorFormat(this, "Unable to set MessageBox right button to {0} besause RightButtonText object is null.", rightButtonText);
+            }
 
             this.SetLeftRightText(title, body, leftButtonText, rightButtonText);
             this.Show();

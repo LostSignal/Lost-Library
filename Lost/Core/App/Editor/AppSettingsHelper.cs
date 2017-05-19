@@ -16,28 +16,37 @@ namespace Lost
 
     public static partial class AppSettingsHelper
     {
+        public static AppSettings GetAppSettings()
+        {
+            return Resources.Load<AppSettings>("AppSettings");
+        }
+
         #if !UNITY_CLOUD_BUILD
         [InitializeOnLoadMethod]
         public static void InitializeProjectSettings()
         {
-            if (AppSettings.Instance == null)
+            // don't want to use the singleton instance because this method gets called way too often and can corrupt the static variable
+            AppSettings appSettings = GetAppSettings();
+            
+            if (!appSettings)
             {
-                return; 
+                Debug.LogError("Unable to load AppSettings from Resources.");
+                return;
             }
 
             // making sure ForceText is on if this project uses source control
-            if (AppSettings.Instance.SourceControl != SourceControlType.None && EditorSettings.serializationMode != SerializationMode.ForceText)
+            if (appSettings.SourceControl != SourceControlType.None && EditorSettings.serializationMode != SerializationMode.ForceText)
             {
                 EditorSettings.serializationMode = SerializationMode.ForceText;
             }
             
             // testing if we should set the p4ignore variable
-            if (AppSettings.Instance.UseP4IgnoreFile && AppSettings.Instance.SetP4IgnoreVariableAtStartup && AppSettings.Instance.P4IgnoreFileName != GetCurrentP4IgnoreVariable())
+            if (appSettings.UseP4IgnoreFile && appSettings.SetP4IgnoreVariableAtStartup && appSettings.P4IgnoreFileName != GetCurrentP4IgnoreVariable())
             {
-                SetP4IgnoreFileVariable(AppSettings.Instance.P4IgnoreFileName);
+                SetP4IgnoreFileVariable(appSettings.P4IgnoreFileName);
             }
 
-            if (AppSettings.Instance.WarningsAsErrors)
+            if (appSettings.WarningsAsErrors)
             {
                 GenerateWarngingsAsErrorsFile();
             }
@@ -46,7 +55,7 @@ namespace Lost
                 RemoveWarngingsAsErrorsFile();
             }
             
-            if (AppSettings.Instance.OverrideTemplateCShardFiles)
+            if (appSettings.OverrideTemplateCShardFiles)
             {
                 OverrideTemplateCSharpFiles();
             }
@@ -56,6 +65,8 @@ namespace Lost
         [MenuItem("Lost/Actions/Override C# Template Files")]
         public static void OverrideTemplateCSharpFiles()
         {
+            AppSettings appSettings = GetAppSettings();
+
             string unityDirectory = null;
             string templateFilesDirectory = null;
 
@@ -117,7 +128,7 @@ namespace Lost
             {
                 foreach (var templateFile in templateFiles)
                 {
-                    CopyFile(templateFile, Path.Combine(templateFilesDirectory, Path.GetFileName(templateFile)), false);
+                    CopyFile(templateFile, Path.Combine(templateFilesDirectory, Path.GetFileName(templateFile)), false, appSettings.ProjectLineEndings);
                 }
             }
             else
@@ -129,18 +140,22 @@ namespace Lost
         [MenuItem("Lost/Actions/Convert all C# files to project line endings")]
         public static void ConvertAllCSharpFileLineEndings()
         {
+            AppSettings appSettings = GetAppSettings();
+
             foreach (string file in Directory.GetFiles(".", "*.cs", SearchOption.AllDirectories))
             {
                 // removing the first 2 characters "./" so it's a relative path from the project folder
                 string fileName = file.Substring(2);
 
-                CopyFile(fileName, fileName, true);
+                CopyFile(fileName, fileName, true, appSettings.ProjectLineEndings);
             }
         }
 
         [MenuItem("Lost/Actions/Generate Warnings As Errors File")]
         public static void GenerateWarngingsAsErrorsFile()
         {
+            AppSettings appSettings = GetAppSettings();
+
             string mcsFilePath = "Assets/mcs.rsp";
             string warningsAsErrors = "-warnaserror+";
 
@@ -178,7 +193,7 @@ namespace Lost
             }
             else
             {
-                CreateFile(warningsAsErrors, mcsFilePath, true);
+                CreateFile(warningsAsErrors, mcsFilePath, true, appSettings.ProjectLineEndings);
             }
         }
 
@@ -248,9 +263,9 @@ namespace Lost
             RemoveEmptyDirectories("Assets");
         }
 
-        public static void CreateFile(string contents, string destinationFile, bool sourceControlAdd)
+        public static void CreateFile(string contents, string destinationFile, bool sourceControlAdd, LineEndings lineEndings)
         {
-            string fileContents = ConvertLineEndings(contents);
+            string fileContents = ConvertLineEndings(contents, lineEndings);
 
             // actually writing out the contents
             File.WriteAllText(destinationFile, fileContents);
@@ -263,14 +278,14 @@ namespace Lost
             }
         }
 
-        public static void CopyFile(string sourceFile, string destinationFile, bool sourceControlCheckout)
+        public static void CopyFile(string sourceFile, string destinationFile, bool sourceControlCheckout, LineEndings lineEndings)
         {
             if (File.Exists(sourceFile) == false)
             {
                 Debug.LogErrorFormat("Unable to copy file {0} to {1}.  Source file does not exist!", sourceFile, destinationFile);
             }
 
-            string fileContents = ConvertLineEndings(File.ReadAllText(sourceFile));
+            string fileContents = ConvertLineEndings(File.ReadAllText(sourceFile), lineEndings);
 
             if (fileContents != File.ReadAllText(destinationFile))
             {
@@ -285,7 +300,7 @@ namespace Lost
             }
         }
 
-        public static string ConvertLineEndings(string inputText)
+        public static string ConvertLineEndings(string inputText, LineEndings lineEndings)
         {
             // checking for a really messed up situation that happens when mixing max/pc sometimes
             if (inputText.Contains("\r\r\n"))
@@ -299,12 +314,12 @@ namespace Lost
                 inputText = inputText.Replace("\r\n", "\n");
             }
 
-            if (AppSettings.Instance.ProjectLineEndings == LineEndings.Windows)
+            if (lineEndings == LineEndings.Windows)
             {
                 // convert all unix to windows
                 inputText = inputText.Replace("\n", "\r\n");
             }
-            else if (AppSettings.Instance.ProjectLineEndings == LineEndings.Unix)
+            else if (lineEndings == LineEndings.Unix)
             {
                 // do nothing, already in Unix
             }

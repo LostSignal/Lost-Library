@@ -18,6 +18,8 @@ namespace Lost
                 return;
             }
 
+            AppSettings appSettings = AppSettingsHelper.GetAppSettings();
+
             // removing the ".meta" extension
             assetPath = assetPath.Substring(0, assetPath.LastIndexOf("."));
 
@@ -35,7 +37,7 @@ namespace Lost
             fileContents = fileContents.Replace("#COMPANY_NAME#", companyName);
             fileContents = fileContents.Replace("#NAMESPACE#", nameSpace);
             
-            File.WriteAllText(assetPath, AppSettingsHelper.ConvertLineEndings(fileContents));
+            File.WriteAllText(assetPath, AppSettingsHelper.ConvertLineEndings(fileContents, appSettings.ProjectLineEndings));
             AssetDatabase.Refresh();
         }
     }

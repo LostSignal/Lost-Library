@@ -40,6 +40,27 @@ namespace Lost
             return new Rect(worldPosition, new Vector2(worldWidth, worldHeight));
         }
 
+        public static void MoveToLocal(this RectTransform rectTransform, Vector2 localPosition, float speed)
+        {
+            Vector2 currentPosition = (Vector2)rectTransform.localPosition;
+            Vector2 directionVector = localPosition - currentPosition;
+
+            if (currentPosition != localPosition)
+            {
+                float distanceToMove = speed * Time.deltaTime;
+                float distanceApart = directionVector.magnitude;
+
+                if (distanceApart < distanceToMove)
+                {
+                    rectTransform.localPosition = rectTransform.localPosition.SetXY(localPosition);
+                }
+                else
+                {
+                    rectTransform.localPosition += (Vector3)(directionVector.normalized * distanceToMove);
+                }
+            }
+        }
+        
         public static IEnumerator Translate(this RectTransform rectTransform, Vector2 start, Vector2 end, float timeLengthInSeconds, float delayInSeconds, AnimationCurve animCurve)
         {
             float percentage = 0.0f;

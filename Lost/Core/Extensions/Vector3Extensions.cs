@@ -21,26 +21,33 @@ namespace Lost
             lhs.y = val;
             return lhs;
         }
-        
+
+        public static Vector3 SetXY(this Vector3 lhs, Vector2 val)
+        {
+            lhs.x = val.x;
+            lhs.y = val.y;
+            return lhs;
+        }
+
         public static Vector3 SetZ(this Vector3 lhs, float val)
         {
             lhs.z = val;
             return lhs;
         }
         
-        public static Vector3 OffsetX(this Vector3 lhs, float val)
+        public static Vector3 AddToX(this Vector3 lhs, float val)
         {
             lhs.x += val;
             return lhs;
         }
         
-        public static Vector3 OffsetY(this Vector3 lhs, float val)
+        public static Vector3 AddToY(this Vector3 lhs, float val)
         {
             lhs.y += val;
             return lhs;
         }
         
-        public static Vector3 OffsetZ(this Vector3 lhs, float val)
+        public static Vector3 AddToZ(this Vector3 lhs, float val)
         {
             lhs.z += val;
             return lhs;

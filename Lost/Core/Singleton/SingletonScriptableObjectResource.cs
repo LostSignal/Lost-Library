@@ -53,13 +53,14 @@ namespace Lost
 
                 // loading the scriptable object using the class name
                 var resource = Resources.Load<T>(className);
-
-                if (resource != null)
+                
+                // instantiating the resource
+                if (resource)
                 {
-                    instance = GameObject.Instantiate<T>(resource);
+                    instance = ScriptableObject.Instantiate<T>(resource);
                 }
-
-                if (instance == null)
+                
+                if (!instance)
                 {
                     Debug.LogErrorFormat("Couldn't load ScriptablObject {0}.  Is there a resource named \"{0}\" with a component of type {0} in the project?", className);
                 }

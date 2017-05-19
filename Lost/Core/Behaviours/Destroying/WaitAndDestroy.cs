@@ -15,11 +15,18 @@ namespace Lost
         [SerializeField] private GameObject destroyEffect;
         #pragma warning restore 0649
 
+        private float currentTime = 0.0f;
+
+        private void OnEnable()
+        {
+            this.currentTime = this.waitTime;
+        }
+
         private void Update()
         {
-            this.waitTime -= Time.deltaTime;
+            this.currentTime -= Time.deltaTime;
 
-            if (this.waitTime < 0.0f)
+            if (this.currentTime < 0.0f)
             {
                 if (this.destroyEffect != null)
                 {

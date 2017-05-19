@@ -33,21 +33,22 @@ namespace Lost
             this.image.color = Color.clear;
             this.onClick = new UnityEvent();
             this.Setup();
-
-            // if this input blocker doesn't live on a canvas, then it won't work
-            if (this.GetComponentInParent<Canvas>() == null)
-            {
-                Debug.LogError("InputBlocker doesn't live on a Canvas and will not work!", this);
-            }
         }
 
-        #if UNITY_EDITOR
-        private void Update()
+        private void Start()
+        {
+            // if this input blocker doesn't live on a GraphicRaycaster, then it won't work
+            if (this.GetComponentInParent<GraphicRaycaster>() == null)
+            {
+                Debug.LogError("InputBlocker doesn't live under a GraphicRaycaster and will not work!", this);
+            }
+        }
+        
+        private void Reset()
         {
             this.Setup();
         }
-        #endif
-
+        
         private void Setup()
         {
             if (this.rectTransform.anchorMin != Vector2.zero)

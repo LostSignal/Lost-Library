@@ -39,5 +39,11 @@ namespace Lost
             yield return new WaitForSeconds(delayInSeconds);
             action.InvokeIfNotNull();
         }
+
+        private static IEnumerator DelayExecuteRealtimeCoroutine(float delayInSeconds, Action action)
+        {
+            yield return new WaitForSecondsRealtime(delayInSeconds);
+            action.InvokeIfNotNull();
+        }
     }
 }

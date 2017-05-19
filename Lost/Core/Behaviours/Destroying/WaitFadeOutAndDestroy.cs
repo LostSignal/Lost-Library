@@ -18,9 +18,12 @@ namespace Lost
         #pragma warning restore 0649
 
         private MeshRenderer meshRenderer;
+        private float currentTime;
         
         private void OnEnable()
         {
+            this.currentTime = this.waitTime;
+
             if (diffuseTrnasparentShader == null)
             {
                 diffuseTrnasparentShader = Shader.Find("Transparent/Diffuse");
@@ -31,9 +34,9 @@ namespace Lost
         
         private void Update()
         {
-            this.waitTime -= Time.deltaTime;
+            this.currentTime -= Time.deltaTime;
 
-            if (this.waitTime < 0)
+            if (this.currentTime < 0)
             {
                 if (this.meshRenderer != null && this.meshRenderer.material != null)
                 {

@@ -93,5 +93,15 @@ namespace Lost
             this.PreviousPosition = this.CurrentPosition;
             this.InputState = Lost.InputState.Released;
         }
+
+        public Vector3 GetCurrentPositionWorldSpace(Camera camera, float z = 0.0f)
+        {
+            return camera.ScreenToWorldPoint(new Vector3(this.CurrentPosition.x, this.CurrentPosition.y, z));
+        }
+
+        public Vector3 GetCurrentPositionLocalSpace(Transform transform, Camera camera, float z = 0.0f)
+        {
+            return transform.InverseTransformPoint(this.GetCurrentPositionWorldSpace(camera, z));
+        }
     }
 }

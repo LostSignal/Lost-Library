@@ -60,7 +60,7 @@ namespace Lost
                 {
                     // constructing the singleton object
                     GameObject singleton = new GameObject(className, typeof(T));
-                    singleton.transform.parent = SingletonUtil.GetSingletonContainer();
+                    singleton.transform.SetParent(SingletonUtil.GetSingletonContainer());
                     singleton.transform.Reset();
 
                     instance = singleton.GetComponent<T>();

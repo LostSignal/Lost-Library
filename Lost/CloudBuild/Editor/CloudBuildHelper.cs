@@ -7,43 +7,30 @@
 namespace Lost
 {
     using System.IO;
+    using System.Linq;
     using UnityEditor;
+    using UnityEditor.Callbacks;
     using UnityEngine;
-    
+
     public static class CloudBuildHelper
     {
-        public static void DisableBitCode(BuildTarget buildTarget, string path)
+        public static void PreExport(string configName)
         {
-            #if UNITY_IOS
-            if (buildTarget == BuildTarget.iOS)
+            Debug.LogFormat("CloudBuildHelper.PreExport({0})", configName);
+
+            UpdateActiveConfig(configName);
+
+            if (AppSettings.ActiveConfig.Name != configName)
             {
-                string projectPath = path + "/Unity-iPhone.xcodeproj/project.pbxproj";
-
-                var pbxProject = new UnityEditor.iOS.Xcode.PBXProject();
-                pbxProject.ReadFromFile(projectPath);
-
-                string target = pbxProject.TargetGuidByName("Unity-iPhone");
-                pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
-
-                pbxProject.WriteToFile(projectPath);
+                Debug.LogErrorFormat("Unable to set AppSettings.ActiveConfig to {0}", configName);
+                return;
             }
-            #endif
-        }
 
-        public static void AppendCommitIdToBundleVersion()
-        {
-            var cloudBuildManifest = Lost.CloudBuildManifest.Find();
-            PlayerSettings.bundleVersion = string.Format("{0}.{1}", PlayerSettings.bundleVersion, cloudBuildManifest.ScmCommitId);
-            Debug.LogFormat("PlayerSettings.bundleVersion: {0}", PlayerSettings.bundleVersion);
-        }
+            Debug.LogFormat("Active Config = {0}", AppSettings.ActiveConfig.Name);
 
-        public static void WriteBundleVersionToVersionResourceFile()
-        {
-            // writing the version to a text file in the resources directory
-            var asset = "Assets/Resources/version.txt";
-            File.WriteAllText(asset, PlayerSettings.bundleVersion);
-            AssetDatabase.ImportAsset(asset);
-            AssetDatabase.Refresh();
+            AppendCommitIdToBundleVersion();
+
+            // TODO [bgish]: need to take into account building asset bundles
         }
 
         public static string BuildAssetBundles(bool buildToStreamingAssets)
@@ -123,6 +110,98 @@ namespace Lost
         {
             Directory.CreateDirectory(AssetBundleUtility.AssetBundlesFolderName);
             return AssetBundleUtility.AssetBundlesFolderName;
+        }
+        
+        private static void AppendCommitIdToBundleVersion()
+        {
+            Debug.Log("CloudBuildHelper.AppendCommitIdToBundleVersion()");
+            Debug.LogFormat("AppSettings.ActiveConfig.AppendCommitToVersion = {0}", AppSettings.ActiveConfig.AppendCommitToVersion);
+
+            if (AppSettings.ActiveConfig.AppendCommitToVersion == false)
+            {
+                return;
+            }
+
+            var cloudBuildManifest = Lost.CloudBuildManifest.Find();
+
+            if (cloudBuildManifest == null)
+            {
+                Debug.LogError("Cloud Build Manifest is NULL!");
+                return;
+            }
+            else if (string.IsNullOrEmpty(cloudBuildManifest.ScmCommitId))
+            {
+                Debug.LogError("Cloud Build Manifest has a Null or Empty ScmCommitId!");
+                return;
+            }
+
+            Debug.LogFormat("PlayerSettings.bundleVersion = {0}", PlayerSettings.bundleVersion);
+            Debug.LogFormat("cloudBuildManifest.ScmCommitId = {0}", cloudBuildManifest.ScmCommitId);
+
+            if (AppSettings.ActiveConfig.AppendCommitToVersion)
+            {
+                PlayerSettings.bundleVersion = string.Format("{0}.{1}", PlayerSettings.bundleVersion, cloudBuildManifest.ScmCommitId);
+                Debug.LogFormat("New PlayerSettings.bundleVersion: {0}", PlayerSettings.bundleVersion);
+            }
+        }
+
+        private static void WriteBundleVersionToVersionResourceFile()
+        {
+            // writing the version to a text file in the resources directory
+            var asset = "Assets/Resources/version.txt";
+            File.WriteAllText(asset, PlayerSettings.bundleVersion);
+            AssetDatabase.ImportAsset(asset);
+            AssetDatabase.Refresh();
+        }
+
+        private static void UpdateActiveConfig(string configName)
+        {
+            Debug.LogFormat("CloudBuildHelper.UpdateActiveConfig({0})", configName);
+
+            // setting all the build configs to inactive
+            AppSettings.Instance.BuildConfigs.ForEach(x => x.IsActive = false);
+
+            // getting the one config that should be active
+            var activeConfig = AppSettings.Instance.BuildConfigs.FirstOrDefault(x => x.Name == configName);
+
+            if (activeConfig == null)
+            {
+                Debug.LogErrorFormat("Unable to find BuildConfig {0}!", configName);
+                return;
+            }
+            
+            // updating AppSettings and saving
+            activeConfig.IsActive = true;
+            EditorUtility.SetDirty(AppSettings.Instance);
+            AssetDatabase.SaveAssets();
+
+            // updating defines
+            AppSettingsEditor.UpdateProjectDefines();
+
+            //// TODO [bgish]: need to find a way to save the new project settings
+        }
+
+        [PostProcessBuild]
+        private static void DisableBitCode(BuildTarget buildTarget, string path)
+        {
+            Debug.LogFormat("CloudBuildHelper.DisableBitCode({0}, {1})", buildTarget, path);
+            Debug.LogFormat("Active Config = {0}", AppSettings.ActiveConfig.Name);
+            Debug.LogFormat("DisableBitCode = {0}", AppSettings.ActiveConfig.DisableBitCode);
+            
+            #if UNITY_IOS
+            if (buildTarget == BuildTarget.iOS && AppSettings.ActiveConfig.DisableBitCode)
+            {
+                string projectPath = path + "/Unity-iPhone.xcodeproj/project.pbxproj";
+
+                var pbxProject = new UnityEditor.iOS.Xcode.PBXProject();
+                pbxProject.ReadFromFile(projectPath);
+
+                string target = pbxProject.TargetGuidByName("Unity-iPhone");
+                pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
+
+                pbxProject.WriteToFile(projectPath);
+            }
+            #endif
         }
     }
 }

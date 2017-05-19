@@ -8,7 +8,7 @@ namespace Lost
 {
     using UnityEngine;
     using UnityEngine.UI;
-
+    
     [RequireComponent(typeof(ScrollRect))]
     public class FocusOnChild : MonoBehaviour
     {
@@ -30,7 +30,7 @@ namespace Lost
 
         private GameObject closestChild;
 
-        public GameObject  ClosestChild
+        public GameObject ClosestChild
         {
             get { return this.closestChild; }
         }
@@ -39,6 +39,11 @@ namespace Lost
         {
             get
             {
+                if (this.ChildCount == 0)
+                {
+                    return -1;
+                }
+
                 int closestIndex = 0;
                 float closestDistance = this.GetDistanceVector(0).sqrMagnitude;
 
