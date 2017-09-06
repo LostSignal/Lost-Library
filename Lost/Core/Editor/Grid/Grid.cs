@@ -43,6 +43,32 @@ namespace Lost
             }
         }
 
+        public static bool UpdateList<T>(GridButton gridButtonPressed, List<T> items, int currnentIndex)
+        {
+            var currentItem = items[currnentIndex];
+
+            if (gridButtonPressed == GridButton.Delete)
+            {
+                items.Remove(currentItem);
+                return true;
+            }
+            else if (gridButtonPressed == GridButton.MoveUp && currnentIndex != 0)
+            {
+                items.Remove(currentItem);
+                items.Insert(currnentIndex - 1, currentItem);
+                return true;
+            }
+            else if (gridButtonPressed == GridButton.MoveDown && currnentIndex != items.Count - 1)
+            {
+                items.Remove(currentItem);
+                items.Insert(currnentIndex + 1, currentItem);
+
+                return true;
+            }
+
+            return false;
+        }
+
         public Grid(GridDefinition gridDefinition)
         {
             this.gridDefinition = gridDefinition;
@@ -271,6 +297,28 @@ namespace Lost
             GUILayout.Space(1);
 
             return Mathf.Clamp(newValue, minValue, maxValue);
+        }
+
+        public string DrawPopup(string[] values, string currentValue)
+        {
+            var column = this.GetNextColumn();
+            
+            int currentIndex = Array.IndexOf(values, currentValue);
+
+            if (currentIndex < 0)
+            {
+                currentIndex = 0;
+            }
+
+            GUILayout.Space(3);
+            int newIndex = EditorGUILayout.Popup(currentIndex, values, GUILayout.Width(column.Width - 6));
+
+            return newIndex != currentIndex ? values[newIndex] : currentValue;
+        }
+
+        public string DrawPopup(List<string> values, string currentValue)
+        {
+            return this.DrawPopup(values.ToArray(), currentValue);
         }
 
         public T DrawEnum<T>(T value) where T : struct, IConvertible

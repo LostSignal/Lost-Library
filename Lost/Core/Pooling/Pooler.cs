@@ -14,51 +14,62 @@ namespace Lost
         // TODO [bgish]: need to figure out how to add items to the pool (scriptable object?  components register object?)
         private static Dictionary<int, Pool> pools = new Dictionary<int, Pool>();
 
+        public static void PoolPrefab<T>(T prefab, int initialCount = 0) where T : MonoBehaviour
+        {
+            PoolPrefab(prefab.gameObject, initialCount);
+        }
+
+        public static void PoolPrefab(GameObject prefab, int initialCount = 0)
+        {
+            int instanceId = prefab.GetInstanceID();
+            
+            if (pools.ContainsKey(instanceId))
+            {
+                Debug.LogWarningFormat("Tried pooling the same Prefab \"{0}\"multiple times.", prefab.name);
+                return;
+            }
+
+            pools.Add(instanceId, new Pool(prefab, initialCount));
+        }
+
         public static UnityEngine.GameObject Instantiate(UnityEngine.GameObject prefab)
         {
-            return Instantiate(prefab, null, false);
+            return Instantiate(prefab, null);
         }
 
         public static UnityEngine.GameObject Instantiate(UnityEngine.GameObject prefab, Transform parent)
-        {
-            return Instantiate(prefab, parent, false);
-        }
-
-        public static UnityEngine.GameObject Instantiate(UnityEngine.GameObject prefab, Transform parent, bool instantiateInWorldSpace)
         {
             int instanceId = prefab.GetInstanceID();
             Pool pool = null;
 
             if (pools.TryGetValue(instanceId, out pool))
             {
-                return pool.GetObjectFromPool(prefab, parent, instantiateInWorldSpace);
+                return pool.GetObjectFromPool(prefab, parent);
             }
             else
             {
-                return GameObject.Instantiate(prefab, parent, instantiateInWorldSpace);
+                return GameObject.Instantiate(prefab, parent);
             }
         }
         
         public static T Instantiate<T>(T prefab) where T : UnityEngine.MonoBehaviour
+        {
+            return Instantiate<T>(prefab, null);
+        }
+    
+        public static T Instantiate<T>(T prefab, Transform parent) where T : UnityEngine.MonoBehaviour
         {
             int instanceId = prefab.gameObject.GetInstanceID();
             Pool pool = null;
 
             if (pools.TryGetValue(instanceId, out pool))
             {
-                return pool.GetObjectFromPool(prefab.gameObject, null, false).GetComponent<T>();
+                return pool.GetObjectFromPool(prefab.gameObject, parent).GetComponent<T>();
             }
             else
             {
-                return GameObject.Instantiate<T>(prefab);
+                return GameObject.Instantiate(prefab, parent);
             }
-        }
-
-        public static T Instantiate<T>(T prefab, Transform parent) where T : UnityEngine.MonoBehaviour
-        {
-            var result = Instantiate(prefab);
-            result.transform.SetParent(parent);
-            return result;
         }
 
         public static void Destroy(GameObject gameObject)
@@ -73,7 +84,7 @@ namespace Lost
 
         private static void InternalDestory(GameObject gameObject, bool destroyImmediate)
         {
-            var pooled = gameObject.GetComponent<Pooled>();
+            var pooled = gameObject.GetComponent<PooledObject>();
 
             if (pooled != null)
             {

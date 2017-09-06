@@ -24,8 +24,10 @@ Assets/StreamingAssets/AssetBundles.meta
 # ===================================== #
 
 .vs
-bin
 obj
+bin
+!Assets/Plugins/UnityPurchasing/Bin
+!Assets\Plugins\UnityPurchasing\Bin
 
 *.booproj
 *.csproj

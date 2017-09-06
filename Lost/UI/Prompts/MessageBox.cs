@@ -13,21 +13,26 @@ namespace Lost
     using UnityEngine.UI;
 
     #if USE_TEXTMESH_PRO
-    using Text = TMPro.TextMeshProUGUI;
+    using Text = TMPro.TMP_Text;
     #else
     using Text = UnityEngine.UI.Text;
     #endif
 
+    public enum OkResult
+    {
+        Ok,
+    }
+
     public enum YesNoResult
     {
         Yes,
-        No
+        No,
     }
 
     public enum LeftRightResult
     {
         Left,
-        Right
+        Right,
     }
 
     public class MessageBox : SingletonDialogResource<MessageBox>
@@ -48,10 +53,47 @@ namespace Lost
         public override void OnBackButtonPressed()
         {
             base.OnBackButtonPressed();
-            this.RightButtonClicked();
+            this.LeftButtonClicked();
         }
 
-        public IEnumerator ShowOk(string title, string body)
+        public UnityTask<OkResult> ShowOk(string title, string body)
+        {
+            return UnityTask<OkResult>.Run(this.ShowOkInternal(title, body));
+        }
+
+        public UnityTask<YesNoResult> ShowYesNo(string title, string body)
+        {
+            return UnityTask<YesNoResult>.Run(this.ShowYesNoInternal(title, body));
+        }
+        
+        public UnityTask<LeftRightResult> Show(string title, string body, string leftButtonText, string rightButtonText)
+        {
+            return UnityTask<LeftRightResult>.Run(this.ShowInternal(title, body, leftButtonText, rightButtonText));
+        }
+        
+        protected override void Awake()
+        {
+            base.Awake();
+
+            #if UNITY_EDITOR
+            if (Application.isPlaying == false)
+            {
+                return;
+            }
+            #endif
+
+            Debug.Assert(this.leftButton != null, "MessageBox didn't define left button", this);
+            Debug.Assert(this.rightButton != null, "MessageBox didn't define right button", this);
+            Debug.Assert(this.okButton != null, "MessageBox didn't define an OK button", this);
+            Debug.Assert(this.title != null, "MessageBox didn't define title", this);
+            Debug.Assert(this.body != null, "MessageBox didn't define body", this);
+
+            this.leftButton.onClick.AddListener(this.LeftButtonClicked);
+            this.rightButton.onClick.AddListener(this.RightButtonClicked);
+            this.okButton.onClick.AddListener(this.OkButtonClicked);
+        }
+
+        private IEnumerator<OkResult> ShowOkInternal(string title, string body)
         {
             // TODO [bgish]: If "in use", then wait till it becomes available
 
@@ -61,17 +103,17 @@ namespace Lost
             // waiting for it to start showing
             while (this.IsShowing == false)
             {
-                yield return null;
+                yield return default(OkResult);
             }
 
             // waiting for it to return to the hidden state
             while (this.IsHidden == false)
             {
-                yield return null;
+                yield return default(OkResult);
             }
         }
 
-        public IEnumerator<YesNoResult> ShowYesNo(string title, string body)
+        private IEnumerator<YesNoResult> ShowYesNoInternal(string title, string body)
         {
             // TODO [bgish]: If "in use", then wait till it becomes available
 
@@ -104,10 +146,10 @@ namespace Lost
             }
         }
 
-        public IEnumerator<LeftRightResult> Show(string title, string body, string leftButtonText, string rightButtonText)
+        private IEnumerator<LeftRightResult> ShowInternal(string title, string body, string leftButtonText, string rightButtonText)
         {
             // TODO [bgish]: If "in use", then wait till it becomes available
-            
+
             if (string.IsNullOrEmpty(leftButtonText) == false && this.leftButtonText == null)
             {
                 Debug.LogErrorFormat(this, "Unable to set MessageBox left button to {0} besause LeftButtonText object is null.", leftButtonText);
@@ -134,28 +176,6 @@ namespace Lost
             }
 
             yield return this.result;
-        }
-
-        protected override void Awake()
-        {
-            base.Awake();
-
-            #if UNITY_EDITOR
-            if (Application.isPlaying == false)
-            {
-                return;
-            }
-            #endif
-
-            Debug.Assert(this.leftButton != null, "MessageBox didn't define left button", this);
-            Debug.Assert(this.rightButton != null, "MessageBox didn't define right button", this);
-            Debug.Assert(this.okButton != null, "MessageBox didn't define an OK button", this);
-            Debug.Assert(this.title != null, "MessageBox didn't define title", this);
-            Debug.Assert(this.body != null, "MessageBox didn't define body", this);
-
-            this.leftButton.onClick.AddListener(this.LeftButtonClicked);
-            this.rightButton.onClick.AddListener(this.RightButtonClicked);
-            this.okButton.onClick.AddListener(this.OkButtonClicked);
         }
         
         private void LeftButtonClicked()

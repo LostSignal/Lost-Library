@@ -6,7 +6,6 @@
 
 namespace Lost
 {
-    using System.Collections;
     using UnityEngine;
     
     public static class TransformExtensions

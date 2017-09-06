@@ -11,7 +11,7 @@ namespace Lost
     using UnityEngine.UI;
 
     #if USE_TEXTMESH_PRO
-    using Text = TMPro.TextMeshProUGUI;
+    using Text = TMPro.TMP_Text;
     #else
     using Text = UnityEngine.UI.Text;
     #endif
@@ -19,22 +19,28 @@ namespace Lost
     public class SpinnerBox : SingletonDialogResource<SpinnerBox>
     {
         #pragma warning disable 0649
+        [SerializeField] private Text title;
         [SerializeField] private Text body;
         [SerializeField] private Button cancelButton;
         #pragma warning restore 0649
         
         private Action cancelButtonAction;
 
-        public void Show(string body)
+        public void Show(string title, string body)
         {
-            this.PrivateShow(body, false, null);
+            this.PrivateShow(title, body, false, null);
         }
 
-        public void ShowWithCancel(string body, Action cancelButtonAction)
+        public void ShowWithCancel(string title, string body, Action cancelButtonAction)
         {
-            this.PrivateShow(body, true, cancelButtonAction);
+            this.PrivateShow(title, body, true, cancelButtonAction);
         }
        
+        public void UpdateBodyText(string body)
+        {
+            this.body.text = body;
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -52,14 +58,19 @@ namespace Lost
             this.cancelButton.onClick.AddListener(this.CancelButtonClicked);
         }
 
-        private void PrivateShow(string body, bool showCancelButton, Action cancelButtonAction)
+        private void PrivateShow(string title, string body, bool showCancelButton, Action cancelButtonAction)
         {
             if (this.IsShowing)
             {
                 Debug.LogError("SpinnerBox.Show called while already showing.  SpinnerBox may not function correctly.", this);
             }
-            
-            this.body.text = body;
+
+            if (this.title != null)
+            {
+                this.title.text = title;
+            }
+
+            this.UpdateBodyText(body);
             this.cancelButton.gameObject.SetActive(showCancelButton);
             this.cancelButtonAction = cancelButtonAction;
 

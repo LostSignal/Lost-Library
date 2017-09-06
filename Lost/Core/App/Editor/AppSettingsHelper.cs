@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // <copyright file="AppSettingsHelper.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
@@ -21,10 +21,14 @@ namespace Lost
             return Resources.Load<AppSettings>("AppSettings");
         }
 
-        #if !UNITY_CLOUD_BUILD
         [InitializeOnLoadMethod]
         public static void InitializeProjectSettings()
         {
+            if (Platform.IsUnityCloudBuild)
+            {
+                return;
+            }
+
             // don't want to use the singleton instance because this method gets called way too often and can corrupt the static variable
             AppSettings appSettings = GetAppSettings();
             
@@ -60,7 +64,6 @@ namespace Lost
                 OverrideTemplateCSharpFiles();
             }
         }
-        #endif
 
         [MenuItem("Lost/Actions/Override C# Template Files")]
         public static void OverrideTemplateCSharpFiles()

@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // <copyright file="CloudBuildManifest.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
@@ -18,7 +18,7 @@ namespace Lost
         private CloudBuildManifest(string json)
         {
             this.json = json;
-            this.dictionary = MiniJSON.Json.Deserialize(json) as Dictionary<string, object>;
+            this.dictionary = Lost.MiniJSON.Json.Deserialize(json) as Dictionary<string, object>;
         }
 
         public string CloudBuildTargetName

@@ -9,6 +9,8 @@ namespace Lost
     using System.Collections.Generic;
     using UnityEngine;
 
+    //// NOTE [bgish]: I have absolutely no clue if this even works anymore
+    ////
     //// TODO how should I handle errors that SendGetRequest and SendPostRequest return.  Is returning error codes the right way to go?  
     ////
     //// TODO most definitely need to turn these into Coroutines that run in the background
@@ -24,27 +26,38 @@ namespace Lost
             this.server = server;
         }
 
-        protected T SendGetRequest<T>(string url)
+        public UnityTask<T> SendGetRequest<T>(string url)
+        {
+            return UnityTask<T>.Run(this.SendGetRequestInternal<T>(url));
+        }
+
+        public UnityTask<int> SendPostRequest<T>(string url, T request)
+        {
+            return UnityTask<int>.Run(this.SendPostRequestInternal<T>(url, request));
+        }
+
+        private IEnumerator<T> SendGetRequestInternal<T>(string url)
         {
             var www = new WWW(this.server + url);
 
             while (www.isDone == false)
             {
-                ThreadUtil.SleepInMillis(1);
+                yield return default(T);
             }
 
             if (string.IsNullOrEmpty(www.error) == false)
             {
                 Debug.LogErrorFormat("WWW Error: {0}", www.error);
+                throw new System.Exception(www.error);
             }
 
-            // throw exception if we time out / bad connection
-            // throw exception if got a bad response
-            // throw exception if couldn't correctly deserialize response
-            return JsonUtility.FromJson<T>(www.text);
+            // TODO [bgish]: Throw exception if we time out / bad connection
+            // TODO [bgish]: Throw exception if got a bad response
+            // TODO [bgish]: Throw exception if couldn't correctly deserialize response
+            yield return JsonUtility.FromJson<T>(www.text);
         }
 
-        protected int SendPostRequest<T>(string url, T request)
+        private IEnumerator<int> SendPostRequestInternal<T>(string url, T request)
         {
             string requestJson = JsonUtility.ToJson(request);
             byte[] requestJsonBytes = System.Text.Encoding.UTF8.GetBytes(requestJson);
@@ -58,18 +71,19 @@ namespace Lost
 
             while (www.isDone == false)
             {
-                ThreadUtil.SleepInMillis(1);
+                yield return default(int);
             }
 
             if (string.IsNullOrEmpty(www.error) == false)
             {
                 Debug.LogErrorFormat("WWW Error: {0}", www.error);
+                throw new System.Exception(www.error);
             }
 
-            // throw exception if we time out / bad connection
-            // throw exception if got a bad response
-            // throw exception if couldn't correctly deserialize response
-            return JsonUtility.FromJson<int>(www.text);
+            // TODO [bgish]: Throw exception if we time out / bad connection
+            // TODO [bgish]: Throw exception if got a bad response
+            // TODO [bgish]: Throw exception if couldn't correctly deserialize response
+            yield return JsonUtility.FromJson<int>(www.text);
         } 
 
         private string GetSecurityKey(string json)

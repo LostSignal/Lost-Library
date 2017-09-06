@@ -13,62 +13,41 @@ namespace Lost
         private static readonly int ShownHash = Animator.StringToHash("Show");
         private static readonly int HiddenHash = Animator.StringToHash("Hide");
         
-        private float showStateLength = 0.0f;
-        private float hideStateLength = 0.0f;
         private State state;
 
-        public bool IsInShownState
+        public bool IsDoneShowing
         {
             get { return this.state == State.Shown; }
         }
 
-        public bool IsInHideState
+        public bool IsDoneHiding
         {
             get { return this.state == State.Hidden; }
         }
         
-        public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-        {
-            base.OnStateEnter(animator, stateInfo, layerIndex);
-
-            if (stateInfo.shortNameHash == ShownHash)
-            {
-                this.showStateLength = 0.0f;
-            }
-            else if (stateInfo.shortNameHash == HiddenHash)
-            {
-                this.hideStateLength = 0.0f;
-            }
-        }
-
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             base.OnStateUpdate(animator, stateInfo, layerIndex);
         
-            if (stateInfo.shortNameHash == ShownHash)
+            if (stateInfo.shortNameHash == ShownHash && stateInfo.normalizedTime >= 1.0f)
             {
-                this.showStateLength += Time.deltaTime;
-
-                if (this.showStateLength >= stateInfo.length)
-                {
-                    this.state = State.Shown;
-                }
+                this.state = State.Shown;
             }
-            else if (stateInfo.shortNameHash == HiddenHash)
+            else if (stateInfo.shortNameHash == HiddenHash && stateInfo.normalizedTime >= 1.0f)
             {
-                this.hideStateLength += Time.deltaTime;
-
-                if (this.hideStateLength >= stateInfo.length)
-                {
-                    this.state = State.Hidden;
-                }
+                this.state = State.Hidden;
+            }
+            else
+            {
+                this.state = State.Unknown;
             }
         }
 
         private enum State
         {
+            Unknown,
             Hidden,
-            Shown
+            Shown,
         }
     }
 }

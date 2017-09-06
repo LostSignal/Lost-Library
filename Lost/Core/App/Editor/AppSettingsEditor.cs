@@ -68,10 +68,15 @@ namespace Lost
 
             using (new BeginHorizontalHelper())
             {
-                GUILayout.Label("App Version", GUILayout.Width(100));
+                GUILayout.Label("App Version", GUILayout.Width(140));
                 appSettings.Version = EditorGUILayout.TextField(GUIContent.none, appSettings.Version, GUILayout.Width(200));
+
+                if (appSettings.Version != PlayerSettings.bundleVersion)
+                {
+                    PlayerSettings.bundleVersion = appSettings.Version;
+                }
             }
-            
+
             GUILayout.Label("");
 
             DrawProjectSettings(foldoutId + 0, appSettings);
@@ -121,7 +126,7 @@ namespace Lost
                 }
 
                 int labelWidth = 170;
-
+                
                 using (new BeginHorizontalHelper())
                 {
                     GUILayout.Label("App Company", GUILayout.Width(labelWidth));
@@ -132,6 +137,12 @@ namespace Lost
                 {
                     GUILayout.Label("App Namespace", GUILayout.Width(labelWidth));
                     EditorSettings.projectGenerationRootNamespace = EditorGUILayout.TextField(GUIContent.none, EditorSettings.projectGenerationRootNamespace, GUILayout.Width(200));
+                }
+
+                using (new BeginHorizontalHelper())
+                {
+                    GUILayout.Label("App Build Number Type", GUILayout.Width(labelWidth));
+                    appSettings.BuildNumberType = (BuildNumberType)EditorGUILayout.EnumPopup(GUIContent.none, appSettings.BuildNumberType, GUILayout.Width(200));
                 }
 
                 using (new BeginHorizontalHelper())
@@ -485,7 +496,19 @@ namespace Lost
                 GUILayout.Label("PlayFab Title Id", GUILayout.Width(120));
                 config.PlayfabTitleId = EditorGUILayout.TextField(GUIContent.none, config.PlayfabTitleId, GUILayout.Width(250));
             }
-            
+
+            using (new BeginHorizontalHelper())
+            {
+                GUILayout.Label("Catalog Version", GUILayout.Width(120));
+                config.CatalogVersion = EditorGUILayout.TextField(GUIContent.none, config.CatalogVersion, GUILayout.Width(250));
+            }
+
+            using (new BeginHorizontalHelper())
+            {
+                GUILayout.Label("CloudScript Revision", GUILayout.Width(120));
+                config.CloudScriptRevision = EditorGUILayout.IntField(GUIContent.none, config.CloudScriptRevision, GUILayout.Width(250));
+            }
+
             using (new BeginHorizontalHelper())
             {
                 GUILayout.Label("PlayFab Secret Id", GUILayout.Width(120));
@@ -502,22 +525,22 @@ namespace Lost
             #endif
 
             GUILayout.Label("");
-            GUILayout.Label("Unity Cloud Build Settings");
+            GUILayout.Label("Unity Cloud iOS Settings");
 
             using (new BeginHorizontalHelper())
             {
                 GUILayout.Label("", GUILayout.Width(10));
-                config.AppendCommitToVersion = EditorGUILayout.Toggle(GUIContent.none, config.AppendCommitToVersion, GUILayout.Width(25));
-                GUILayout.Label("Append Commit Number To App Version");
-            }
-
-            using (new BeginHorizontalHelper())
-            {
-                GUILayout.Label("", GUILayout.Width(10));
-                config.DisableBitCode = EditorGUILayout.Toggle(GUIContent.none, config.DisableBitCode, GUILayout.Width(25));
-                GUILayout.Label("Disable BitCode (iOS Only)");
+                config.DisableIOSBitCode = EditorGUILayout.Toggle(GUIContent.none, config.DisableIOSBitCode, GUILayout.Width(25));
+                GUILayout.Label("Disable BitCode");
             }
             
+            using (new BeginHorizontalHelper())
+            {
+                GUILayout.Label("", GUILayout.Width(10));
+                config.EnableIOSPushNotifications = EditorGUILayout.Toggle(GUIContent.none, config.EnableIOSPushNotifications, GUILayout.Width(25));
+                GUILayout.Label("Enable Push Notifications");
+            }
+
             GUILayout.Label("");
 
             // drawing defines

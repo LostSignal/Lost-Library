@@ -13,13 +13,13 @@ namespace Lost
     public class LocText
     {
         #pragma warning disable 0649
-        [SerializeField] private LocTable localizationTable;
+        [SerializeField] private LocalizationTable localizationTable;
         [SerializeField] private ushort localizationTextId;
         #pragma warning restore 0649
 
         private string textCache;
 
-        public LocTable LocalizationTable
+        public LocalizationTable LocalizationTable
         {
             get { return this.localizationTable; }
         }

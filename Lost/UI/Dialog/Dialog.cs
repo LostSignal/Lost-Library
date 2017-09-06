@@ -18,7 +18,13 @@ namespace Lost
     {
         private static readonly int HideHash = Animator.StringToHash("Hide");
         private static readonly int ShowHash = Animator.StringToHash("Show");
-        
+    
+        public enum ShowType
+        {
+            HideThenShow,
+            ShowImmediate,
+        }
+
         #pragma warning disable 0649
         [Tooltip("This dialog should swallow up all input so you can't click behind it.")]
         [SerializeField] private bool blockInput = true;
@@ -33,6 +39,7 @@ namespace Lost
         [SerializeField] private bool registerForBackButton = true;
         [SerializeField] private bool hideOnBackButtonPressed = true;
         [SerializeField] private Dialog showDialogOnBackButtonPressed;
+        [SerializeField] private ShowType showType;
         #pragma warning restore 0649
         
         private bool isHibernateMonitorRunning = false;
@@ -67,7 +74,7 @@ namespace Lost
 
         public bool IsShown
         {
-            get { return this.isShowing && this.dialogStateMachine.IsInShownState; }
+            get { return this.isShowing && this.dialogStateMachine.IsDoneShowing; }
         }
 
         public bool IsHidding
@@ -77,7 +84,7 @@ namespace Lost
 
         public bool IsHidden
         {
-            get { return this.isShowing == false && this.dialogStateMachine.IsInHideState; }
+            get { return this.isShowing == false && this.dialogStateMachine.IsDoneHiding; }
         }
 
         public bool IsTransitioning
@@ -127,6 +134,11 @@ namespace Lost
 
         public virtual void Hide()
         {
+            this.HideThenShow(null);
+        }
+
+        public void HideThenShow(Dialog dialog)
+        {
             // early out if we're not suppose to change state while transitioning
             if (this.dontChangeStateWhileTransitioning && this.IsTransitioning)
             {
@@ -135,7 +147,7 @@ namespace Lost
 
             if (this.isShowing)
             {
-                this.StartHibernateMonitorCoroutine();
+                this.StartHibernateMonitorCoroutine(dialog);
                 this.isShowing = false;
                 this.animator.SetBool(ShowHash, false);
                 this.OnHide();
@@ -148,12 +160,21 @@ namespace Lost
         {
             if (this.HideOnBackButtonPressed)
             {
-                this.Hide();
-            }
-
-            if (this.showDialogOnBackButtonPressed != null)
-            {
-                this.showDialogOnBackButtonPressed.Show();
+                if (this.showType == ShowType.HideThenShow)
+                {
+                    this.HideThenShow(this.showDialogOnBackButtonPressed);
+                }
+                else if (this.showType == ShowType.ShowImmediate)
+                {
+                    if (this.showDialogOnBackButtonPressed != null)
+                    {
+                        this.showDialogOnBackButtonPressed.Show();
+                    }
+                }
+                else
+                {
+                    Debug.LogErrorFormat("Dialog.OnBackButtonPressed found unknown ShowType {0}", this.showType);
+                }
             }
         }
 
@@ -239,23 +260,33 @@ namespace Lost
         {
         }
 
-        private void StartHibernateMonitorCoroutine()
+        private void StartHibernateMonitorCoroutine(Dialog dialog)
         {
             if (this.isHibernateMonitorRunning == false)
             {
                 this.isHibernateMonitorRunning = true;
-                this.StartCoroutine(this.HibernateMonitorCoroutine());
+                this.StartCoroutine(this.HibernateMonitorCoroutine(dialog));
             }
         }
 
-        private IEnumerator HibernateMonitorCoroutine()
+        private IEnumerator HibernateMonitorCoroutine(Dialog dialog)
         {
             while (this.IsHidden == false)
             {
                 yield return null;
             }
 
-            this.SetActive(false);
+            if (dialog != null)
+            {
+                dialog.Show();
+                yield return null;
+            }
+
+            if (this != dialog)
+            {
+                this.SetActive(false);
+            }
+
             this.isHibernateMonitorRunning = false;
         }
 

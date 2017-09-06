@@ -35,6 +35,13 @@ namespace Lost
         None,
         Perforce
     }
+    
+    public enum BuildNumberType
+    {
+        CommitNumber,
+        BuildNumber,
+        None,
+    }
 
     [CreateAssetMenu]
     public class AppSettings : SingletonScriptableObjectResource<AppSettings>
@@ -72,9 +79,12 @@ namespace Lost
         //// s3 -   (string accessKey, string secretKey, string bucket, string folder, string key)
         //// playfab - (string directoryName)
         #pragma warning restore 0649
-
+            
+        private CloudBuildManifest cloudBuildManifest;
+        private BuildNumberType buildNumberType;
         private bool configuredLostDefines;
-        
+        private string longVersion;
+
         public static BuildConfig ActiveConfig
         {
             get
@@ -100,7 +110,7 @@ namespace Lost
                 return this.lostDefines;
             }
         }
-        
+
         public string Version
         {
             get { return this.version; }
@@ -110,6 +120,69 @@ namespace Lost
             #endif
         }
         
+        public BuildNumberType BuildNumberType
+        {
+            get { return this.buildNumberType; }
+            
+            #if UNITY_EDITOR
+            set { this.buildNumberType = value; }
+            #endif
+        }
+
+        public int BuildNumber
+        {
+            get
+            {
+                if (this.buildNumberType == BuildNumberType.None)
+                {
+                    return 0;
+                }
+
+                if (this.cloudBuildManifest == null)
+                {
+                    this.cloudBuildManifest = CloudBuildManifest.Find();
+                }
+                
+                if (this.cloudBuildManifest == null)
+                {
+                    return 0;
+                }
+                else if (this.buildNumberType == BuildNumberType.BuildNumber)
+                {
+                    return this.cloudBuildManifest.BuildNumber;
+                }
+                else if (this.buildNumberType == BuildNumberType.CommitNumber)
+                {
+                    string commitId = cloudBuildManifest.ScmCommitId;
+                    int commitNumber;
+
+                    if (int.TryParse(commitId, out commitNumber) == false)
+                    {
+                        Debug.LogErrorFormat("AppSettings.BuildNumber couldn't parse build number {0}.  It is not a valid integer!", commitId);
+                        return 0;
+                    }
+
+                    return commitNumber;
+                }
+
+                Debug.LogErrorFormat("Found unknown BuildNumberType {0}", this.buildNumberType.ToString());
+                return 0;
+            }
+        }
+        
+        public string LongVersion
+        {
+            get
+            {
+                if (this.longVersion == null)
+                {
+                    this.longVersion = this.BuildNumber == 0 ? this.Version : string.Format("{0} ({1})", this.Version, this.BuildNumber);
+                }
+
+                return this.longVersion;
+            }
+        }
+
         public List<string> ProjectDefines
         {
             get { return this.projectDefines; }
@@ -281,11 +354,13 @@ namespace Lost
             #pragma warning disable 0649
             [SerializeField] private string name;
             [SerializeField] private bool isActive;
-            [SerializeField] private bool appendCommitToVersion;
-            [SerializeField] private bool disableBitCode;
+            [SerializeField] private bool disableIOSBitCode;
+            [SerializeField] private bool enableIOSPushNotifications;
             
             #if USE_PLAYFAB_SDK
             [SerializeField] private string playfabTitleId;
+            [SerializeField] private string catalogVersion;
+            [SerializeField] private int cloudScriptRevision;
             #if UNITY_EDITOR
             [SerializeField] private string playfabSecretId;
             #endif
@@ -309,17 +384,17 @@ namespace Lost
                 get { return this.name; }
                 set { this.name = value; }
             }
-
-            public bool AppendCommitToVersion
+            
+            public bool DisableIOSBitCode
             {
-                get { return this.appendCommitToVersion; }
-                set { this.appendCommitToVersion = value; }
+                get { return this.disableIOSBitCode; }
+                set { this.disableIOSBitCode = value; }
             }
 
-            public bool DisableBitCode
+            public bool EnableIOSPushNotifications
             {
-                get { return this.disableBitCode; }
-                set { this.disableBitCode = value; }
+                get { return this.enableIOSPushNotifications; }
+                set { this.enableIOSPushNotifications = value; }
             }
 
             #if USE_PLAYFAB_SDK
@@ -328,7 +403,19 @@ namespace Lost
                 get { return this.playfabTitleId; }
                 set { this.playfabTitleId = value; }
             }
-            
+
+            public string CatalogVersion
+            {
+                get { return this.catalogVersion; }
+                set { this.catalogVersion = value; }
+            }
+
+            public int CloudScriptRevision
+            {
+                get { return this.cloudScriptRevision; }
+                set { this.cloudScriptRevision = value; }
+            }
+
             #if UNITY_EDITOR
             public string PlayfabSecretId
             {

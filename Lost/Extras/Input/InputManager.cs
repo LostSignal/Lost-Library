@@ -56,9 +56,9 @@ namespace Lost
             base.Awake();
 
             UnityEngine.Input.simulateMouseWithTouches = false;
-            this.useTouchInput = Platform.Instance.IsTouchSupported;
-            this.useMouseInput = Platform.Instance.IsMousePresent;
-            this.usePenInput = Platform.Instance.IsPenPresent;
+            this.useTouchInput = Platform.IsTouchSupported;
+            this.useMouseInput = Platform.IsMousePresent;
+            this.usePenInput = Platform.IsPenPresent;
         }
 
         private void FixedUpdate()

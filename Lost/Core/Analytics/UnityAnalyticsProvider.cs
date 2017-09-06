@@ -27,7 +27,7 @@ namespace Lost
                 Analytics.SetUserBirthYear(birthYear);
             }
 
-            this.SendIdentityEventAsTrackEvent(userId, eventData, gender, age);
+            this.SendIdentityEventAsTrackEvent(gender, age, eventData);
         }
         
         public override void Screen(string screenName, Dictionary<string, object> eventData)

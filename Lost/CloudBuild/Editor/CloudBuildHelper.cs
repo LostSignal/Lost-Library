@@ -28,7 +28,9 @@ namespace Lost
 
             Debug.LogFormat("Active Config = {0}", AppSettings.ActiveConfig.Name);
 
-            AppendCommitIdToBundleVersion();
+            Debug.LogFormat("Setting BuildNumber/BundleVersionCode to {0}", AppSettings.Instance.BuildNumber);
+            PlayerSettings.iOS.buildNumber = AppSettings.Instance.BuildNumber.ToString();
+            PlayerSettings.Android.bundleVersionCode = AppSettings.Instance.BuildNumber;
 
             // TODO [bgish]: need to take into account building asset bundles
         }
@@ -71,9 +73,10 @@ namespace Lost
         {
             var options = BuildAssetBundleOptions.None;
 
-            #if UNITY_CLOUD_BUILD
-            options |= BuildAssetBundleOptions.ForceRebuildAssetBundle;
-            #endif
+            if (Platform.IsUnityCloudBuild)
+            {
+                options |= BuildAssetBundleOptions.ForceRebuildAssetBundle;
+            }
 
             // The following code used to live inside AssetBundleManager, but I moved it out to here
             bool shouldCheckODR = EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS || EditorUserBuildSettings.activeBuildTarget == BuildTarget.tvOS;
@@ -110,39 +113,6 @@ namespace Lost
         {
             Directory.CreateDirectory(AssetBundleUtility.AssetBundlesFolderName);
             return AssetBundleUtility.AssetBundlesFolderName;
-        }
-        
-        private static void AppendCommitIdToBundleVersion()
-        {
-            Debug.Log("CloudBuildHelper.AppendCommitIdToBundleVersion()");
-            Debug.LogFormat("AppSettings.ActiveConfig.AppendCommitToVersion = {0}", AppSettings.ActiveConfig.AppendCommitToVersion);
-
-            if (AppSettings.ActiveConfig.AppendCommitToVersion == false)
-            {
-                return;
-            }
-
-            var cloudBuildManifest = Lost.CloudBuildManifest.Find();
-
-            if (cloudBuildManifest == null)
-            {
-                Debug.LogError("Cloud Build Manifest is NULL!");
-                return;
-            }
-            else if (string.IsNullOrEmpty(cloudBuildManifest.ScmCommitId))
-            {
-                Debug.LogError("Cloud Build Manifest has a Null or Empty ScmCommitId!");
-                return;
-            }
-
-            Debug.LogFormat("PlayerSettings.bundleVersion = {0}", PlayerSettings.bundleVersion);
-            Debug.LogFormat("cloudBuildManifest.ScmCommitId = {0}", cloudBuildManifest.ScmCommitId);
-
-            if (AppSettings.ActiveConfig.AppendCommitToVersion)
-            {
-                PlayerSettings.bundleVersion = string.Format("{0}.{1}", PlayerSettings.bundleVersion, cloudBuildManifest.ScmCommitId);
-                Debug.LogFormat("New PlayerSettings.bundleVersion: {0}", PlayerSettings.bundleVersion);
-            }
         }
 
         private static void WriteBundleVersionToVersionResourceFile()
@@ -186,11 +156,11 @@ namespace Lost
         {
             Debug.LogFormat("CloudBuildHelper.DisableBitCode({0}, {1})", buildTarget, path);
             Debug.LogFormat("Active Config = {0}", AppSettings.ActiveConfig.Name);
-            Debug.LogFormat("DisableBitCode = {0}", AppSettings.ActiveConfig.DisableBitCode);
+            Debug.LogFormat("DisableBitCode = {0}", AppSettings.ActiveConfig.DisableIOSBitCode);
             
-            #if UNITY_IOS
-            if (buildTarget == BuildTarget.iOS && AppSettings.ActiveConfig.DisableBitCode)
+            if (buildTarget == BuildTarget.iOS && AppSettings.ActiveConfig.DisableIOSBitCode)
             {
+                #if UNITY_IOS
                 string projectPath = path + "/Unity-iPhone.xcodeproj/project.pbxproj";
 
                 var pbxProject = new UnityEditor.iOS.Xcode.PBXProject();
@@ -200,8 +170,21 @@ namespace Lost
                 pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
 
                 pbxProject.WriteToFile(projectPath);
+                #endif
             }
-            #endif
+        }
+
+        // http://answers.unity3d.com/questions/1225564/enable-unity-uses-remote-notifications.html
+        [PostProcessBuild]
+        private static void EnableIOSPushNotifications(BuildTarget buildTarget, string path)
+        {
+            if (buildTarget == BuildTarget.iOS && AppSettings.ActiveConfig.EnableIOSPushNotifications)
+            {
+                string preprocessorPath = path + "/Classes/Preprocessor.h";
+                string text = File.ReadAllText(preprocessorPath);
+                text = text.Replace("UNITY_USES_REMOTE_NOTIFICATIONS 0", "UNITY_USES_REMOTE_NOTIFICATIONS 1");
+                File.WriteAllText(preprocessorPath, text);
+            }
         }
     }
 }

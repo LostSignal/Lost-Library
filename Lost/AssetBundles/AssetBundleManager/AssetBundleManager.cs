@@ -122,7 +122,7 @@ namespace Lost
             }
             else
             {
-                SetSourceAssetBundleURL(Platform.Instance.GetStreamingAssetsURL(AssetBundleUtility.AssetBundlesFolderName));
+                SetSourceAssetBundleURL(Platform.GetStreamingAssetsURL(AssetBundleUtility.AssetBundlesFolderName));
             }
         }
         

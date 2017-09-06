@@ -15,7 +15,7 @@ namespace Lost
     {
         public override void Identify(string userId, Dictionary<string, object> eventData, Gender gender, int age)
         {
-            this.SendIdentityEventAsTrackEvent(userId, eventData, gender, age);
+            this.SendIdentityEventAsTrackEvent(gender, age, eventData);
         }
         
         public override void Screen(string screenName, Dictionary<string, object> eventData)
@@ -35,8 +35,9 @@ namespace Lost
 
         public override void Track(string eventName, Dictionary<string, object> eventData)
         {
-            // TODO [bgish] fill this out corretly.  Would be best to use PF instead of PlayFabClientAPI
-            if (PF.IsLoggedIn)
+            // TODO [bgish]: fill this out corretly.  Would be best to use PF instead of PlayFabClientAPI
+            // TODO [bgish]: should also save off in case it fails and we can try again later (even save to disk if neccessary
+            //if (PF.IsLoggedIn)
             {
                 PlayFab.PlayFabClientAPI.WritePlayerEvent(new PlayFab.ClientModels.WriteClientPlayerEventRequest
                 {

@@ -29,20 +29,36 @@ namespace Lost
             #endif
         }
 
-        public static void DelayExecute(this MonoBehaviour lhs, float delayInSeconds, Action action)
+        public static void ExecuteAtEndOfFrame(this MonoBehaviour lhs, Action action)
         {
-            lhs.StartCoroutine(DelayExecuteCoroutine(delayInSeconds, action));
+            lhs.StartCoroutine(DelayTillEndOfFrameCoroutine(action));
         }
 
-        private static IEnumerator DelayExecuteCoroutine(float delayInSeconds, Action action)
+        public static void ExecuteDelayed(this MonoBehaviour lhs, float delayInSeconds, Action action)
+        {
+            lhs.StartCoroutine(DelayInSecondsCoroutine(delayInSeconds, action));
+        }
+
+        public static void ExecuteDelayedRealtime(this MonoBehaviour lhs, float delayInRealtimeSeconds, Action action)
+        {
+            lhs.StartCoroutine(DelayExecuteRealtimeCoroutine(delayInRealtimeSeconds, action));
+        }
+
+        private static IEnumerator DelayTillEndOfFrameCoroutine(Action action)
+        {
+            yield return new WaitForEndOfFrame();
+            action.InvokeIfNotNull();
+        }
+        
+        private static IEnumerator DelayInSecondsCoroutine(float delayInSeconds, Action action)
         {
             yield return new WaitForSeconds(delayInSeconds);
             action.InvokeIfNotNull();
         }
 
-        private static IEnumerator DelayExecuteRealtimeCoroutine(float delayInSeconds, Action action)
+        private static IEnumerator DelayExecuteRealtimeCoroutine(float delayInRealtimeSeconds, Action action)
         {
-            yield return new WaitForSecondsRealtime(delayInSeconds);
+            yield return new WaitForSecondsRealtime(delayInRealtimeSeconds);
             action.InvokeIfNotNull();
         }
     }

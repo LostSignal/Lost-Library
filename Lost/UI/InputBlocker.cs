@@ -30,7 +30,6 @@ namespace Lost
             this.rectTransform = this.GetComponent<RectTransform>();
             this.image = this.GetComponent<Image>();
             this.image.raycastTarget = true;
-            this.image.color = Color.clear;
             this.onClick = new UnityEvent();
             this.Setup();
         }

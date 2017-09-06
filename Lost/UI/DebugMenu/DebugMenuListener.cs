@@ -37,7 +37,7 @@ namespace Lost
                 if (this.threeFingerHoldTime > HoldTime)
                 {
                     this.threeFingerHoldTime = 0.0f;
-                    this.debugMenu.Show();
+                    this.debugMenu.ShowMenu();
                 }
             }
             else
@@ -55,7 +55,7 @@ namespace Lost
                 if (this.spaceHoldTime > HoldTime)
                 {
                     this.spaceHoldTime = 0.0f;
-                    this.debugMenu.Show();
+                    this.debugMenu.ShowMenu();
                 }
             }
             else

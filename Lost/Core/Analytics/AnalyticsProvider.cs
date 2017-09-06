@@ -21,11 +21,10 @@ namespace Lost
 
         public abstract void Transaction(string productId, decimal amount, string currency, Dictionary<string, object> eventData, string receiptPurchaseData, string signature);
         
-        protected void SendIdentityEventAsTrackEvent(string userId, Dictionary<string, object> eventData, Gender gender, int age)
+        protected void SendIdentityEventAsTrackEvent(Gender gender, int age, Dictionary<string, object> eventData)
         {
             var eventDataCopy = new Dictionary<string, object>(eventData);
-
-            this.AddIfDoesntExist(eventDataCopy, "UserId", userId);
+            
             this.AddIfDoesntExist(eventDataCopy, "Gender", gender);
             this.AddIfDoesntExist(eventDataCopy, "Age", age);
 

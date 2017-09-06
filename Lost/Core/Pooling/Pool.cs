@@ -12,70 +12,105 @@ namespace Lost
     public class Pool
     {
         private List<GameObject> active = new List<GameObject>();
-        private List<GameObject> unactive = new List<GameObject>();
+        private List<GameObject> inactive = new List<GameObject>();
+        private Transform inactivePoolParent;
         
-        public int InstanceId { get; set; }
+        public string PrefabName { get; private set; }
+
+        public int InstanceId { get; private set; }
         
         // TODO [bgish]: these will need to come in later sometime
         // public int InitialSize { get; set; }
         // public int MaxSize { get; set; } 
-
-        public GameObject GetObjectFromPool(GameObject prefab, Transform parent, bool instantiateInWorldSpace)
+        
+        public Pool(GameObject prefab, int initialCount = 0)
         {
-            if (this.unactive.Count > 0)
+            this.PrefabName = prefab.name;
+            this.InstanceId = prefab.GetInstanceID();
+
+            this.inactivePoolParent = new GameObject(string.Format("{0} ({1})", this.PrefabName, this.InstanceId)).transform;
+            this.inactivePoolParent.SetParent(SingletonUtil.GetOrCreateSingletonChildObject("Pool"));
+
+            if (initialCount < 1)
             {
-                int lastIndex = this.unactive.Count - 1;
-                var last = this.unactive[lastIndex];
-                this.unactive.RemoveAt(lastIndex);
+                return;
+            }
+
+            var initialPooledObjects = new List<PooledObject>(initialCount);
+
+            for (int i = 0; i < initialCount; i++)
+            {
+                initialPooledObjects.Add(this.GetObjectFromPool(prefab).GetComponent<PooledObject>());
+            }
+
+            for (int i = 0; i < initialCount; i++)
+            {
+                initialPooledObjects[i].Recycle();
+            }
+        }
+
+        public void PermanentlyRemoveObjectFromPool(PooledObject pooledObject)
+        {
+            Debug.Assert(pooledObject.Pool == this, "Tried permanently removing pooled object from the wrong pool.");
+
+            if (pooledObject.State == PooledObjectState.Active)
+            {
+                this.active.Remove(pooledObject.gameObject);
+            }
+            else if (pooledObject.State == PooledObjectState.Inactive)
+            {
+                this.inactive.Remove(pooledObject.gameObject);
+            }
+            else
+            {
+                Debug.LogErrorFormat("Pool.PermanentlyRemoveObjectFromPool found unknown Pooled State {0}", pooledObject.State);
+            }
+
+            Debug.LogWarningFormat("Pool.PermanentlyRemoveObjectFromPool called on {0}.  Could this have been avoided?", pooledObject.Pool.PrefabName);
+        }
+
+        public GameObject GetObjectFromPool(GameObject prefab, Transform parent = null)
+        {
+            Debug.Assert(prefab.GetInstanceID() == this.InstanceId, "Trying to get object pool using the wrong prefab.");
+
+            if (this.inactive.Count > 0)
+            {
+                int lastIndex = this.inactive.Count - 1;
+                var last = this.inactive[lastIndex];
+                this.inactive.RemoveAt(lastIndex);
                 this.active.Add(last);
-
-                // setting it's new parent and making sure it's active
-                if (parent != null)
-                {
-                    last.transform.SetParent(parent);
-
-                    // TODO [bgish]: need to double check that this is the desired behavior
-                    if (instantiateInWorldSpace)
-                    {
-                        last.transform.position = prefab.transform.position;
-                    }
-                    else
-                    {
-                        last.transform.localPosition = prefab.transform.position;
-                    }
-                }
-                else
-                {
-                    last.transform.SetParent(null);
-                }
-
+                
+                last.transform.SetParent(parent);
                 last.SetActive(true);
+                last.GetComponent<PooledObject>().State = PooledObjectState.Active;
 
                 return last;
             }
             else
             {
-                GameObject gameObject = null;
+                GameObject gameObject = parent == null ? GameObject.Instantiate(prefab) : GameObject.Instantiate(prefab, parent);
 
-                if (parent == null)
-                {
-                    gameObject = GameObject.Instantiate(prefab);
-                }
-                else
-                {
-                    gameObject = GameObject.Instantiate(prefab, parent, instantiateInWorldSpace);
-                }
+                var pooledObject = gameObject.AddComponent<PooledObject>();
+                pooledObject.State = PooledObjectState.Active;
+                pooledObject.Pool = this;
 
-                gameObject.AddComponent<Pooled>().Pool = this;
                 this.active.Add(gameObject);
+
                 return gameObject;
             }
         }
 
-        public void ReturnObjectToPool(GameObject gameObject)
+        public void ReturnObjectToPool(PooledObject pooledObject)
         {
-            this.active.Remove(gameObject);
-            this.unactive.Add(gameObject);
+            Debug.Assert(pooledObject.State == PooledObjectState.Active, "Tried returning an already inactive object to the pool.");
+            Debug.Assert(pooledObject.Pool == this, "Tried returning object to the wrong pool.");
+            
+            pooledObject.State = PooledObjectState.Inactive;
+            pooledObject.transform.SetParent(this.inactivePoolParent);
+            pooledObject.gameObject.SetActive(false);
+            
+            this.active.Remove(pooledObject.gameObject);
+            this.inactive.Add(pooledObject.gameObject);
         }
     }
 }

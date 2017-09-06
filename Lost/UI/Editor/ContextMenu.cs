@@ -1,10 +1,10 @@
 //-----------------------------------------------------------------------
-// <copyright file="ContextMenu.cs" company="Enfu LLC">
-//     Copyright (c) Enfu LLC. All rights reserved.
+// <copyright file="ContextMenu.cs" company="Lost Signal LLC">
+//     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace MatchFu
+namespace Lost
 {
     using UnityEditor;
     using UnityEditor.Animations;
