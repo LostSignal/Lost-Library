@@ -86,13 +86,11 @@ namespace Lost
             }
         }
 
-        public void Transaction(string productId, decimal amount, string currency, Dictionary<string, object> eventData, string receiptPurchaseData, string signature)
+        public void Transaction(string productId, decimal amount, string currency)
         {
-            Dictionary<string, object> allEventData = this.GetAllEventData(eventData);
-
             foreach (var provider in this.analyticsProviders)
             {
-                provider.Transaction(productId, amount, currency, allEventData, receiptPurchaseData, signature);
+                provider.Transaction(productId, amount, currency);
             }
         }
 
@@ -146,11 +144,14 @@ namespace Lost
         private Dictionary<string, object> GetAllEventData(Dictionary<string, object> eventData)
         {
             var contantDataCopy = this.CopyDictionary(this.ConstantEventData);
-
+            
             // appending all the event data
-            foreach (var keyValuePair in eventData)
+            if (eventData != null)
             {
-                this.AddIfDoesntExist(contantDataCopy, keyValuePair.Key, keyValuePair.Value);
+                foreach (var keyValuePair in eventData)
+                {
+                    this.AddIfDoesntExist(contantDataCopy, keyValuePair.Key, keyValuePair.Value);
+                }
             }
 
             return contantDataCopy;

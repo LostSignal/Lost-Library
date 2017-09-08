@@ -22,7 +22,7 @@ namespace Lost
     public delegate void OnUserInventoryChagnedDelegate();
     public delegate void OnServerNeedsReloginDelegate();
 
-    public abstract class PlayFabServer<T> : MonoBehaviour, IStoreListener where T : MonoBehaviour
+    public abstract class PlayFabServer<T> : MonoBehaviour where T : MonoBehaviour
     {
         #region Singleton Related Code
 
@@ -102,11 +102,6 @@ namespace Lost
         // inventory
         private List<InventoryItem> userInventory = new List<InventoryItem>();
         private Catalog activeCatalog;
-
-        // TODO [bgish]: Make private once they're actually being used
-        // iap
-        public IStoreController controller;
-        public IExtensionProvider extensions;
 
         private Catalog ActiveCatalog
         {
@@ -278,8 +273,6 @@ namespace Lost
             PF.PlayfabEvents.OnGetTimeResultEvent += PlayfabEvents_OnGetTimeResultEvent;
             PF.PlayfabEvents.OnGlobalErrorEvent += PlayfabEvents_OnGlobalErrorEvent;
             PF.PlayfabEvents.OnGetUserInventoryResultEvent += PlayfabEvents_OnGetUserInventoryResultEvent;
-
-            this.InitializeUnityPurchasing();
         }
 
         protected void InternalAddVirtualCurrencyToInventory(string virtualCurrencyId, int amountToAdd)
@@ -429,6 +422,8 @@ namespace Lost
             }
             else if (storeItem.IsIapItem)
             {
+                #if UNITY_PURCHASING
+
                 if (showPurchaseItemDialog)
                 {
                     var purchaseItemDialog = PurchaseItem.Instance.ShowStoreItem(storeItem, true);
@@ -444,7 +439,34 @@ namespace Lost
                     }
                 }
 
-                this.controller.InitiatePurchase(storeItem.ItemId);
+                var iapPurchaseItem = UnityPurchasingManager.Instance.PurchaseProduct(storeItem);
+
+                while (iapPurchaseItem.IsDone == false)
+                {
+                    yield return default(bool);
+                }
+
+                if (iapPurchaseItem.HasError)
+                {
+                    PlayFabMessages.HandleError(iapPurchaseItem.Exception);
+                }
+                else
+                {
+                    if (Debug.isDebugBuild || Application.isEditor)
+                    {
+                        this.StartCoroutine(this.DebugPurchaseStoreItem(iapPurchaseItem.Value));
+                    }
+                    else
+                    {
+                        this.StartCoroutine(this.ProcessPurchaseCoroutine(iapPurchaseItem.Value));
+                    }
+                }
+
+                #else
+                
+                throw new NotImplementedException("Trying to buy IAP Store Item when UNITY_PURCHASING is not defined!");
+                
+                #endif
             }
             else
             {
@@ -467,7 +489,7 @@ namespace Lost
                 
                 if (hasSufficientFunds == false)
                 {
-                    var messageBoxDialog = MessageBox.Instance.ShowYesNo("Not Enough Currency", "You'll need to buy more currency from the store.<br>Would you like to go there now?");
+                    var messageBoxDialog = PlayFabMessages.ShowInsufficientCurrency();
 
                     while (messageBoxDialog.IsDone == false)
                     {
@@ -511,8 +533,6 @@ namespace Lost
 
         private IEnumerator<List<StoreItem>> GetStoreItemsInternal(string storeId)
         {
-            SpinnerBox.Instance.UpdateBodyText("Getting Store Items...");
-
             var getStore = PF.Do(new GetStoreItemsRequest() { StoreId = storeId });
 
             while (getStore.IsDone == false)
@@ -645,56 +665,7 @@ namespace Lost
                 this.ServerNeedsRelogin();
             }
         }
-        
-        private void InitializeUnityPurchasing()
-        {
-            var module = StandardPurchasingModule.Instance();
-
-            if (Debug.isDebugBuild || Application.isEditor)
-            {
-                module.useFakeStoreUIMode = FakeStoreUIMode.StandardUser;
-            }
-
-            var builder = ConfigurationBuilder.Instance(module);
-
-            foreach (var catalogItem in this.ActiveCatalog.CatalogItems.Where(x => x.IsIapItem))
-            {
-                builder.AddProduct(catalogItem.Id, catalogItem.UsageType == UsageType.Consumable ? ProductType.Consumable : ProductType.NonConsumable);
-            }
-
-            foreach (var bundleItem in this.ActiveCatalog.BundleItems.Where(x => x.IsIapItem))
-            {
-                builder.AddProduct(bundleItem.Id, ProductType.Consumable);
-            }
-
-            UnityPurchasing.Initialize(this, builder);
-        }
-        
-        void IStoreListener.OnInitialized(IStoreController controller, IExtensionProvider extensions)
-        {
-            this.controller = controller;
-            this.extensions = extensions;
-        }
-
-        void IStoreListener.OnInitializeFailed(InitializationFailureReason error)
-        {
-            Debug.LogErrorFormat("IStoreListener.OnInitializeFailed: {0}", error.ToString());
-        }
-
-        PurchaseProcessingResult IStoreListener.ProcessPurchase(PurchaseEventArgs e)
-        {
-            if (Debug.isDebugBuild || Application.isEditor)
-            {
-                this.StartCoroutine(this.DebugPurchaseStoreItem(e));
-            }
-            else
-            {
-                this.StartCoroutine(this.ProcessPurchaseCoroutine(e));
-            }
-
-            return PurchaseProcessingResult.Complete;
-        }
-        
+                
         private IEnumerator ProcessPurchaseCoroutine(PurchaseEventArgs e)
         {
             Debug.AssertFormat(e.purchasedProduct.hasReceipt, "Purchased item {0} doesn't have a receipt", e.purchasedProduct.definition.id);
@@ -704,8 +675,6 @@ namespace Lost
 
             Debug.AssertFormat(catalogItem != null || bundleItem != null, "Couln't find BundleItem or CatalogItem {0}", e.purchasedProduct.definition.id);
 
-            var purchasePrice = catalogItem != null ? catalogItem.RealMoneyCost : bundleItem.RealMoneyCost;
-                        
             var receipt = (Dictionary<string, object>)Lost.MiniJSON.Json.Deserialize(e.purchasedProduct.receipt);
             Debug.AssertFormat(receipt != null, "Unable to parse receipt {0}", e.purchasedProduct.receipt);
 
@@ -723,19 +692,21 @@ namespace Lost
             {
                 var validate = PF.Do(new ValidateIOSReceiptRequest()
                 {
-                    CurrencyCode = "USD",
-                    PurchasePrice = purchasePrice,
+                    CurrencyCode = e.purchasedProduct.metadata.isoCurrencyCode,
+                    PurchasePrice = (int)(e.purchasedProduct.metadata.localizedPrice * 100),
                     ReceiptData = payload,
                 });
 
                 yield return validate;
 
-                wasSuccessfull = validate.HasError == false;
-
-                if (wasSuccessfull == false)
+                if (validate.HasError)
                 {
-                    // TODO [bgish]: Unable to validate iOS Purchase, tell user why
                     Debug.LogErrorFormat("Unable to validate iOS IAP Purchase: {0}", validate.Exception.ToString());
+                    PlayFabMessages.HandleError(validate.Exception);
+                }
+                else
+                {
+                    AnalyticsManager.Instance.Transaction(e.purchasedProduct.definition.id, e.purchasedProduct.metadata.localizedPrice, e.purchasedProduct.metadata.isoCurrencyCode);
                 }
             }
             else if (Platform.CurrentDevicePlatform == DevicePlatform.Android)
@@ -751,20 +722,22 @@ namespace Lost
                 
                 var validate = PF.Do(new ValidateGooglePlayPurchaseRequest()
                 {
-                    CurrencyCode = "USD",
-                    PurchasePrice = (uint)purchasePrice,
+                    CurrencyCode = e.purchasedProduct.metadata.isoCurrencyCode,
+                    PurchasePrice = (uint)(e.purchasedProduct.metadata.localizedPrice * 100),
                     ReceiptJson = receiptJson,
                     Signature = signature,
                 });
 
                 yield return validate;
 
-                wasSuccessfull = validate.HasError == false;
-
-                if (wasSuccessfull == false)
+                if (validate.HasError)
                 {
-                    // TODO [bgish]: Unable to validate Google Play IAP Purchase, tell user why
                     Debug.LogErrorFormat("Unable to validate Google Play IAP Purchase: {0}", validate.Exception.ToString());
+                    PlayFabMessages.HandleError(validate.Exception);
+                }
+                else
+                {
+                    AnalyticsManager.Instance.Transaction(e.purchasedProduct.definition.id, e.purchasedProduct.metadata.localizedPrice, e.purchasedProduct.metadata.isoCurrencyCode);
                 }
             }
             else
@@ -785,11 +758,6 @@ namespace Lost
             {
                 this.InternalAddCatalogItemToInventory(catalogItem.Id, 1);
             }
-        }
-
-        void IStoreListener.OnPurchaseFailed(Product i, PurchaseFailureReason p)
-        {
-            Debug.LogErrorFormat("IStoreListener.OnPurchaseFailed({0}, {1})", i, p);
         }
         
         private IEnumerator DebugPurchaseStoreItem(PurchaseEventArgs e)
@@ -824,7 +792,7 @@ namespace Lost
                 }
             }
         }
-
+        
         private class InventoryItem : IInventoryItem
         {
             public string Id { get; set; }

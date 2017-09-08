@@ -35,12 +35,9 @@ namespace Lost
             this.SendScreenEventAsTrackEvent(screenName, eventData);
         }
 
-        public override void Transaction(string productId, decimal amount, string currency, Dictionary<string, object> eventData, string receiptPurchaseData, string signature)
+        public override void Transaction(string productId, decimal amount, string currency)
         {
-            Analytics.Transaction(productId, amount, currency, receiptPurchaseData, signature);
-
-            // also send as Track event because Unity doesn't let you pass in eventData
-            SendTransactionEventAsTrackEvent(productId, amount, currency, eventData, receiptPurchaseData, signature);
+            Analytics.Transaction(productId, amount, currency);
         }
 
         public override void TrackPosition(string eventName, Vector3 position)

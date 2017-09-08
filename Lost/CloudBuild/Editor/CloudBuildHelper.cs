@@ -11,7 +11,7 @@ namespace Lost
     using UnityEditor;
     using UnityEditor.Callbacks;
     using UnityEngine;
-
+            
     public static class CloudBuildHelper
     {
         public static void PreExport(string configName)
@@ -175,16 +175,60 @@ namespace Lost
         }
 
         // http://answers.unity3d.com/questions/1225564/enable-unity-uses-remote-notifications.html
+        // https://forum.unity3d.com/threads/how-to-put-ios-entitlements-file-in-a-unity-project.442277/
         [PostProcessBuild]
-        private static void EnableIOSPushNotifications(BuildTarget buildTarget, string path)
-        {
-            if (buildTarget == BuildTarget.iOS && AppSettings.ActiveConfig.EnableIOSPushNotifications)
+        private static void EnableIOSPushNotifications(BuildTarget buildTarget, string buildPath)
+        {            
+            if (buildTarget != BuildTarget.iOS || AppSettings.ActiveConfig.IOSPushNotificationType == IOSPushNotificationType.None)
             {
-                string preprocessorPath = path + "/Classes/Preprocessor.h";
-                string text = File.ReadAllText(preprocessorPath);
-                text = text.Replace("UNITY_USES_REMOTE_NOTIFICATIONS 0", "UNITY_USES_REMOTE_NOTIFICATIONS 1");
-                File.WriteAllText(preprocessorPath, text);
+                return;
             }
+
+            #if UNITY_IOS
+
+            // making sure remote notifications is turned on
+            string preprocessorPath = buildPath + "/Classes/Preprocessor.h";
+            string text = File.ReadAllText(preprocessorPath);
+            text = text.Replace("UNITY_USES_REMOTE_NOTIFICATIONS 0", "UNITY_USES_REMOTE_NOTIFICATIONS 1");
+            File.WriteAllText(preprocessorPath, text);
+
+            // // creating the entitlements file
+            var entitlements = new System.Text.StringBuilder();
+            entitlements.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+            entitlements.AppendLine("<!DOCTYPE plist PUBLIC \" -//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
+            entitlements.AppendLine("<plist version=\"1.0\">");
+            entitlements.AppendLine("<dict>");
+            entitlements.AppendLine("<key>aps-environment</key>");
+            entitlements.AppendLine(string.Format("<string>{0}</string>", AppSettings.ActiveConfig.IOSPushNotificationType.ToString().ToLower()));
+            entitlements.AppendLine("</dict>");
+            entitlements.AppendLine("</plist>");
+
+            // loading teh pbx project
+            var pbxProjectPath = UnityEditor.iOS.Xcode.PBXProject.GetPBXProjectPath(buildPath);
+            var pbxProject = new UnityEditor.iOS.Xcode.PBXProject();
+            pbxProject.ReadFromFile(pbxProjectPath);
+            
+            string fileName = "Push.entitlements";
+            string targetName = UnityEditor.iOS.Xcode.PBXProject.GetUnityTargetName();
+            string targetGuid = pbxProject.TargetGuidByName(targetName);
+
+            // writing out the entitlements file to disk
+            string destinationFilePath = string.Format("{0}/{1}/{2}", buildPath, targetName, fileName);
+            Debug.Log("Adding Entitlements " + destinationFilePath);
+            Debug.Log(entitlements.ToString());
+
+            File.Delete(destinationFilePath);
+            File.WriteAllText(destinationFilePath, entitlements.ToString());
+
+            // adding entitlements to pbx project
+            string relativeFilePath = string.Format("{0}/{1}", targetName, fileName);
+            pbxProject.AddFile(relativeFilePath, fileName);
+            pbxProject.AddBuildProperty(targetGuid, "CODE_SIGN_ENTITLEMENTS", relativeFilePath);
+
+            // saving the pbx project back to disk
+            pbxProject.WriteToFile(pbxProjectPath);
+            
+            #endif
         }
     }
 }

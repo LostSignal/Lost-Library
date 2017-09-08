@@ -23,9 +23,9 @@ namespace Lost
             this.SendScreenEventAsTrackEvent(screenName, eventData);
         }
 
-        public override void Transaction(string productId, decimal amount, string currency, Dictionary<string, object> eventData, string receiptPurchaseData, string signature)
+        public override void Transaction(string productId, decimal amount, string currency)
         {
-            this.SendTransactionEventAsTrackEvent(productId, amount, currency, eventData, receiptPurchaseData, signature);
+            // Do nothing, it already handles this with IAP Validation
         }
 
         public override void TrackPosition(string eventName, Vector3 position)

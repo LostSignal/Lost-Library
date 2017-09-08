@@ -537,8 +537,8 @@ namespace Lost
             using (new BeginHorizontalHelper())
             {
                 GUILayout.Label("", GUILayout.Width(10));
-                config.EnableIOSPushNotifications = EditorGUILayout.Toggle(GUIContent.none, config.EnableIOSPushNotifications, GUILayout.Width(25));
-                GUILayout.Label("Enable Push Notifications");
+                config.IOSPushNotificationType = (IOSPushNotificationType)EditorGUILayout.EnumPopup(GUIContent.none, config.IOSPushNotificationType, GUILayout.Width(90));
+                GUILayout.Label("Push Notifications");
             }
 
             GUILayout.Label("");

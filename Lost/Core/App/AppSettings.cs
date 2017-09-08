@@ -35,12 +35,19 @@ namespace Lost
         None,
         Perforce
     }
-    
+
     public enum BuildNumberType
     {
         CommitNumber,
         BuildNumber,
         None,
+    }
+
+    public enum IOSPushNotificationType
+    {
+        None,
+        Development,
+        Production,
     }
 
     [CreateAssetMenu]
@@ -56,6 +63,7 @@ namespace Lost
         [SerializeField] private List<string> projectDefines = new List<string>();
         
         // project
+        [SerializeField] private BuildNumberType buildNumberType;
         [SerializeField] private bool warningsAsErrors = true;
         [SerializeField] private LineEndings projectLineEndings = LineEndings.Windows;
         [SerializeField] private bool overrideTemplateCShardFiles = true;
@@ -81,7 +89,6 @@ namespace Lost
         #pragma warning restore 0649
             
         private CloudBuildManifest cloudBuildManifest;
-        private BuildNumberType buildNumberType;
         private bool configuredLostDefines;
         private string longVersion;
 
@@ -354,8 +361,10 @@ namespace Lost
             #pragma warning disable 0649
             [SerializeField] private string name;
             [SerializeField] private bool isActive;
+
+            [Header("iOS Related Properties")]
             [SerializeField] private bool disableIOSBitCode;
-            [SerializeField] private bool enableIOSPushNotifications;
+            [SerializeField] private IOSPushNotificationType iosPushNotificationType;
             
             #if USE_PLAYFAB_SDK
             [SerializeField] private string playfabTitleId;
@@ -391,10 +400,10 @@ namespace Lost
                 set { this.disableIOSBitCode = value; }
             }
 
-            public bool EnableIOSPushNotifications
+            public IOSPushNotificationType IOSPushNotificationType
             {
-                get { return this.enableIOSPushNotifications; }
-                set { this.enableIOSPushNotifications = value; }
+                get { return this.iosPushNotificationType; }
+                set { this.iosPushNotificationType = value; }
             }
 
             #if USE_PLAYFAB_SDK
