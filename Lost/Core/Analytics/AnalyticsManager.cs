@@ -182,6 +182,12 @@ namespace Lost
             {
                 this.sentLogs.Add(hashCode);
 
+                // making sure we don't go over our 1k body limit size in playfab
+                if (stackTrace.Length > 450)
+                {
+                    stackTrace = stackTrace.Substring(0, 450);
+                }
+
                 this.Track("LogEvent", new Dictionary<string, object>
                 {
                     { "Condition", condition },

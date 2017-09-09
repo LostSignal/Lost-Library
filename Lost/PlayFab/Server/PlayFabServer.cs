@@ -706,7 +706,7 @@ namespace Lost
                 }
                 else
                 {
-                    AnalyticsManager.Instance.Transaction(e.purchasedProduct.definition.id, e.purchasedProduct.metadata.localizedPrice, e.purchasedProduct.metadata.isoCurrencyCode);
+                    wasSuccessfull = true;
                 }
             }
             else if (Platform.CurrentDevicePlatform == DevicePlatform.Android)
@@ -737,7 +737,7 @@ namespace Lost
                 }
                 else
                 {
-                    AnalyticsManager.Instance.Transaction(e.purchasedProduct.definition.id, e.purchasedProduct.metadata.localizedPrice, e.purchasedProduct.metadata.isoCurrencyCode);
+                    wasSuccessfull = true;
                 }
             }
             else
@@ -749,6 +749,8 @@ namespace Lost
             {
                 yield break;
             }
+
+            AnalyticsManager.Instance.Transaction(e.purchasedProduct.definition.id, e.purchasedProduct.metadata.localizedPrice, e.purchasedProduct.metadata.isoCurrencyCode);
 
             if (bundleItem != null)
             {

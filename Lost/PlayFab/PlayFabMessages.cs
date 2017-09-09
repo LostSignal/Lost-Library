@@ -25,9 +25,10 @@ namespace Lost
 
             #if UNITY_PURCHASING
             result = result ?? HandlePurchasingError(exception as PurchasingException);
-            result = result ?? HandlePurchasingInitializationError(exception as PurchasingInitializationException);
+            result = result ?? HandlePurchasingInitializationError(exception as PurchasingInitializationException); 
+            result = result ?? HandlePurchasingInitializationTimeOutError(exception as PurchasingInitializationTimeOutException);
             #endif
-            
+
             return result ?? HandlePlayFabError(exception as PlayFabException);
         }
 
@@ -83,6 +84,16 @@ namespace Lost
                 default:
                     return null;
             }
+        }
+
+        private static UnityTask<OkResult> HandlePurchasingInitializationTimeOutError(PurchasingInitializationTimeOutException purchasingInitializationTimeOutException)
+        {
+            if (purchasingInitializationTimeOutException == null)
+            {
+                return null;
+            }
+
+            return MessageBox.Instance.ShowOk("Purchase Failed", "Unable to initialize the store.");
         }
 
         private static UnityTask<OkResult> HandlePurchasingError(PurchasingException purchasingException)

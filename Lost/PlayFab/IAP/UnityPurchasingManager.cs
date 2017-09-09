@@ -94,12 +94,18 @@ namespace Lost
                 yield break;
             }
 
+            float startTime = Time.realtimeSinceStartup;
             this.initializationState = InitializationState.Initializing;
             UnityPurchasing.Initialize(this, this.GetConfigurationBuilder());
-
+	
             while (this.initializationState == InitializationState.Initializing)
             {
                 yield return default(bool);
+				
+				if (Time.realtimeSinceStartup - startTime > 3.0f)
+				{
+					throw new PurchasingInitializationTimeOutException();
+				}
             }
 
             if (this.initializationState == InitializationState.InitializedSucceeded)
