@@ -7,13 +7,12 @@
 namespace Lost
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.UI;
 
     #if USE_TEXTMESH_PRO
-    using Text = TMPro.TMP_Text;
+    using Text = TMPro.TextMeshProUGUI;
     #else
     using Text = UnityEngine.UI.Text;
     #endif
@@ -38,6 +37,7 @@ namespace Lost
     public class MessageBox : SingletonDialogResource<MessageBox>
     {
         #pragma warning disable 0649
+        [Header("MessageBox")]
         [SerializeField] private Button leftButton;
         [SerializeField] private Button rightButton;
         [SerializeField] private Button okButton;
@@ -49,6 +49,27 @@ namespace Lost
         #pragma warning restore 0649
         
         private LeftRightResult result;
+
+        public void SetupDefault()
+        {
+            var content = this.transform.Find("Content").gameObject;
+            content.GetOrAddComponent<Image>();
+            content.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0.5f);
+            content.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0.5f);
+            content.GetComponent<RectTransform>().sizeDelta = new Vector2(800, 800);
+            content.GetComponent<RectTransform>().localPosition = new Vector3(0, 0, 0);
+
+            this.title = this.DebugCreateText(content, "TitleText", "Title", new Vector3(0, 300));
+            this.body = this.DebugCreateText(content, "TitleBody", "Body", Vector3.zero);
+
+            this.leftButton = this.DebugCreateButton(content, "LeftButton", "LeftText", "No", new Vector3(-300, -300));
+            this.rightButton = this.DebugCreateButton(content, "RightButton", "RightText", "Yes", new Vector3(300, -300));
+            this.okButton = this.DebugCreateButton(content, "OkButton", "OkText", "Ok", new Vector3(0, -300));
+
+            this.leftButtonText = this.leftButton.GetComponentInChildren<Text>();
+            this.rightButtonText = this.rightButton.GetComponentInChildren<Text>();
+            this.okButtonText = this.okButton.GetComponentInChildren<Text>();
+        }
 
         public override void OnBackButtonPressed()
         {

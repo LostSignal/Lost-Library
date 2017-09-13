@@ -50,13 +50,19 @@ namespace Lost
         Production,
     }
 
+    public enum AppOrientation
+    {
+        Portrait,
+        Landscape,
+    }
+
     [CreateAssetMenu]
     public class AppSettings : SingletonScriptableObjectResource<AppSettings>
     {
         private static BuildConfig activeConfig = null;
 
         #pragma warning disable 0649
-        [SerializeField] private string version;
+        [SerializeField] private AppOrientation appOrientation;
         [SerializeField] private DevicePlatform supportedPlatforms;
         [SerializeField] private List<BuildConfig> buildConfigs = new List<BuildConfig>();
         [SerializeField] private List<Define> lostDefines = new List<Define>();
@@ -90,7 +96,7 @@ namespace Lost
             
         private CloudBuildManifest cloudBuildManifest;
         private bool configuredLostDefines;
-        private string longVersion;
+        private string versionAndBuildNumber;
 
         public static BuildConfig ActiveConfig
         {
@@ -120,13 +126,23 @@ namespace Lost
 
         public string Version
         {
-            get { return this.version; }
-
             #if UNITY_EDITOR
-            set { this.version = value; }
+            get { return UnityEditor.PlayerSettings.bundleVersion; }
+            set { UnityEditor.PlayerSettings.bundleVersion = value; }
+            #else
+            get { return Application.version; }
             #endif
         }
-        
+
+        public AppOrientation AppOrientation
+        {
+            get { return this.appOrientation; }
+            
+            #if UNITY_EDITOR
+            set { this.appOrientation = value; }
+            #endif
+        }
+
         public BuildNumberType BuildNumberType
         {
             get { return this.buildNumberType; }
@@ -177,16 +193,16 @@ namespace Lost
             }
         }
         
-        public string LongVersion
+        public string VersionAndBuildNumber
         {
             get
             {
-                if (this.longVersion == null)
+                if (this.versionAndBuildNumber == null)
                 {
-                    this.longVersion = this.BuildNumber == 0 ? this.Version : string.Format("{0} ({1})", this.Version, this.BuildNumber);
+                    this.versionAndBuildNumber = this.BuildNumber == 0 ? this.Version : string.Format("{0} ({1})", this.Version, this.BuildNumber);
                 }
 
-                return this.longVersion;
+                return this.versionAndBuildNumber;
             }
         }
 

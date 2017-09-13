@@ -19,13 +19,18 @@ namespace Lost
             return MessageBox.Instance.ShowYesNo("Not Enough Currency", "You'll need to buy more currency from the store.<br>Would you like to go there now?");
         }
 
+        public static void ShowConnectingToStoreSpinner()
+        {
+            SpinnerBox.Instance.UpdateBodyText("Connecting To Store...");
+        }
+
         public static UnityTask<OkResult> HandleError(System.Exception exception)
         {
             UnityTask<OkResult> result = null;
 
             #if UNITY_PURCHASING
             result = result ?? HandlePurchasingError(exception as PurchasingException);
-            result = result ?? HandlePurchasingInitializationError(exception as PurchasingInitializationException); 
+            result = result ?? HandlePurchasingInitializationError(exception as PurchasingInitializationException);
             result = result ?? HandlePurchasingInitializationTimeOutError(exception as PurchasingInitializationTimeOutException);
             #endif
 
@@ -65,7 +70,7 @@ namespace Lost
 
             return null;
         }
-        
+
         #if UNITY_PURCHASING
 
         private static UnityTask<OkResult> HandlePurchasingInitializationError(PurchasingInitializationException purchasingInitializationException)
@@ -78,8 +83,15 @@ namespace Lost
             switch (purchasingInitializationException.FailureReason)
             {
                 case InitializationFailureReason.AppNotKnown:
+                    Debug.LogErrorFormat("Error initializing purchasing \"{0}\"", purchasingInitializationException.FailureReason.ToString());
+                    return MessageBox.Instance.ShowOk("Store Error", "The store doesn't recognize this application.");
+
                 case InitializationFailureReason.NoProductsAvailable:
+                    Debug.LogErrorFormat("Error initializing purchasing \"{0}\"", purchasingInitializationException.FailureReason.ToString());
+                    return MessageBox.Instance.ShowOk("Store Error", "There are no valid products available for this application.");
+
                 case InitializationFailureReason.PurchasingUnavailable:
+                    return MessageBox.Instance.ShowOk("Store Error", "Unable to purchase.  Purchases have been turned off for this application.");
 
                 default:
                     return null;
@@ -93,7 +105,7 @@ namespace Lost
                 return null;
             }
 
-            return MessageBox.Instance.ShowOk("Purchase Failed", "Unable to initialize the store.");
+            return MessageBox.Instance.ShowOk("Store Error", "We timed out trying to connect to the store.");
         }
 
         private static UnityTask<OkResult> HandlePurchasingError(PurchasingException purchasingException)

@@ -294,6 +294,7 @@ MonoBehaviour:
   registerForBackButton: 1
   hideOnBackButtonPressed: 0
   showDialogOnBackButtonPressed: {fileID: 0}
+  showType: 0
   layerName: DebugMenu
   debugMenuCamera: {fileID: 20307402713208378}
   debugMenu: {fileID: 1499559544242544}
@@ -1004,7 +1005,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
-  m_SortingLayerID: -1704140029
+  m_SortingLayerID: 803426823
   m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!224 &224000010729898534

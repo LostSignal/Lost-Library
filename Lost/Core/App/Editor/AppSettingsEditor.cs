@@ -70,11 +70,6 @@ namespace Lost
             {
                 GUILayout.Label("App Version", GUILayout.Width(140));
                 appSettings.Version = EditorGUILayout.TextField(GUIContent.none, appSettings.Version, GUILayout.Width(200));
-
-                if (appSettings.Version != PlayerSettings.bundleVersion)
-                {
-                    PlayerSettings.bundleVersion = appSettings.Version;
-                }
             }
 
             GUILayout.Label("");
@@ -126,19 +121,31 @@ namespace Lost
                 }
 
                 int labelWidth = 170;
+
+                using (new BeginHorizontalHelper())
+                {
+                    GUILayout.Label("Product Name", GUILayout.Width(labelWidth));
+                    PlayerSettings.productName = EditorGUILayout.TextField(GUIContent.none, PlayerSettings.productName, GUILayout.Width(200));
+                }
                 
                 using (new BeginHorizontalHelper())
                 {
-                    GUILayout.Label("App Company", GUILayout.Width(labelWidth));
+                    GUILayout.Label("Company", GUILayout.Width(labelWidth));
                     PlayerSettings.companyName = EditorGUILayout.TextField(GUIContent.none, PlayerSettings.companyName, GUILayout.Width(200));
                 }
 
                 using (new BeginHorizontalHelper())
                 {
-                    GUILayout.Label("App Namespace", GUILayout.Width(labelWidth));
+                    GUILayout.Label("Code Namespace", GUILayout.Width(labelWidth));
                     EditorSettings.projectGenerationRootNamespace = EditorGUILayout.TextField(GUIContent.none, EditorSettings.projectGenerationRootNamespace, GUILayout.Width(200));
                 }
-
+                
+                using (new BeginHorizontalHelper())
+                {
+                    GUILayout.Label("App Orientation", GUILayout.Width(labelWidth));
+                    appSettings.AppOrientation = (AppOrientation)EditorGUILayout.EnumPopup(GUIContent.none, appSettings.AppOrientation, GUILayout.Width(200));
+                }
+                
                 using (new BeginHorizontalHelper())
                 {
                     GUILayout.Label("App Build Number Type", GUILayout.Width(labelWidth));

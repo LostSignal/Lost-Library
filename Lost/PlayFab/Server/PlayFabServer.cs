@@ -424,6 +424,26 @@ namespace Lost
             {
                 #if UNITY_PURCHASING
 
+                if (UnityPurchasingManager.Instance.IsIAPInitialized == false)
+                {
+                    var initializeIap = UnityPurchasingManager.Instance.InitializeUnityPurchasing();
+                    
+                    PlayFabMessages.ShowConnectingToStoreSpinner();
+
+                    while (initializeIap.IsDone == false)
+                    {
+                        yield return default(bool);
+                    }
+
+                    SpinnerBox.Instance.Hide();
+
+                    if (initializeIap.HasError)
+                    {
+                        PlayFabMessages.HandleError(initializeIap.Exception);
+                        yield break;
+                    }
+                }
+
                 if (showPurchaseItemDialog)
                 {
                     var purchaseItemDialog = PurchaseItem.Instance.ShowStoreItem(storeItem, true);

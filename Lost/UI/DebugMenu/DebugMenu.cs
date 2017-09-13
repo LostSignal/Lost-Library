@@ -190,12 +190,23 @@ namespace Lost
             base.Awake();
             this.HideMenu();
             this.Show();
+            
+            // setting the canvas sorting layer
+            if (SortingLayer.NameToID(this.layerName) == -1)
+            {
+                Debug.LogErrorFormat(this, "Trying to use DebugMenu without creating a Layer and Sorting Layer of name \"{0}\".  The debug will not work unless create that layer.", this.layerName);
+            }
+            else
+            {
+                this.Canvas.sortingLayerName = this.layerName;
+            }
 
+            // setting the camera layer
             this.debugLayer = LayerMask.NameToLayer(this.layerName);
 
             if (this.debugLayer == -1)
             {
-                Debug.LogErrorFormat(this, "Trying to use DebugMenu without creating a Layer of name \"{0}\".  The debug will not work unless create that layer.", this.layerName);
+                Debug.LogErrorFormat(this, "Trying to use DebugMenu without creating a Layer and Sorting Layer of name \"{0}\".  The debug will not work unless create that layer.", this.layerName);
             }
             else
             {

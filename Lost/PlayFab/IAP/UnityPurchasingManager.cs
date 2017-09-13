@@ -102,7 +102,7 @@ namespace Lost
             {
                 yield return default(bool);
 				
-				if (Time.realtimeSinceStartup - startTime > 3.0f)
+				if (Time.realtimeSinceStartup - startTime > 5.0f)
 				{
 					throw new PurchasingInitializationTimeOutException();
 				}

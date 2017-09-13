@@ -11,9 +11,16 @@ namespace Lost
     using UnityEngine;
     using UnityEngine.UI;
 
+    #if USE_TEXTMESH_PRO
+    using Text = TMPro.TextMeshProUGUI;
+    #else
+    using Text = UnityEngine.UI.Text;
+    #endif
+
     [RequireComponent(typeof(Animator))]
     [RequireComponent(typeof(HDCanvas))]
     [RequireComponent(typeof(GraphicRaycaster))]
+    [RequireComponent(typeof(DialogSetupHelper))]    
     public class Dialog : MonoBehaviour
     {
         private static readonly int HideHash = Animator.StringToHash("Hide");
@@ -52,6 +59,21 @@ namespace Lost
         private Canvas canvas;
         private bool isShowing;
         
+        public Canvas Canvas
+        {
+            get { return this.canvas; }
+        }
+
+        public bool BlockInput
+        {
+            get { return this.blockInput; }
+        }
+
+        public bool TapOutsideToDismiss
+        {
+            get { return this.tapOutsideToDismiss; }
+        }
+
         public Animator Animator
         {
             get { return this.animator; }
@@ -227,29 +249,15 @@ namespace Lost
             //                coroutine because unity doesn't like creating object in the Awake
             if (this.blockInput || this.tapOutsideToDismiss)
             {
-                CoroutineRunner.Start(this.CreateInputBlocker());
+                GameObject blockerObject = this.gameObject.GetChild("Blocker");
+                Debug.AssertFormat(blockerObject != null, "Dialog {0} needs a Blocker, but no object of that name exists.", this.name);
+                
+                this.blocker = blockerObject.GetComponent<InputBlocker>();
+                Debug.AssertFormat(this.blocker != null, "Dialog {0} has a Blocker object, but no InputBlocker component.", this.name);
             }
 
             // default everything to inactive and wait for someone to call Show()
             this.SetActive(false);
-        }
-
-        private IEnumerator CreateInputBlocker()
-        {
-            yield return new WaitForEndOfFrame();
-
-            // NOTE [bgish]: Must pass in InputBlocker, or else it will have a Standard Transform and the RequireComponent attributes wont work when adding the InputBlocker later
-            GameObject blockerObject = this.gameObject.GetOrCreateChild("Blocker", typeof(InputBlocker));
-            this.blocker = blockerObject.GetComponent<InputBlocker>();
-            this.blocker.gameObject.transform.SetAsFirstSibling();
-
-            if (this.tapOutsideToDismiss)
-            {
-                this.blocker.OnClick.AddListener(this.Hide);
-                this.contentRectTransform.gameObject.AddComponent<GraphicRaycaster>();
-            }
-            
-            this.blocker.gameObject.SetActive(this.enabled);
         }
 
         protected virtual void OnShow()
@@ -258,6 +266,61 @@ namespace Lost
 
         protected virtual void OnHide()
         {
+        }
+        
+        protected Image DebugCreateImage(GameObject parent, string objectName, Color color, Vector3 localPosition)
+        {
+            var itemDescriptionText = new GameObject(objectName, typeof(Image));
+            itemDescriptionText.transform.SetParent(parent.transform);
+            itemDescriptionText.transform.Reset();
+            itemDescriptionText.transform.localPosition = localPosition;
+
+            var imageComponent = itemDescriptionText.GetComponent<Image>();
+            imageComponent.color = color;
+
+            return imageComponent;
+        }
+
+        protected Text DebugCreateText(GameObject parent, string objectName, string text, Vector3 localPosition)
+        {
+            var itemDescriptionText = new GameObject(objectName, typeof(RectTransform), typeof(Text));
+            itemDescriptionText.transform.SetParent(parent.transform);
+            itemDescriptionText.transform.Reset();
+            itemDescriptionText.transform.localPosition = localPosition;
+
+            var textComponent = itemDescriptionText.GetComponent<Text>();
+            textComponent.text = text;
+            textComponent.color = Color.black;
+
+            return textComponent;
+        }
+
+        protected Button DebugCreateButton(GameObject parent, string objectName, string textObjectName, string text, Vector3 localPosition)
+        {
+            var button = new GameObject(objectName, typeof(RectTransform), typeof(Image), typeof(Button));
+            button.transform.SetParent(parent.transform);
+            button.transform.Reset();
+            button.transform.localPosition = localPosition;
+            button.GetComponent<Image>().color = Color.grey;
+            button.GetComponent<RectTransform>().sizeDelta = new Vector2(150, 50);
+
+            var cancelButtonText = new GameObject(textObjectName, typeof(RectTransform), typeof(Text));
+            cancelButtonText.transform.SetParent(button.transform);
+            cancelButtonText.transform.Reset();
+            cancelButtonText.GetComponent<Text>().text = text;
+            cancelButtonText.GetComponent<Text>().color = Color.black;
+
+            return button.GetComponent<Button>();
+        }
+
+        private void Start()
+        {
+            // this needs to happen after all Awakes are called
+            if (this.tapOutsideToDismiss)
+            {
+                this.blocker.OnClick.AddListener(this.Hide);
+                this.contentRectTransform.gameObject.AddComponent<GraphicRaycaster>();
+            }
         }
 
         private void StartHibernateMonitorCoroutine(Dialog dialog)

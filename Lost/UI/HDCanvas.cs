@@ -82,18 +82,15 @@ namespace Lost
             {
                 this.canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             }
-
-            bool isPortrait = Screen.orientation == ScreenOrientation.Portrait || Screen.orientation == ScreenOrientation.PortraitUpsideDown;
-            bool isLandscape = Screen.orientation == ScreenOrientation.Landscape || Screen.orientation == ScreenOrientation.LandscapeLeft || Screen.orientation == ScreenOrientation.LandscapeRight;
-
-            if (isPortrait)
+            
+            if (AppSettings.Instance.AppOrientation == AppOrientation.Portrait)
             {
                 if (this.canvasScaler.referenceResolution != new Vector2(1080, 1920))
                 {
                     this.canvasScaler.referenceResolution = new Vector2(1080, 1920);
                 }
             }
-            else if (isLandscape)
+            else if (AppSettings.Instance.AppOrientation == AppOrientation.Landscape)
             {
                 if (this.canvasScaler.referenceResolution != new Vector2(1920, 1080))
                 {
@@ -102,7 +99,7 @@ namespace Lost
             }
             else
             {
-                Debug.LogErrorFormat(this, "Unknown Screen Orientation Type {0}", Screen.orientation);
+                Debug.LogErrorFormat(this, "Unknown AppOrientation Type {0}", AppOrientation.Landscape);
             }
             
             if (this.canvasScaler.screenMatchMode != CanvasScaler.ScreenMatchMode.MatchWidthOrHeight)
