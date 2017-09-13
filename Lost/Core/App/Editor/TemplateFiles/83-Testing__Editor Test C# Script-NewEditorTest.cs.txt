@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="#SCRIPTNAME#.cs" company="#COMPANY_NAME#">
 //     Copyright (c) #COMPANY_NAME#. All rights reserved.
 // </copyright>
@@ -8,7 +8,7 @@ namespace #NAMESPACE#
 {
     using NUnit.Framework;
     using UnityEngine;
- 
+
     public class #SCRIPTNAME#
     {
         [Test]
@@ -16,7 +16,7 @@ namespace #NAMESPACE#
         {
             var gameObject = new GameObject();
             var newGameObjectName = "My game object";
-            
+
             // Try to rename the GameObject
             gameObject.name = newGameObjectName;
 

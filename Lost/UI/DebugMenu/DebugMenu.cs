@@ -23,8 +23,7 @@ namespace Lost
     {
         #pragma warning disable 0649
         [Header("Camera")]
-        [SerializeField] private string layerName = "DebugMenu";
-        [SerializeField] private Camera debugMenuCamera;
+        [SerializeField] private string sortingLayerName = "DebugMenu";
 
         [Header("Menu Items")]
         [SerializeField] private GameObject debugMenu;
@@ -37,9 +36,7 @@ namespace Lost
         [SerializeField] private TextMeshProUGUI lowerLeftText;
         [SerializeField] private TextMeshProUGUI lowerRightText;
         #pragma warning restore 0649
-
-        private int debugLayer = -1;
-
+        
         // fps related variables
         private StringBuilder fpsBuilder = new StringBuilder();
         private readonly int fpsUpdateTicks = 10;
@@ -48,6 +45,8 @@ namespace Lost
         private Corner fpsCorner = Corner.UpperLeft;
         private Color fpsColor = Color.red;
         private bool showFps = false;
+
+        private Camera cameraCache = null;
 
         #region Menu Item Related Methods
 
@@ -66,12 +65,6 @@ namespace Lost
             var newItem = Pooler.Instantiate<DebugMenuItem>(this.debugMenuItemPrefab);
             newItem.transform.SetParent(this.debugMenuItemsHolder);
             newItem.transform.Reset();
-
-            if (this.debugLayer != -1)
-            {
-                newItem.gameObject.layer = this.debugLayer;
-            }
-            
             newItem.Initialize(name, customAction, this.HideMenu);
         }
 
@@ -192,35 +185,24 @@ namespace Lost
             this.Show();
             
             // setting the canvas sorting layer
-            if (SortingLayer.NameToID(this.layerName) == -1)
+            if (SortingLayer.NameToID(this.sortingLayerName) == -1)
             {
-                Debug.LogErrorFormat(this, "Trying to use DebugMenu without creating a Layer and Sorting Layer of name \"{0}\".  The debug will not work unless create that layer.", this.layerName);
+                Debug.LogErrorFormat(this, "Trying to use DebugMenu without creating a Sorting Layer of name \"{0}\".  The debug will not work unless create that layer.", this.sortingLayerName);
             }
             else
             {
-                this.Canvas.sortingLayerName = this.layerName;
-            }
-
-            // setting the camera layer
-            this.debugLayer = LayerMask.NameToLayer(this.layerName);
-
-            if (this.debugLayer == -1)
-            {
-                Debug.LogErrorFormat(this, "Trying to use DebugMenu without creating a Layer and Sorting Layer of name \"{0}\".  The debug will not work unless create that layer.", this.layerName);
-            }
-            else
-            {
-                this.debugMenuCamera.cullingMask = 1 << this.debugLayer;
-
-                foreach (var child in this.GetComponentsInChildren<RectTransform>())
-                {
-                    child.gameObject.layer = this.debugLayer;
-                }
+                this.Canvas.sortingLayerName = this.sortingLayerName;
             }
         }
         
         private void Update()
         {
+            if (!this.cameraCache)
+            {
+                this.cameraCache = Camera.main;
+                this.Canvas.worldCamera = this.cameraCache;
+            }
+
             if (this.showFps == false)
             {
                 return;
