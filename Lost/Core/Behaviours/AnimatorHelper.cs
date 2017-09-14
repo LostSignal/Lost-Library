@@ -23,6 +23,11 @@ namespace Lost
             this.animator.SetBool(paramName, false);
         }
 
+        public void ToggleBool(string paramName)
+        {
+            this.animator.SetBool(paramName, !this.animator.GetBool(paramName));
+        }
+
         public void TimedDisable(float seconds)
         {
             this.ExecuteDelayed(seconds, () => this.animator.enabled = false);
