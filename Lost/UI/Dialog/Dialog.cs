@@ -33,6 +33,8 @@ namespace Lost
         }
 
         #pragma warning disable 0649
+        [SerializeField] private bool showOnAwake = false;
+
         [Tooltip("This dialog should swallow up all input so you can't click behind it.")]
         [SerializeField] private bool blockInput = true;
 
@@ -256,8 +258,14 @@ namespace Lost
                 Debug.AssertFormat(this.blocker != null, "Dialog {0} has a Blocker object, but no InputBlocker component.", this.name);
             }
 
-            // default everything to inactive and wait for someone to call Show()
-            this.SetActive(false);
+            if (this.showOnAwake)
+            {
+                this.Show();
+            }
+            else
+            {
+                this.SetActive(false);
+            }            
         }
 
         protected virtual void OnShow()
