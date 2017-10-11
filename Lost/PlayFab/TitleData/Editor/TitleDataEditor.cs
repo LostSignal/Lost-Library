@@ -8,12 +8,12 @@ namespace Lost
 {
     using System;
     using System.Linq;
-    using PlayFab.PfEditor;
     using UnityEditor;
     using UnityEngine;
 
     #if ENABLE_PLAYFABADMIN_API
     using PlayFab.AdminModels;
+    using PlayFab.PfEditor;
     #endif
 
     public abstract class TitleDataEditor<T> : Editor where T : IVersion, new()

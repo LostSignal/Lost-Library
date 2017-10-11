@@ -9,12 +9,12 @@ namespace Lost
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using PlayFab.PfEditor;
     using UnityEditor;
     using UnityEngine;
 
     #if ENABLE_PLAYFABADMIN_API
     using PlayFab.AdminModels;
+    using PlayFab.PfEditor;
     #endif
 
     [CustomEditor(typeof(Catalogs))]

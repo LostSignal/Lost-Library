@@ -56,12 +56,13 @@ namespace Lost
         Landscape,
     }
 
-    [CreateAssetMenu]
+    [CreateAssetMenu(fileName = "AppSettings")]
     public class AppSettings : SingletonScriptableObjectResource<AppSettings>
     {
         private static BuildConfig activeConfig = null;
 
         #pragma warning disable 0649
+        [SerializeField] private string bundleIdentifier;
         [SerializeField] private AppOrientation appOrientation;
         [SerializeField] private DevicePlatform supportedPlatforms;
         [SerializeField] private List<BuildConfig> buildConfigs = new List<BuildConfig>();
@@ -133,7 +134,16 @@ namespace Lost
             get { return Application.version; }
             #endif
         }
-
+        
+        public string BundleIdentifier
+        {
+            get { return this.bundleIdentifier; }
+            
+            #if UNITY_EDITOR
+            set { this.bundleIdentifier = value; }
+            #endif
+        }
+        
         public AppOrientation AppOrientation
         {
             get { return this.appOrientation; }

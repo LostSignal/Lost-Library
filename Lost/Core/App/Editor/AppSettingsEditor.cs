@@ -136,6 +136,19 @@ namespace Lost
 
                 using (new BeginHorizontalHelper())
                 {
+                    GUILayout.Label("Bundle Identifier", GUILayout.Width(labelWidth));
+                    
+                    string newIdentifier = EditorGUILayout.TextField(GUIContent.none, appSettings.BundleIdentifier, GUILayout.Width(200));
+
+                    if (newIdentifier != appSettings.BundleIdentifier)
+                    {
+                        appSettings.BundleIdentifier = newIdentifier;
+                        UpdateBundleIdentifier(appSettings);
+                    }
+                }
+
+                using (new BeginHorizontalHelper())
+                {
                     GUILayout.Label("Code Namespace", GUILayout.Width(labelWidth));
                     EditorSettings.projectGenerationRootNamespace = EditorGUILayout.TextField(GUIContent.none, EditorSettings.projectGenerationRootNamespace, GUILayout.Width(200));
                 }
@@ -211,6 +224,11 @@ namespace Lost
                             if (isOnBefore != isOnAfter)
                             {
                                 appSettings.SupoortedPlatforms = isOnAfter ? (appSettings.SupoortedPlatforms | supportedPlatform) : (appSettings.SupoortedPlatforms & ~supportedPlatform);
+
+                                if (isOnAfter)
+                                {
+                                    UpdateBundleIdentifier(appSettings);
+                                }                                
                             }
                         }
                     }
@@ -660,6 +678,19 @@ namespace Lost
             }
 
             return false;
+        }
+
+        private static void UpdateBundleIdentifier(AppSettings appSettings)
+        {
+            foreach (var supportedPlatform in Enum.GetValues(typeof(DevicePlatform)).Cast<DevicePlatform>())
+            {
+                if ((appSettings.SupoortedPlatforms & supportedPlatform) == 0)
+                {
+                    continue;
+                }
+                
+                PlayerSettings.SetApplicationIdentifier(GetBuildTargetGroup(supportedPlatform), appSettings.BundleIdentifier);
+            }
         }
 
         private static BuildTargetGroup GetBuildTargetGroup(DevicePlatform devicePlatform)
