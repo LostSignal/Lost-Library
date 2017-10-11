@@ -6,17 +6,20 @@
 
 namespace Lost
 {
+    using System;
     using System.Collections.Generic;
-    using UnityEngine.Networking;
     using UnityEngine.Networking.Match;
     using UnityEngine.Networking.Types;
 
     public static class MatchMakingHelper
     {
-        private static bool hasStartedMatchMaker = false;
-
-        public static int RequestDomain { get; set; }  
-
+        // matchmaking configuration
+        private static NetworkMatch matchMaker = null;
+        private static string matchHost = "mm.unet.unity3d.com";
+        private static int matchPort = 443;
+        
+        public static int RequestDomain { get; set; }
+        
         public static UnityTask<MatchInfo> CreateMatch(string matchName, uint matchSize, bool matchAdvertise, string matchPassword, int eloScore)
         {
             return UnityTask<MatchInfo>.Run(CreateMatchCoroutine(matchName, matchSize, matchAdvertise, matchPassword, eloScore));
@@ -37,20 +40,21 @@ namespace Lost
             return UnityTask<bool>.Run(DestroyMatchCoroutine(matchInfo));
         }        
 
+        public static UnityTask<bool> DropConnection(MatchInfo matchInfo)
+        {
+            return UnityTask<bool>.Run(DropConnectionCoroutine(matchInfo));
+        }
+
         private static IEnumerator<MatchInfo> CreateMatchCoroutine(string matchName, uint matchSize, bool matchAdvertise, string matchPassword, int eloScore)
         {
-            if (hasStartedMatchMaker == false)
-            {
-                NetworkManager.singleton.StartMatchMaker();
-                hasStartedMatchMaker = true;
-            }
+            InitializeMatchMaker();
 
             bool isDone = false;
             bool successResult = false;
             string extendedInfoResult = null;
             MatchInfo matchInfoResult = null;
                         
-            NetworkManager.singleton.matchMaker.CreateMatch(
+            matchMaker.CreateMatch(
                 matchName,
                 matchSize,
                 matchAdvertise,
@@ -84,18 +88,14 @@ namespace Lost
 
         private static IEnumerator<List<MatchInfoSnapshot>> ListMatchesCoroutine(string matchName, string matchPassword, int eloScore, bool filterOutPrivateMatches)
         {
-            if (hasStartedMatchMaker == false)
-            {
-                NetworkManager.singleton.StartMatchMaker();
-                hasStartedMatchMaker = true;
-            }
+            InitializeMatchMaker();
 
             bool isDone = false;
             bool successResult = false;
             string extendedInfoResult = null;
             List<MatchInfoSnapshot> matchesResult = null;
 
-            NetworkManager.singleton.matchMaker.ListMatches(
+            matchMaker.ListMatches(
                 0,  // startPageNumber
                 10, // resultPageSize
                 matchName,
@@ -127,18 +127,14 @@ namespace Lost
 
         private static IEnumerator<MatchInfo> JoinMatchCoroutine(NetworkID networkId, string matchPassword, int eloScoreForClient)
         {
-            if (hasStartedMatchMaker == false)
-            {
-                NetworkManager.singleton.StartMatchMaker();
-                hasStartedMatchMaker = true;
-            }
+            InitializeMatchMaker();
 
             bool isDone = false;
             bool successResult = false;
             string extendedInfoResult = null;
             MatchInfo matchInfoResult = null;
 
-            NetworkManager.singleton.matchMaker.JoinMatch(
+            matchMaker.JoinMatch(
                 networkId,
                 matchPassword,
                 string.Empty,    // publicClientAddress
@@ -170,17 +166,13 @@ namespace Lost
 
         private static IEnumerator<bool> DestroyMatchCoroutine(MatchInfo matchInfo)
         {
-            if (hasStartedMatchMaker == false)
-            {
-                NetworkManager.singleton.StartMatchMaker();
-                hasStartedMatchMaker = true;
-            }
+            InitializeMatchMaker();
 
             bool isDone = false;
             bool successResult = false;
             string extendedInfoResult = null;
 
-            NetworkManager.singleton.matchMaker.DestroyMatch(
+            matchMaker.DestroyMatch(
                 matchInfo.networkId, 
                 matchInfo.domain,
                 (bool success, string extendedInfo) =>
@@ -203,6 +195,77 @@ namespace Lost
             {
                 yield return true;
             }
+        }
+
+        private static IEnumerator<bool> DropConnectionCoroutine(MatchInfo matchInfo)
+        {
+            InitializeMatchMaker();
+
+            bool isDone = false;
+            bool successResult = false;
+            string extendedInfoResult = null;
+
+            matchMaker.DropConnection(
+                matchInfo.networkId,
+                matchInfo.nodeId,
+                matchInfo.domain,
+                (bool success, string extendedInfo) =>
+                {
+                    successResult = success;
+                    extendedInfoResult = extendedInfo;
+                    isDone = true;
+                });
+
+            while (isDone == false)
+            {
+                yield return default(bool);
+            }
+
+            if (successResult == false)
+            {
+                throw new MatchMakingException(extendedInfoResult);
+            }
+            else
+            {
+                yield return true;
+            }
+        }
+
+        private static void InitializeMatchMaker()
+        {
+            if (matchMaker != null)
+            {
+                return;
+            }
+
+            var networkMatchObject = SingletonUtil.GetOrCreateSingletonChildObject("NetworkMatch").gameObject;
+            matchMaker = networkMatchObject.AddComponent<NetworkMatch>();
+
+            SetMatchHost(matchHost, matchPort, matchPort == 443);
+        }
+
+        private static void SetMatchHost(string newHost, int port, bool isHttps)
+        {
+            if (newHost == "127.0.0.1")
+            {
+                newHost = "localhost";
+            }
+            
+            if (newHost.StartsWith("http://"))
+            {
+                newHost = newHost.Replace("http://", "");
+            }
+
+            if (newHost.StartsWith("https://"))
+            {
+                newHost = newHost.Replace("https://", "");
+            }
+
+            string prefix = isHttps ? "https://" : "http://";
+            matchHost = newHost;
+            matchPort = port;
+
+            matchMaker.baseUri = new Uri(prefix + matchHost + ":" + matchPort);
         }
     }
 }

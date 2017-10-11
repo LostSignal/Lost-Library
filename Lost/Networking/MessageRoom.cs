@@ -21,6 +21,52 @@ namespace Lost
             Connected,
         }
 
+        public void CreateOrJoinRoom(string roomName, string password, int maxSize)
+        {
+
+        }
+
+
+        //private SimpleServer server;
+        //private NetworkClient client;
+
+        // public enum MessageType
+        // {
+        //     MessageType1 = 1001,
+        // }
+        // 
+        // public class MessageType1 : NetworkMessage
+        // {
+        // 
+        // }
+        // 
+        // public SimpleServer()
+        // {
+        //     this.Listen("127.0.0.1", 4567);  // or this.ListenRelay(...)
+        //     this.RegisterHandler(MessageType.MessageType1, this.OnReceivedMessageType1);
+        // }
+        // 
+        // private void OnReceivedMessageType1(NetworkMessage networkMessage)
+        // {
+        //     var messageType1 = networkMessage.ReadMessage<MessageType1>();
+        //     Debug.Log(messageType1.ToString());
+        // }
+
+        // This gets called when a client disconnects
+        // If we have a valid connection here drop the client in the matchmaker before shutting down below
+        // if (matchMaker != null && matchInfo != null && matchInfo.networkId != NetworkID.Invalid && matchInfo.nodeId != NodeID.Invalid)
+        // {
+        //     matchMaker.DropConnection(matchInfo.networkId, matchInfo.nodeId, matchInfo.domain, OnDropConnection);
+        // }
+
+        // ABCDEFGHIJKLMNPQRSTUVWXYZ123456789  - 35 characters
+
+        //void OnServerReadyToBeginMessage(NetworkMessage netMsg)
+        //{
+        //    var beginMessage = netMsg.ReadMessage<IntegerMessage>();
+        //    Debug.Log("received OnServerReadyToBeginMessage " + beginMessage.value);
+        //}
+
         private void Start()
         {
             NetworkManager.singleton.StartMatchMaker();
@@ -262,71 +308,3 @@ namespace Lost
 ////     public const short MessageType1 = 100;
 //// }
 //// 
-//// public class MessageType1 : MessageBase
-//// {
-//// }
-//// 
-//// public class MySimpleServer : NetworkServerSimple
-//// {
-////     public MySimpleServer()
-////     {
-////         this.Listen("127.0.0.1", 4567);  // or this.ListenRelay(...)
-////         this.RegisterHandler(MessageType.MessageType1, this.OnReceivedMessageType1);
-////     }
-//// 
-////     private void OnReceivedMessageType1(NetworkMessage networkMessage)
-////     {
-////         var messageType1 = networkMessage.ReadMessage<MessageType1>();
-////         Debug.Log(messageType1.ToString());
-////     }
-//// 
-////     public override void OnConnectError(int connectionId, byte error)
-////     {
-////         base.OnConnectError(connectionId, error); // just prints the errors
-////     }
-//// 
-////     public override void OnDataError(NetworkConnection conn, byte error)
-////     {
-////         base.OnDataError(conn, error); // just prints the errors
-////     }
-//// 
-////     public override void OnDisconnectError(NetworkConnection conn, byte error)
-////     {
-////         base.OnDisconnectError(conn, error); // just prints the errors
-////     }
-//// 
-////     public override void OnConnected(NetworkConnection conn)
-////     {
-////         base.OnConnected(conn);
-////         // your code
-////     }
-//// 
-////     public override void OnDisconnected(NetworkConnection conn)
-////     {
-////         base.OnDisconnected(conn);
-////         // your code
-////     }
-//// 
-////     public override void OnData(NetworkConnection conn, int receivedSize, int channelId)
-////     {
-////         base.OnData(conn, receivedSize, channelId);
-////         // your code (but not sure why you'd care about this, should be using Handlers)
-////     }
-//// 
-////     public void SendMessage(short messageType, MessageBase message)
-////     {
-////         foreach (var connection in this.connections)
-////         {
-////             connection.Send(messageType, message);  // or connection.SendUnreliable(messageType, message);
-////         }
-////     }
-//// }*/
-
-
-
-
-
-
-
-
-
