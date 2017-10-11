@@ -46,19 +46,19 @@ namespace Lost
 
         private static IEnumerator DelayTillEndOfFrameCoroutine(Action action)
         {
-            yield return new WaitForEndOfFrame();
+            yield return WaitForUtil.EndOfFrame;
             action.InvokeIfNotNull();
         }
         
         private static IEnumerator DelayInSecondsCoroutine(float delayInSeconds, Action action)
         {
-            yield return new WaitForSeconds(delayInSeconds);
+            yield return WaitForUtil.Seconds(delayInSeconds);
             action.InvokeIfNotNull();
         }
 
         private static IEnumerator DelayExecuteRealtimeCoroutine(float delayInRealtimeSeconds, Action action)
         {
-            yield return new WaitForSecondsRealtime(delayInRealtimeSeconds);
+            yield return WaitForUtil.RealtimeSeconds(delayInRealtimeSeconds);
             action.InvokeIfNotNull();
         }
     }

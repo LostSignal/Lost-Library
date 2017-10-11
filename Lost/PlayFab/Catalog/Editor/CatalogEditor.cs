@@ -79,7 +79,7 @@ namespace Lost
             if (catalogItemGrid == null)
             {
                 var gridDefinition = new GridDefinition();
-                gridDefinition.AddColumn("Id", 250);
+                gridDefinition.AddColumn("Id", 300);
                 gridDefinition.AddColumn("Item Class", 100);
                 gridDefinition.AddColumn("Item Type", 100);
                 gridDefinition.AddColumn("Display Name", 120);
@@ -95,7 +95,7 @@ namespace Lost
             if (bundleItemGrid == null)
             {
                 var gridDefinition = new GridDefinition();
-                gridDefinition.AddColumn("Id", 250);
+                gridDefinition.AddColumn("Id", 300);
                 gridDefinition.AddColumn("Item Class", 100);
                 gridDefinition.AddColumn("Display Name", 120);
                 gridDefinition.AddColumn("Description", 100);
@@ -113,7 +113,7 @@ namespace Lost
             {
                 var gridDefinition = new GridDefinition();
                 gridDefinition.AddColumn("Item Type", 120);
-                gridDefinition.AddColumn("Item Id", 250);
+                gridDefinition.AddColumn("Item Id", 300);
                 gridDefinition.AddColumn("Virtual Currency", 120);
                 gridDefinition.AddColumn("Cost", 80);
                 gridDefinition.AddColumn("Purchase Description", 250);
@@ -127,7 +127,7 @@ namespace Lost
         
         private void OnGUI()
         {
-            this.scrollViewPosition = GUILayout.BeginScrollView(this.scrollViewPosition, GUILayout.Width(1100));
+            this.scrollViewPosition = GUILayout.BeginScrollView(this.scrollViewPosition, GUILayout.Width(1500));
 
             {
                 GUILayout.Label("");
@@ -176,6 +176,12 @@ namespace Lost
             this.DrawCatalogItems(foldoutId + 2);
             this.DrawBundleItems(foldoutId + 3);
             this.DrawStores(foldoutId + 4);
+
+            if (GUI.changed)
+            {
+                Debug.Log("GUI Changed");
+                this.UpdateCache();
+            }
         }
 
         private void DrawItemClasses(int foldoutId)
@@ -270,8 +276,6 @@ namespace Lost
                     GUILayout.Label("");
                 }
             }
-
-            // TODO [bgish]:  If a VirtualCurrency is Added/Removed/Renamed, then call this.UpdateCache()
         }
 
         private void DrawCatalogItems(int foldoutId)
@@ -323,8 +327,6 @@ namespace Lost
                     GUILayout.Label("");
                 }
             }
-
-            // TODO [bgish]:  If a CatalogItem is Added/Removed/Renamed, then call this.UpdateCache()
         }
 
         private void DrawBundleItems(int foldoutId)
@@ -428,7 +430,7 @@ namespace Lost
                     this.ActiveCatalog.Stores.Add(new Store() { Id = "New Store " + this.ActiveCatalog.Stores.Count });
                     this.currentStoreIndex = this.ActiveCatalog.Stores.Count - 1;
                 }
-
+                
                 if (GUILayout.Button("Delete Selected Store", GUILayout.Width(200)))
                 {
 
@@ -457,6 +459,14 @@ namespace Lost
 
                 GUILayout.Label("");
 
+                using (new BeginHorizontalHelper())
+                {
+                    GUILayout.Label("Name", GUILayout.Width(40));
+                    this.ActiveCatalog.Stores[this.currentStoreIndex].Id = EditorGUILayout.TextField(this.ActiveCatalog.Stores[this.currentStoreIndex].Id, GUILayout.Width(120));
+                }
+
+                GUILayout.Label("");
+
                 this.DrawStore(foldoutId, this.ActiveCatalog.Stores[this.currentStoreIndex]);
             }
         }
@@ -478,13 +488,33 @@ namespace Lost
                     {
                         gridItem.Type = grid.DrawEnum<StoreItemType>(gridItem.Type);
 
+                        bool isIap = false;
+
                         if (gridItem.Type == StoreItemType.BundleItem)
                         {
                             gridItem.ItemId = grid.DrawPopup(this.bundleItemsCache, gridItem.ItemId);
+
+                            var bundleItem = this.ActiveCatalog.BundleItems.FirstOrDefault(x => x.Id == gridItem.ItemId);
+
+                            if (bundleItem != null && bundleItem.IsIapItem)
+                            {
+                                isIap = true;
+                                gridItem.CostCurrencyId = "RM";
+                                gridItem.Cost = bundleItem.RealMoneyCost;
+                            }
                         }
                         else if (gridItem.Type == StoreItemType.CatalogItem)
                         {
                             gridItem.ItemId = grid.DrawPopup(this.catalogItemsCache, gridItem.ItemId);
+
+                            var catalogItem = this.ActiveCatalog.CatalogItems.FirstOrDefault(x => x.Id == gridItem.ItemId);
+
+                            if (catalogItem != null && catalogItem.IsIapItem)
+                            {
+                                isIap = true;
+                                gridItem.CostCurrencyId = "RM";
+                                gridItem.Cost = catalogItem.RealMoneyCost;
+                            }
                         }
                         else
                         {
@@ -492,8 +522,17 @@ namespace Lost
                             grid.DrawLabel("?");
                         }
 
-                        gridItem.CostCurrencyId = grid.DrawPopup(this.allVirtualCurrenciesCache, gridItem.CostCurrencyId);
-                        gridItem.Cost = grid.DrawInt(gridItem.Cost);
+                        if (isIap)
+                        {
+                            grid.DrawLabel(gridItem.CostCurrencyId);
+                            grid.DrawLabel(gridItem.Cost.ToString());
+                        }
+                        else
+                        {
+                            gridItem.CostCurrencyId = grid.DrawPopup(this.allVirtualCurrenciesCache, gridItem.CostCurrencyId);
+                            gridItem.Cost = grid.DrawInt(gridItem.Cost);
+                        }
+
                         gridItem.PurchaseDescription = grid.DrawString(gridItem.PurchaseDescription);
                         gridItem.PurchaseIcon = grid.DrawSprite(gridItem.PurchaseIcon, false);
                     }
@@ -508,7 +547,7 @@ namespace Lost
 
                 if (grid.DrawAddButton())
                 {
-                    gridItems.Add(new StoreItem());
+                    gridItems.Add(new StoreItem { ItemId = this.catalogItemsCache.First() });
                 }
 
                 GUILayout.Label("");

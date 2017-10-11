@@ -55,6 +55,11 @@ namespace Lost
 
         public void UpdateValue(int newValue, TextUpdateType updateType)
         {
+            if (this.goalValue == newValue)
+            {
+                return;
+            }
+
             this.goalValue = newValue;
 
             if (updateType == TextUpdateType.Instant)

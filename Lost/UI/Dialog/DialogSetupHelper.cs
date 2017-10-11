@@ -17,6 +17,12 @@ namespace Lost
         private void Update()
         {
             Dialog dialog = this.GetComponent<Dialog>();
+
+            if (dialog == null)
+            {
+                return;
+            }
+
             bool needsBlocker = dialog.BlockInput || dialog.TapOutsideToDismiss;
             Transform blockerTransform = dialog.transform.Find("Blocker");
 

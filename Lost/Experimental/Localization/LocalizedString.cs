@@ -25,7 +25,7 @@ namespace Lost
         public string Value
         {
             // TODO [bgish]: Actually query localizatin system to get this info
-            get { throw new NotImplementedException(); }
+            get { return this.Id; } // throw new NotImplementedException(); }
         }
     }
 }

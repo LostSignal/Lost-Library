@@ -119,6 +119,7 @@ namespace Lost
 
         // virtual currencies
         private Dictionary<string, int> virtualCurrencies = new Dictionary<string, int>();
+        private Dictionary<string, int> virtualCurrencyRechargeTimes = new Dictionary<string, int>();
 
         public event OnVirtualCurrencyChangedDelegate VirtualCurrencyChanged;
 
@@ -252,6 +253,11 @@ namespace Lost
             return -1;
         }
         
+        public UnityTask<GetUserInventoryResult> RefreshVirtualCurrency()
+        {
+            return PF.Do(new GetUserInventoryRequest());
+        }
+
         public UnityTask<List<StoreItem>> GetStoreItems(string storeId)
         {
             return UnityTask<List<StoreItem>>.Run(this.GetStoreItemsInternal(storeId));
@@ -293,6 +299,24 @@ namespace Lost
             this.OnVirtualCurrencyChanged();
         }
 
+        protected void InternalSetVirtualCurrencyToInventory(string virtualCurrencyId, int neValue)
+        {
+            if (virtualCurrencyId == "RM" || virtualCurrencyId == "AD")
+            {
+                return;
+            }
+
+            if (this.virtualCurrencies.ContainsKey(virtualCurrencyId) == false)
+            {
+                Debug.LogErrorFormat("Tried to add unknown virtual currency to inventory {0}", virtualCurrencyId);
+                return;
+            }
+
+            this.virtualCurrencies[virtualCurrencyId] = neValue;
+
+            this.OnVirtualCurrencyChanged();
+        }
+        
         protected void InternalAddCatalogItemToInventory(string catalogItemId, int count)
         {
             var inventoryItem = this.userInventory.FirstOrDefault(x => x.Id == catalogItemId);
@@ -326,6 +350,23 @@ namespace Lost
                     Debug.LogErrorFormat("PlayFabServer.InternalAddBundleItemToInventory found unknown BundleItemType {0} on bundle item id {1}", item.Type, bundleItem.Id);
                 }
             }
+        }
+
+        protected int GetSecondsToRecharge(string virtualCurrencyId)
+        {
+            if (this.virtualCurrencyRechargeTimes == null)
+            {
+                return 0;
+            }
+
+            int rechargeFinishedTime = 0;
+
+            if (this.virtualCurrencyRechargeTimes.TryGetValue(virtualCurrencyId, out rechargeFinishedTime))
+            {
+                return Math.Max(0, rechargeFinishedTime - (int)Time.realtimeSinceStartup);
+            }
+
+            return 0;
         }
 
         protected void InternalAddStoreItemToInventory(StoreItem storeItem)
@@ -654,8 +695,15 @@ namespace Lost
         private void UpdateVirtualCurrencies(Dictionary<string, int> virtualCurrencies, Dictionary<string, VirtualCurrencyRechargeTime> rechargeTimes)
         {
             this.virtualCurrencies = virtualCurrencies;
-            
-            // TODO [bgish]: update the recharge times, and start timer for when virtual currencies should change
+            this.virtualCurrencyRechargeTimes = new Dictionary<string, int>();
+
+            foreach (var vc in rechargeTimes.Keys)
+            {
+                if (rechargeTimes.ContainsKey(vc))
+                {
+                    this.virtualCurrencyRechargeTimes.Add(vc, (int)(Time.realtimeSinceStartup + rechargeTimes[vc].SecondsToRecharge + 1));
+                }
+            }
 
             this.OnVirtualCurrencyChanged();
         }

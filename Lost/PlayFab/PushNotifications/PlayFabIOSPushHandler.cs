@@ -60,7 +60,7 @@ namespace Lost
                     yield break;
                 }
         
-                yield return new WaitForSeconds(RetryWaitTime);
+                yield return WaitForUtil.Seconds(RetryWaitTime);
             }
 
             // if we got here and still no deviceToken, then we timed out

@@ -33,7 +33,7 @@ namespace Lost
             Initialize();
 
             // early out if no types were found
-            if (uiActionTypes.Length == 0)
+            if (uiActionTypes == null || uiActionTypes.Length == 0)
             {
                 return;
             }
