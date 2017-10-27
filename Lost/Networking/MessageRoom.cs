@@ -11,22 +11,246 @@ namespace Lost
     using UnityEngine.Networking;
     using UnityEngine.Networking.Match;
 
-    public class MessageRoom : MonoBehaviour
+    public class RegisterMessage
+    {
+        public short MessageId { get; set; }
+        public NetworkMessageDelegate Delegate { get; set; }
+        public bool RelayToAllClients { get; set; }
+        public bool Reliable { get; set; }
+
+        public RegisterMessage()
+        {
+            this.RelayToAllClients = true;
+            this.Reliable = true;
+        }
+    }
+
+    public class RoomInfo
+    {
+        public Options RoomOptions { get; set; }
+        public Options ReconnectRoomOptions { get; set; }
+        public int MaxConnections { get; set; }
+        public int Elo { get; set; }
+        
+        public RoomInfo()
+        {
+            this.RoomOptions = new Options();
+            this.ReconnectRoomOptions = null;
+            this.MaxConnections = 2;
+            this.Elo = 0;
+        }
+
+        public class Options
+        {
+            public string RoomName { get; set; }
+            public string RoomPassword { get; set; }
+            public bool Advertise { get; set; }
+
+            public Options()
+            {
+                this.RoomName = string.Empty;
+                this.RoomPassword = null;
+                this.Advertise = true;
+            }
+        }
+    }
+
+    public abstract class MessageRoom : MonoBehaviour
     {
         public enum State
         {
+            Waiting,
             Searching,
-            Creating,
             Joining,
-            Connected,
+            Creating,
+            
+            ConnectedServer,
+            ConnectedClient,
+
+            ReconnectingToOriginalRoom,  // happens when a client disconnects
+
+            SearchingForFallback,
+            JoiningFallback,
+            CreatingFallback,  // what happens if the fallback fails?
+            
+            ShuttingDown,
         }
 
-        public void CreateOrJoinRoom(string roomName, string password, int maxSize)
+        private HashSet<short> relayToAllClientsMessageIds = new HashSet<short>();
+        private HashSet<short> unreliableMessageIds = new HashSet<short>();
+        private ConnectionConfig connectionConfig;
+        private NetworkClient client;
+        private SimpleServer server;
+        //private RoomInfo roomInfo;
+        private State state;
+
+        public abstract IEnumerable<RegisterMessage> Messages { get; }
+
+
+        private void SetState(State newState)
         {
+            if (this.state == newState)
+            {
+                Debug.LogErrorFormat("MessageRoom try to go into state {0} while already in that state.", newState);
+                return;
+            }
+
+            this.state = newState;
+
+            switch (this.state)
+            {
+                case State.Waiting:
+                case State.Searching:
+                case State.Joining:
+                case State.Creating:
+                case State.ConnectedServer:
+                case State.ConnectedClient:
+                case State.ShuttingDown:
+                default:
+                    break;
+            }
+        }
+
+        private void Update()
+        {
+            switch (this.state)
+            {
+                case State.Waiting:
+                case State.Searching:
+                case State.Joining:
+                case State.Creating:
+                    break;
+
+                case State.ConnectedServer:
+                    this.server.Update();
+                    break;
+
+                case State.ConnectedClient:
+                    break;
+                
+                case State.ShuttingDown:
+
+                    if (this.client != null)
+                    {
+                        this.client.Shutdown();
+                        this.client = null;
+                    }
+
+                    if (this.server != null)
+                    {
+                        // TODO: unregister events?
+                        this.server.Stop();
+                        this.server = null;
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        public void CreateOrJoinRoom(RoomInfo roomInfo)
+        {
+            // this.roomInfo = roomInfo;
+        }
+
+        protected virtual void Awake()
+        {
+            foreach (var message in this.Messages)
+            {
+                if (message.RelayToAllClients)
+                {
+                    this.relayToAllClientsMessageIds.Add(message.MessageId);
+                }
+
+                if (message.Reliable == false)
+                {
+                    this.unreliableMessageIds.Add(message.MessageId);
+                }
+            }
+        }
+
+        protected virtual ConnectionConfig CreateConnectionConfig()
+        {
+            var config = new ConnectionConfig();
+            config.AddChannel(QosType.Reliable);
+            config.AddChannel(QosType.Unreliable);
+
+            return config;
+        }
+
+        private void OnConnected()
+        {
+             if (this.connectionConfig == null)
+             {
+                this.connectionConfig = this.CreateConnectionConfig();
+             }
+
+            // If Client
+
+            // -------------- Client -----------------
+            if (this.client != null)
+            {
+                // this.client = new NetworkClient();
+                // this.client.Configure(this.connectionConfig);
+
+                foreach (var message in this.Messages)
+                {
+                    this.client.RegisterHandler(message.MessageId, message.Delegate);
+                }
+
+                // this.client.Connect(the MatchInfo result of the join room call);
+            }
+            
+            // ---------------- Server ----------------
+            // this.matches.Add(createMatch.Value);
+            // 
+            // if (this.server == null)
+            // {
+            //     this.server = new SimpleServer();
+            //     this.server.OnConnectedEvent += Server_OnConnectedEvent;
+            //     this.server.OnConnectErrorEvent += Server_OnConnectErrorEvent;
+            //     this.server.OnDataErrorEvent += Server_OnDataErrorEvent;
+            //     this.server.OnDisconnectErrorEvent += Server_OnDisconnectErrorEvent;
+            //     this.server.OnDisconnectedEvent += Server_OnDisconnectedEvent;
+            // }
+            // 
+            // this.server.Configure(config, int.Parse(createMatchSize.text));
+            // this.server.RegisterHandler((short)NetworkTestType.Text, this.OnTextMessageReceived);
+            // this.server.ListenMatchInfo(the MatchInfo result from the create room call);
 
         }
 
+        #region Simple Server Callbacks
 
+        private void Server_OnDisconnectErrorEvent(UnityEngine.Networking.NetworkConnection conn, byte error)
+        {
+            Debug.LogError("Server_OnDisconnectErrorEvent");
+        }
+
+        private void Server_OnDataErrorEvent(UnityEngine.Networking.NetworkConnection conn, byte error)
+        {
+            Debug.LogError("Server_OnDataErrorEvent");
+        }
+
+        private void Server_OnConnectErrorEvent(int connectionId, byte error)
+        {
+            Debug.LogError("Server_OnConnectErrorEvent");
+        }
+
+        private void Server_OnConnectedEvent(UnityEngine.Networking.NetworkConnection conn)
+        {
+            Debug.Log("Server_OnConnectedEvent");
+        }
+
+        private void Server_OnDisconnectedEvent(NetworkConnection conn)
+        {
+            Debug.Log("Server_OnDisconnectedEvent");
+        }
+
+        #endregion
+        
         //private SimpleServer server;
         //private NetworkClient client;
 
@@ -78,7 +302,7 @@ namespace Lost
             NetworkManager.singleton.matchMaker.CreateMatch(matchName, 4, true, "", "", "", 0, 0, OnInternetMatchCreate);
         }
 
-        //this method is called when your request for creating a match is returned
+        // this method is called when your request for creating a match is returned
         private void OnInternetMatchCreate(bool success, string extendedInfo, MatchInfo matchInfo)
         {
             if (success)
@@ -96,13 +320,13 @@ namespace Lost
             }
         }
 
-        //call this method to find a match through the matchmaker
+        // call this method to find a match through the matchmaker
         public void FindInternetMatch(string matchName)
         {
             NetworkManager.singleton.matchMaker.ListMatches(0, 10, matchName, true, 0, 0, OnInternetMatchList);
         }
 
-        //this method is called when a list of matches is returned
+        // this method is called when a list of matches is returned
         private void OnInternetMatchList(bool success, string extendedInfo, List<MatchInfoSnapshot> matches)
         {
             if (success)
@@ -125,7 +349,7 @@ namespace Lost
             }
         }
 
-        //this method is called when your request to join a match is returned
+        // this method is called when your request to join a match is returned
         private void OnJoinInternetMatch(bool success, string extendedInfo, MatchInfo matchInfo)
         {
             if (success)
@@ -142,7 +366,6 @@ namespace Lost
         }
     }
 }
-
 
 //public static void CreateOrJoinRoom(string matchName, int eloScore, int playerCount)
 //{
