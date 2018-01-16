@@ -40,9 +40,13 @@ namespace Lost
                 case BuildTarget.StandaloneWindows:
                 case BuildTarget.StandaloneWindows64:
                     return "Windows";
+                #if UNITY_2017_3_OR_NEWER
+                case BuildTarget.StandaloneOSX:
+                #else
                 case BuildTarget.StandaloneOSXIntel:
                 case BuildTarget.StandaloneOSXIntel64:
                 case BuildTarget.StandaloneOSXUniversal:
+                #endif
                     return "OSX";
 
                 // Add more build targets for your own.  If you add more targets, don't forget to

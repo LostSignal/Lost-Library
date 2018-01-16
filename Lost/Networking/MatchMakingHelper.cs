@@ -8,11 +8,15 @@ namespace Lost
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
     using UnityEngine.Networking.Match;
     using UnityEngine.Networking.Types;
 
     public static class MatchMakingHelper
     {
+        // TODO [bgish]:  Might be worth it to make this localizable someday
+        private const string validCharacters = "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789";
+
         // matchmaking configuration
         private static NetworkMatch matchMaker = null;
         private static string matchHost = "mm.unet.unity3d.com";
@@ -20,6 +24,19 @@ namespace Lost
         
         public static int RequestDomain { get; set; }
         
+        public static string GenerateRandomRoomName(int size)
+        {
+            StringBuilder roomName = new StringBuilder(size);
+
+            for (int i = 0; i < size; i++)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, validCharacters.Length);
+                roomName.Append(validCharacters[randomIndex]);
+            }
+
+            return roomName.ToString();
+        }
+
         public static UnityTask<MatchInfo> CreateMatch(string matchName, uint matchSize, bool matchAdvertise, string matchPassword, int eloScore)
         {
             return UnityTask<MatchInfo>.Run(CreateMatchCoroutine(matchName, matchSize, matchAdvertise, matchPassword, eloScore));
@@ -28,6 +45,11 @@ namespace Lost
         public static UnityTask<List<MatchInfoSnapshot>> ListMatches(string matchName, string matchPassword, int eloScore, bool filterOutPrivateMatches)
         {
             return UnityTask<List<MatchInfoSnapshot>>.Run(ListMatchesCoroutine(matchName, matchPassword, eloScore, filterOutPrivateMatches));
+        }
+
+        public static UnityTask<bool> DoesMatchExist(string matchName)
+        {
+            return UnityTask<bool>.Run(DoesMatchExistCoroutine(matchName));
         }
 
         public static UnityTask<MatchInfo> JoinMatch(NetworkID networkId, string matchPassword, int eloScoreForClient)
@@ -122,6 +144,45 @@ namespace Lost
             else
             {
                 yield return matchesResult;
+            }
+        }
+
+        private static IEnumerator<bool> DoesMatchExistCoroutine(string matchName)
+        {
+            InitializeMatchMaker();
+
+            bool isDone = false;
+            bool successResult = false;
+            string extendedInfoResult = null;
+            List<MatchInfoSnapshot> matchesResult = null;
+
+            matchMaker.ListMatches(
+                0,         // startPageNumber
+                10,        // resultPageSize
+                matchName,
+                false,     // filterOutPrivateMatches
+                0,         // eloScore
+                RequestDomain,
+                (bool success, string extendedInfo, List<MatchInfoSnapshot> matches) =>
+                {
+                    successResult = success;
+                    extendedInfoResult = extendedInfo;
+                    matchesResult = matches;
+                    isDone = true;
+                });
+
+            while (isDone == false)
+            {
+                yield return default(bool);
+            }
+
+            if (successResult == false)
+            {
+                throw new MatchMakingException(extendedInfoResult);
+            }
+            else
+            {
+                yield return matchesResult.Count > 0;
             }
         }
 

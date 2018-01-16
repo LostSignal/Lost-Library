@@ -89,37 +89,38 @@ namespace Lost
             }
         }
 
-        public void SendMessage(short messageType, MessageBase message)
+        public bool SendMessage(short messageType, MessageBase message)
         {
-            foreach (var connection in this.connections)
+            bool result = true;
+
+            // this list holds all connections (local and remote)
+            for (int i = 0; i < connections.Count; i++)
             {
-                connection.Send(messageType, message);
+                NetworkConnection connection = connections[i];
+                if (connection != null)
+                {
+                    result &= connection.Send(messageType, message);
+                }
             }
+
+            return result;
         }
 
-        public void SendMessageUnreliable(short messageType, MessageBase message)
+        public bool SendMessageUnreliable(short messageType, MessageBase message)
         {
-            foreach (var connection in this.connections)
-            {
-                connection.SendUnreliable(messageType, message);
-            }
-        }
+            bool result = true;
 
-        // static public bool SendToAll(short msgType, MessageBase msg)
-        // {
-        //     if (LogFilter.logDev) { Debug.Log("Server.SendToAll msgType:" + msgType); }
-        // 
-        //     bool result = true;
-        // 
-        //     // this list holds all connections (local and remote)
-        //     for (int i = 0; i < connections.Count; i++)
-        //     {
-        //         NetworkConnection conn = connections[i];
-        //         if (conn != null)
-        //             result &= conn.Send(msgType, msg);
-        //     }
-        // 
-        //     return result;
-        // }
+            // this list holds all connections (local and remote)
+            for (int i = 0; i < connections.Count; i++)
+            {
+                NetworkConnection connection = connections[i];
+                if (connection != null)
+                {
+                    result &= connection.SendUnreliable(messageType, message);
+                }
+            }
+
+            return result;
+        }
     }
 }

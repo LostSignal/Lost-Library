@@ -32,21 +32,23 @@ namespace Lost
 
         public static Vector3 Interpolate(SplinePoint p1, SplinePoint p2, float percentage)
         {
-            Vector3 v1 = p1.transform.position;
-            Vector3 v2 = p1.transform.position + (p1.transform.rotation * p1.OutHandle);
-            Vector3 v3 = p2.transform.position + (p2.transform.rotation * p2.InHandle);
-            Vector3 v4 = p2.transform.position;
+            Vector3 v1 = p1.transform.localPosition;
+            Vector3 v2 = p1.transform.localPosition + (p1.transform.localRotation * p1.OutHandle);
+            Vector3 v3 = p2.transform.localPosition + (p2.transform.localRotation * p2.InHandle);
+            Vector3 v4 = p2.transform.localPosition;
 
-            return new Vector3(
-                Interpolate(v1.x, v2.x, v3.x, v4.x, percentage),
-                Interpolate(v1.y, v2.y, v3.y, v4.y, percentage),
-                Interpolate(v1.z, v2.z, v3.z, v4.z, percentage));
+            Vector3 interpolatedPoint = new Vector3(
+              Interpolate(v1.x, v2.x, v3.x, v4.x, percentage),
+              Interpolate(v1.y, v2.y, v3.y, v4.y, percentage),
+              Interpolate(v1.z, v2.z, v3.z, v4.z, percentage));
+
+            return p1.transform.parent.localToWorldMatrix.MultiplyPoint(interpolatedPoint);
         }
 
         public Vector3 Evaluate(float desiredLength)
         {
             // early out if we've reached the end
-            if (desiredLength > this.splineLength)
+            if (desiredLength >= this.splineLength)
             {
                 return this.isLooping ? this.children.First().transform.position : this.children.Last().transform.position;
             }

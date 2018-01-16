@@ -10,24 +10,29 @@ namespace Lost
     
     public static class Vector2Extensions
     {
-        public static Vector2 SetX(this Vector2 lhs, float val)
+        public static Vector2 SetX(this Vector2 vector, float x)
         {
-            lhs.x = val;
-            return lhs;
+            vector.x = x;
+            return vector;
         }
         
-        public static Vector2 SetY(this Vector2 lhs, float val)
+        public static Vector2 SetY(this Vector2 vector, float y)
         {
-            lhs.y = val;
-            return lhs;
+            vector.y = y;
+            return vector;
+        }
+
+        public static Vector3 AddZ(this Vector2 vector, float z)
+        {
+            return new Vector3(vector.x, vector.y, z);
         }
         
-        public static Vector2 ConvertPixelSpaceToOrthographicWorldSpace(this Vector2 lhs)
+        public static Vector2 ConvertPixelSpaceToOrthographicWorldSpace(this Vector2 vector)
         {
-            return Camera.main.ScreenToWorldPoint(lhs);
+            return Camera.main.ScreenToWorldPoint(vector);
         }
         
-        public static float ConvertPixelSpaceToLengthInInches(this Vector2 lhs)
+        public static float ConvertPixelSpaceToLengthInInches(this Vector2 vector)
         {
             float dpi = Screen.dpi;
 
@@ -36,7 +41,7 @@ namespace Lost
                 dpi = 100.0f;
             }
 
-            return lhs.magnitude / dpi;
+            return vector.magnitude / dpi;
         }
     }
 }

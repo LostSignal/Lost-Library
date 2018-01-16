@@ -6,54 +6,12 @@
 
 namespace Lost
 {
+    using System;
     using System.Collections.Generic;
+    using System.Text;
     using UnityEngine;
     using UnityEngine.Networking;
     using UnityEngine.Networking.Match;
-
-    public class RegisterMessage
-    {
-        public short MessageId { get; set; }
-        public NetworkMessageDelegate Delegate { get; set; }
-        public bool RelayToAllClients { get; set; }
-        public bool Reliable { get; set; }
-
-        public RegisterMessage()
-        {
-            this.RelayToAllClients = true;
-            this.Reliable = true;
-        }
-    }
-
-    public class RoomInfo
-    {
-        public Options RoomOptions { get; set; }
-        public Options ReconnectRoomOptions { get; set; }
-        public int MaxConnections { get; set; }
-        public int Elo { get; set; }
-        
-        public RoomInfo()
-        {
-            this.RoomOptions = new Options();
-            this.ReconnectRoomOptions = null;
-            this.MaxConnections = 2;
-            this.Elo = 0;
-        }
-
-        public class Options
-        {
-            public string RoomName { get; set; }
-            public string RoomPassword { get; set; }
-            public bool Advertise { get; set; }
-
-            public Options()
-            {
-                this.RoomName = string.Empty;
-                this.RoomPassword = null;
-                this.Advertise = true;
-            }
-        }
-    }
 
     public abstract class MessageRoom : MonoBehaviour
     {
@@ -61,51 +19,326 @@ namespace Lost
         {
             Waiting,
             Searching,
-            Joining,
+
             Creating,
-            
-            ConnectedServer,
-            ConnectedClient,
+            ConnectedAsServer,
+            DisconnectedAsServer,
 
-            ReconnectingToOriginalRoom,  // happens when a client disconnects
+            Joining,
+            SendingClientInfo,
+            ConnectedAsClient,
+            DisconnectedAsClient,
 
-            SearchingForFallback,
-            JoiningFallback,
-            CreatingFallback,  // what happens if the fallback fails?
-            
             ShuttingDown,
         }
 
-        private HashSet<short> relayToAllClientsMessageIds = new HashSet<short>();
-        private HashSet<short> unreliableMessageIds = new HashSet<short>();
+        // connection
         private ConnectionConfig connectionConfig;
         private NetworkClient client;
         private SimpleServer server;
-        //private RoomInfo roomInfo;
+        private MatchInfo matchInfo;
+        private RoomInfo roomInfo;
         private State state;
 
-        public abstract IEnumerable<RegisterMessage> Messages { get; }
+        // tasks
+        private UnityTask<List<MatchInfoSnapshot>> listMatchesTask;
+        private UnityTask<MatchInfo> createMatchTask;
+        private UnityTask<MatchInfo> joinMatchTask;
 
+        // client / server state
+        private MatchInfo serverMatchInfo;
+        private MatchInfoSnapshot joinMatchInfoSnapshot;
+
+        // messages
+        private Dictionary<short, Type> roomMessageTypes = new Dictionary<short, Type>();
+        private Dictionary<short, List<RoomMessage>> roomMessagePools = new Dictionary<short, List<RoomMessage>>();
+
+        // used to invalidate debug info and regenerate (so it wont happen every tick)
+        private string debugInfoCache = null;
+        private bool isDebugInfoDirty = true;
+
+        private ConnectionConfig ConnectionConfig
+        {
+            get
+            {
+                if (this.connectionConfig == null)
+                {
+                    this.connectionConfig = this.CreateConnectionConfig();
+                }
+
+                return this.connectionConfig;
+            }
+        }
+        
+        public string GetDebugSummary()
+        {
+            if (this.state == State.Waiting)
+            {
+                return string.Empty;
+            }
+            else if (this.isDebugInfoDirty == false)
+            {
+                return this.debugInfoCache;
+            }
+            
+            StringBuilder summary = new StringBuilder();
+
+            summary.Append("State: ");
+            summary.AppendLine(this.state.ToString());
+            
+            if (this.roomInfo != null)
+            {
+                summary.Append("Room: ");
+                summary.AppendLine(this.roomInfo.RoomName);
+            }
+
+            if (this.roomInfo != null && string.IsNullOrEmpty(this.roomInfo.RoomPassword) == false)
+            {
+                summary.Append("Room Password: ");
+                summary.AppendLine(this.roomInfo.RoomPassword);
+            }
+
+            if (this.server != null)
+            {
+                int count = 1;
+
+                for (int i = 0; i < this.server.connections.Count; i++)
+                {
+                    if (this.server.connections[i] != null)
+                    {
+                        count++;
+                    }
+                }
+                
+                summary.Append("Room Count: ");
+                summary.AppendLine(count.ToString());
+            }
+
+            if (this.client != null)
+            {
+                summary.Append("Client IsConnected: ");
+                summary.AppendLine(this.client.isConnected.ToString());
+            }
+
+            this.debugInfoCache = summary.ToString();
+            this.isDebugInfoDirty = false;
+
+            return this.debugInfoCache;
+        }
+        
+        public void CreateOrJoinRoom(RoomInfo roomInfo)
+        {
+            if (this.state != State.Waiting)
+            {
+                this.SetState(State.ShuttingDown);
+            }
+
+            this.roomInfo = roomInfo;
+            this.SetState(State.Searching);
+        }
+
+        public void RegisterMessage<T>() where T : RoomMessage, new()
+        {
+            RoomMessage roomMessage = new T();
+            short roomMessageId = roomMessage.GetMessageId();
+            
+            if (this.roomMessageTypes.ContainsKey(roomMessageId))
+            {
+                Debug.LogErrorFormat(this, "RoomMessage Type {0} Has Duplicate Id {0}", roomMessage.GetType().Name, roomMessageId);
+                return;
+            }
+
+            roomMessageTypes.Add(roomMessageId, typeof(T));
+            roomMessagePools.Add(roomMessageId, new List<RoomMessage> { roomMessage });
+        }
+
+        public void SendRoomMessage(RoomMessage roomMessage)
+        {
+            // TOOD [bgish]: If temporarily disconnected, should I buffer the messages?
+
+            short roomMessageId = roomMessage.GetMessageId();
+
+            if (this.roomMessageTypes.ContainsKey(roomMessageId) == false)
+            {
+                Debug.LogErrorFormat("Tried Sending Unregisted RoomMessage Type = {0} with Id = {1}", roomMessage.GetType().Name, roomMessageId);
+                return;
+            }
+
+            if (this.server != null)
+            {
+                if (roomMessage.IsReliable)
+                {
+                    this.server.SendMessage(roomMessageId, roomMessage);
+                }
+                else
+                {
+                    this.server.SendMessageUnreliable(roomMessageId, roomMessage);
+                }
+            }
+            else if (this.client != null && this.client.isConnected)
+            {
+                if (roomMessage.IsReliable)
+                {
+                    this.client.Send(roomMessageId, roomMessage);
+                }
+                else
+                {
+                    this.client.SendUnreliable(roomMessageId, roomMessage);
+                }
+            }
+        }
+
+        public void Shutdown()
+        {
+            // stopping all match tasks
+            if (this.createMatchTask != null)
+            {
+                this.createMatchTask.Cancel();
+                this.createMatchTask = null;
+            }
+
+            if (this.listMatchesTask != null)
+            {
+                this.listMatchesTask.Cancel();
+                this.listMatchesTask = null;
+            }
+
+            if (this.joinMatchTask != null)
+            {
+                this.joinMatchTask.Cancel();
+                this.joinMatchTask = null;
+            }
+            
+            if (this.client != null)
+            {
+                // unregistering all handlers
+                this.client.UnregisterHandler(MsgType.Connect);
+                this.client.UnregisterHandler(MsgType.Disconnect);
+                this.client.UnregisterHandler(MsgType.NotReady);
+                this.client.UnregisterHandler(MsgType.Error);
+
+                foreach (var roomMessageId in this.roomMessageTypes.Keys)
+                {
+                    this.client.UnregisterHandler(roomMessageId);
+                }
+
+                // shutting down client
+                this.client.Disconnect();
+                this.client.Shutdown();
+                this.client = null;
+            }
+
+            if (this.server != null)
+            {
+                // unregistering all events and handlers
+                this.server.OnConnectedEvent -= Server_OnConnectedEvent;
+                this.server.OnConnectErrorEvent -= Server_OnConnectErrorEvent;
+                this.server.OnDataErrorEvent -= Server_OnDataErrorEvent;
+                this.server.OnDisconnectErrorEvent -= Server_OnDisconnectErrorEvent;
+                this.server.OnDisconnectedEvent -= Server_OnDisconnectedEvent;
+
+                this.server.ClearHandlers();
+
+                // shutting down server
+                this.server.DisconnectAllConnections();
+                this.server.Stop();
+                this.server.ClearHandlers();
+                this.server = null;
+
+                MatchMakingHelper.DestroyMatch(this.serverMatchInfo);
+            }
+
+            this.roomInfo = null;
+            this.joinMatchInfoSnapshot = null;
+            this.serverMatchInfo = null;
+
+            if (this.state != State.Waiting)
+            {
+                this.SetState(State.Waiting);
+            }
+        }
+
+        protected abstract void RegisterCustomMessages();
+
+        protected abstract void OnRoomMessageReceived(RoomMessage roomMessage);
+
+        protected abstract void DisconnectedAsServer();
+
+        protected abstract void DisconnectedAsClient();
+
+        private void Awake()
+        {
+            this.RegisterMessage<ClientConnected>();
+            this.RegisterMessage<ClientsConnected>();
+            this.RegisterMessage<ClientDisconnected>();
+            this.RegisterMessage<ClientIdentity>();
+
+            this.RegisterCustomMessages();
+        }
+
+        private void OnDestroy()
+        {
+            this.Shutdown();
+        }
 
         private void SetState(State newState)
         {
             if (this.state == newState)
             {
-                Debug.LogErrorFormat("MessageRoom try to go into state {0} while already in that state.", newState);
+                Debug.LogErrorFormat("MessageRoom tried to go into state {0} while already in that state.", newState);
                 return;
             }
 
+            this.isDebugInfoDirty = true;
             this.state = newState;
 
             switch (this.state)
             {
-                case State.Waiting:
                 case State.Searching:
+                    {
+                        this.listMatchesTask = MatchMakingHelper.ListMatches(this.roomInfo.RoomName, this.roomInfo.RoomPassword, this.roomInfo.Elo, false);
+                        break;
+                    }
+
                 case State.Joining:
+                    {
+                        this.joinMatchTask = MatchMakingHelper.JoinMatch(this.joinMatchInfoSnapshot.networkId, this.roomInfo.RoomPassword, this.roomInfo.Elo);
+                        break;
+                    }
+
                 case State.Creating:
-                case State.ConnectedServer:
-                case State.ConnectedClient:
+                    {
+                        this.createMatchTask = MatchMakingHelper.CreateMatch(this.roomInfo.RoomName, this.roomInfo.MaxConnections, true, this.roomInfo.RoomPassword, this.roomInfo.Elo);
+                        break;
+                    }
+
+                case State.SendingClientInfo:
+                    {
+                        // TODO [bgish]: Send the Client info
+                        this.SetState(State.ConnectedAsClient);
+                        break;
+                    }
+
+                case State.DisconnectedAsClient:
+                    {
+                        this.DisconnectedAsClient();
+                        this.SetState(State.ShuttingDown);
+                        break;
+                    }
+
+                case State.DisconnectedAsServer:
+                    {
+                        this.DisconnectedAsServer();
+                        this.SetState(State.ShuttingDown);
+                        break;
+                    }
+
                 case State.ShuttingDown:
+                    {
+                        this.Shutdown();
+                        break;
+                    }
+
                 default:
                     break;
             }
@@ -115,34 +348,107 @@ namespace Lost
         {
             switch (this.state)
             {
-                case State.Waiting:
                 case State.Searching:
+                    {
+                        if (this.listMatchesTask.IsDone)
+                        {
+                            if (this.listMatchesTask.HasError == false)
+                            {
+                                if (this.listMatchesTask.Value.Count == 0)
+                                {
+                                    this.SetState(State.Creating);
+                                }
+                                else
+                                {
+                                    this.joinMatchInfoSnapshot = this.listMatchesTask.Value[0];
+                                    this.SetState(State.Joining);
+                                }
+                            }
+                            else
+                            {
+                                Debug.LogErrorFormat("Restarting: Error Trying To List Matches: {0}", this.listMatchesTask.Exception.Message);
+                                this.CreateOrJoinRoom(this.roomInfo);
+                            }
+                        }
+
+                        break;
+                    }
+
                 case State.Joining:
+                    {
+                        if (this.joinMatchTask.IsDone)
+                        {
+                            if (joinMatchTask.HasError == false)
+                            {
+                                Debug.Assert(this.client == null, "Creating client, when old client was never cleanded up!");
+
+                                this.matchInfo = joinMatchTask.Value;
+
+                                this.client = new NetworkClient();
+                                this.client.Configure(this.ConnectionConfig, this.joinMatchInfoSnapshot.maxSize);
+
+                                this.client.RegisterHandler(MsgType.Connect, this.Client_OnConnectInternal);
+                                this.client.RegisterHandler(MsgType.Disconnect, this.Client_OnDisconnectInternal);
+                                this.client.RegisterHandler(MsgType.NotReady, this.Client_OnNotReadyMessageInternal);
+                                this.client.RegisterHandler(MsgType.Error, this.Client_OnErrorInternal);
+
+                                // registering room messages
+                                foreach (var roomMessageId in this.roomMessageTypes.Keys)
+                                {
+                                    this.client.RegisterHandler(roomMessageId, this.HandleRoomMessage);
+                                }
+
+                                this.client.Connect(this.matchInfo);
+                                this.SetState(State.SendingClientInfo);
+                            }
+                            else
+                            {
+                                Debug.LogErrorFormat("Restarting: Error Trying To Join Match: {0}", this.joinMatchTask.Exception.Message);
+                                this.CreateOrJoinRoom(this.roomInfo);
+                            }
+                        }
+
+                        break;
+                    }
+
                 case State.Creating:
-                    break;
+                    {
+                        if (this.createMatchTask.IsDone)
+                        {
+                            if (this.createMatchTask.HasError == false)
+                            {
+                                Debug.Assert(this.client == null, "Creating client, when old client was never cleanded up!");
 
-                case State.ConnectedServer:
+                                this.server = new SimpleServer();
+                                this.server.OnConnectedEvent += Server_OnConnectedEvent;
+                                this.server.OnConnectErrorEvent += Server_OnConnectErrorEvent;
+                                this.server.OnDataErrorEvent += Server_OnDataErrorEvent;
+                                this.server.OnDisconnectErrorEvent += Server_OnDisconnectErrorEvent;
+                                this.server.OnDisconnectedEvent += Server_OnDisconnectedEvent;
+
+                                // registering room messages
+                                foreach (var roomMessageId in this.roomMessageTypes.Keys)
+                                {
+                                    this.server.RegisterHandler(roomMessageId, this.HandleRoomMessage);
+                                }
+
+                                this.serverMatchInfo = this.createMatchTask.Value;
+                                this.server.Configure(this.ConnectionConfig, (int)this.roomInfo.MaxConnections);
+                                this.server.ListenMatchInfo(this.serverMatchInfo);
+                                this.SetState(State.ConnectedAsServer);
+                            }
+                            else
+                            {
+                                Debug.LogErrorFormat("Restarting: Error Trying To Create Match: {0}", this.createMatchTask.Exception.Message);
+                                this.CreateOrJoinRoom(this.roomInfo);
+                            }
+                        }
+
+                        break;
+                    }
+
+                case State.ConnectedAsServer:
                     this.server.Update();
-                    break;
-
-                case State.ConnectedClient:
-                    break;
-                
-                case State.ShuttingDown:
-
-                    if (this.client != null)
-                    {
-                        this.client.Shutdown();
-                        this.client = null;
-                    }
-
-                    if (this.server != null)
-                    {
-                        // TODO: unregister events?
-                        this.server.Stop();
-                        this.server = null;
-                    }
-
                     break;
 
                 default:
@@ -150,27 +456,89 @@ namespace Lost
             }
         }
 
-        public void CreateOrJoinRoom(RoomInfo roomInfo)
+        protected void RecycleRoomMessage(RoomMessage roomMessage)
         {
-            // this.roomInfo = roomInfo;
+            short roomMessageId = roomMessage.GetMessageId();
+
+            if (this.roomMessagePools.ContainsKey(roomMessageId) == false)
+            {
+                Debug.LogErrorFormat("Tried to recycle RoomMessage {0} with Id {1} without registering it!", roomMessage.GetType().Name, roomMessageId);
+                return;
+            }
+
+            this.roomMessagePools[roomMessageId].Add(roomMessage);
         }
 
-        protected virtual void Awake()
+        private RoomMessage GetRoomMessage(short msgType)
         {
-            foreach (var message in this.Messages)
-            {
-                if (message.RelayToAllClients)
-                {
-                    this.relayToAllClientsMessageIds.Add(message.MessageId);
-                }
+            List<RoomMessage> pool = null;
 
-                if (message.Reliable == false)
+            if (this.roomMessagePools.TryGetValue(msgType, out pool) == false)
+            {
+                Debug.LogErrorFormat("Tried to get RoomMessage Id {0} without registering it!", msgType);
+                return null;
+            }
+
+            if (pool.Count > 0)
+            {
+                int lastIndex = pool.Count - 1;
+                RoomMessage roomMessage = pool[lastIndex];
+                pool.RemoveAt(lastIndex);
+                return roomMessage;
+            }
+            else
+            {
+                Type roomMessageType = null;
+                if (this.roomMessageTypes.TryGetValue(msgType, out roomMessageType))
                 {
-                    this.unreliableMessageIds.Add(message.MessageId);
+                    return (RoomMessage)Activator.CreateInstance(roomMessageType);
+                }
+                else
+                {
+                    Debug.LogErrorFormat("Tried to get RoomMessage Id {0} without registering it!", msgType);
+                    return null;
                 }
             }
         }
 
+        private void HandleRoomMessage(NetworkMessage networkMessage)
+        {
+            var roomMessageInstance = this.GetRoomMessage(networkMessage.msgType);
+            roomMessageInstance.Deserialize(networkMessage.reader);
+
+            // if we're the server, then lets forward these messages back to all the other clients (except the one that sent it)
+            if (this.server != null && roomMessageInstance.RelayToAllClients)
+            {
+                for (int i = 0; i < this.server.connections.Count; i++)
+                {
+                    var connection = this.server.connections[i];
+                    if (connection != null && connection.isConnected && connection != networkMessage.conn)
+                    {
+                        if (roomMessageInstance.IsReliable)
+                        {
+                            connection.Send(roomMessageInstance.GetMessageId(), roomMessageInstance);
+                        }
+                        else
+                        {
+                            connection.SendUnreliable(roomMessageInstance.GetMessageId(), roomMessageInstance);
+                        }
+                    }
+                }
+            }
+
+            // TODO [bgish]: actually handle these cases
+            switch (networkMessage.msgType)
+            {
+                case ClientConnected.MessageId:
+                case ClientsConnected.MessageId:
+                case ClientDisconnected.MessageId:
+                case ClientIdentity.MessageId:
+                    break;
+            }
+            
+            this.OnRoomMessageReceived(roomMessageInstance);
+        }
+                
         protected virtual ConnectionConfig CreateConnectionConfig()
         {
             var config = new ConnectionConfig();
@@ -180,354 +548,74 @@ namespace Lost
             return config;
         }
 
-        private void OnConnected()
+        #region Client Callbacks
+
+        // this is called when the client has successfully connected to the server
+        private void Client_OnConnectInternal(NetworkMessage message)
         {
-             if (this.connectionConfig == null)
-             {
-                this.connectionConfig = this.CreateConnectionConfig();
-             }
-
-            // If Client
-
-            // -------------- Client -----------------
-            if (this.client != null)
-            {
-                // this.client = new NetworkClient();
-                // this.client.Configure(this.connectionConfig);
-
-                foreach (var message in this.Messages)
-                {
-                    this.client.RegisterHandler(message.MessageId, message.Delegate);
-                }
-
-                // this.client.Connect(the MatchInfo result of the join room call);
-            }
-            
-            // ---------------- Server ----------------
-            // this.matches.Add(createMatch.Value);
-            // 
-            // if (this.server == null)
-            // {
-            //     this.server = new SimpleServer();
-            //     this.server.OnConnectedEvent += Server_OnConnectedEvent;
-            //     this.server.OnConnectErrorEvent += Server_OnConnectErrorEvent;
-            //     this.server.OnDataErrorEvent += Server_OnDataErrorEvent;
-            //     this.server.OnDisconnectErrorEvent += Server_OnDisconnectErrorEvent;
-            //     this.server.OnDisconnectedEvent += Server_OnDisconnectedEvent;
-            // }
-            // 
-            // this.server.Configure(config, int.Parse(createMatchSize.text));
-            // this.server.RegisterHandler((short)NetworkTestType.Text, this.OnTextMessageReceived);
-            // this.server.ListenMatchInfo(the MatchInfo result from the create room call);
-
+            Debug.Log("Client_OnConnectInternal");
+            this.isDebugInfoDirty = true;
         }
+
+        // this is called when the client is disconnected from the server, or was never able to connect to the server (timeout is pretty long if server quit while joining room, may want to shorten it a bit)
+        private void Client_OnDisconnectInternal(NetworkMessage message)
+        {
+            Debug.LogError("Client_OnDisconnectInternal");
+            this.SetState(State.DisconnectedAsClient);
+            this.isDebugInfoDirty = true;
+        }
+
+        private void Client_OnNotReadyMessageInternal(NetworkMessage message)
+        {
+            Debug.LogError("Client_OnNotReadyMessageInternal");
+            this.isDebugInfoDirty = true;
+        }
+
+        private void Client_OnErrorInternal(NetworkMessage message)
+        {
+            Debug.LogError("Client_OnErrorInternal");
+            this.isDebugInfoDirty = true;
+        }
+
+        #endregion
 
         #region Simple Server Callbacks
 
         private void Server_OnDisconnectErrorEvent(UnityEngine.Networking.NetworkConnection conn, byte error)
         {
-            Debug.LogError("Server_OnDisconnectErrorEvent");
+            // TODO [bgish]: Need to send client disconnected event to everyone
+            Debug.LogErrorFormat("Server_OnDisconnectErrorEvent: {0}", error);
+            this.isDebugInfoDirty = true;
         }
 
         private void Server_OnDataErrorEvent(UnityEngine.Networking.NetworkConnection conn, byte error)
         {
-            Debug.LogError("Server_OnDataErrorEvent");
+            Debug.LogErrorFormat("Server_OnDataErrorEvent: {0}", error);
+            this.isDebugInfoDirty = true;
         }
 
         private void Server_OnConnectErrorEvent(int connectionId, byte error)
         {
-            Debug.LogError("Server_OnConnectErrorEvent");
+            Debug.LogErrorFormat("Server_OnConnectErrorEvent: {0}", error);
+            this.isDebugInfoDirty = true;
         }
 
         private void Server_OnConnectedEvent(UnityEngine.Networking.NetworkConnection conn)
         {
+            // conn.connectionId
+
+            // TODO [bgish]: Need to send client connected event to everyone
             Debug.Log("Server_OnConnectedEvent");
+            this.isDebugInfoDirty = true;
         }
 
         private void Server_OnDisconnectedEvent(NetworkConnection conn)
         {
             Debug.Log("Server_OnDisconnectedEvent");
+            this.SetState(State.DisconnectedAsServer);
+            this.isDebugInfoDirty = true;
         }
 
         #endregion
-        
-        //private SimpleServer server;
-        //private NetworkClient client;
-
-        // public enum MessageType
-        // {
-        //     MessageType1 = 1001,
-        // }
-        // 
-        // public class MessageType1 : NetworkMessage
-        // {
-        // 
-        // }
-        // 
-        // public SimpleServer()
-        // {
-        //     this.Listen("127.0.0.1", 4567);  // or this.ListenRelay(...)
-        //     this.RegisterHandler(MessageType.MessageType1, this.OnReceivedMessageType1);
-        // }
-        // 
-        // private void OnReceivedMessageType1(NetworkMessage networkMessage)
-        // {
-        //     var messageType1 = networkMessage.ReadMessage<MessageType1>();
-        //     Debug.Log(messageType1.ToString());
-        // }
-
-        // This gets called when a client disconnects
-        // If we have a valid connection here drop the client in the matchmaker before shutting down below
-        // if (matchMaker != null && matchInfo != null && matchInfo.networkId != NetworkID.Invalid && matchInfo.nodeId != NodeID.Invalid)
-        // {
-        //     matchMaker.DropConnection(matchInfo.networkId, matchInfo.nodeId, matchInfo.domain, OnDropConnection);
-        // }
-
-        // ABCDEFGHIJKLMNPQRSTUVWXYZ123456789  - 35 characters
-
-        //void OnServerReadyToBeginMessage(NetworkMessage netMsg)
-        //{
-        //    var beginMessage = netMsg.ReadMessage<IntegerMessage>();
-        //    Debug.Log("received OnServerReadyToBeginMessage " + beginMessage.value);
-        //}
-
-        private void Start()
-        {
-            NetworkManager.singleton.StartMatchMaker();
-        }
-        
-        //call this method to request a match to be created on the server
-        public void CreateInternetMatch(string matchName)
-        {
-            NetworkManager.singleton.matchMaker.CreateMatch(matchName, 4, true, "", "", "", 0, 0, OnInternetMatchCreate);
-        }
-
-        // this method is called when your request for creating a match is returned
-        private void OnInternetMatchCreate(bool success, string extendedInfo, MatchInfo matchInfo)
-        {
-            if (success)
-            {
-                //Debug.Log("Create match succeeded");
-
-                MatchInfo hostInfo = matchInfo;
-                NetworkServer.Listen(hostInfo, 9000);
-
-                NetworkManager.singleton.StartHost(hostInfo);
-            }
-            else
-            {
-                Debug.LogError("Create match failed");
-            }
-        }
-
-        // call this method to find a match through the matchmaker
-        public void FindInternetMatch(string matchName)
-        {
-            NetworkManager.singleton.matchMaker.ListMatches(0, 10, matchName, true, 0, 0, OnInternetMatchList);
-        }
-
-        // this method is called when a list of matches is returned
-        private void OnInternetMatchList(bool success, string extendedInfo, List<MatchInfoSnapshot> matches)
-        {
-            if (success)
-            {
-                if (matches.Count != 0)
-                {
-                    //Debug.Log("A list of matches was returned");
-
-                    //join the last server (just in case there are two...)
-                    NetworkManager.singleton.matchMaker.JoinMatch(matches[matches.Count - 1].networkId, "", "", "", 0, 0, OnJoinInternetMatch);
-                }
-                else
-                {
-                    Debug.Log("No matches in requested room!");
-                }
-            }
-            else
-            {
-                Debug.LogError("Couldn't connect to match maker");
-            }
-        }
-
-        // this method is called when your request to join a match is returned
-        private void OnJoinInternetMatch(bool success, string extendedInfo, MatchInfo matchInfo)
-        {
-            if (success)
-            {
-                //Debug.Log("Able to join a match");
-
-                MatchInfo hostInfo = matchInfo;
-                NetworkManager.singleton.StartClient(hostInfo);
-            }
-            else
-            {
-                Debug.LogError("Join match failed");
-            }
-        }
     }
 }
-
-//public static void CreateOrJoinRoom(string matchName, int eloScore, int playerCount)
-//{
-    // if CreateMatch worked, then run this
-    // MatchInfo hostInfo = matchInfo;
-    // NetworkServer.Listen(hostInfo, 9000);
-    // NetworkManager.singleton.StartHost(hostInfo);
-
-    // if list match successful call 
-    // NetworkManager.singleton.matchMaker.JoinMatch(matches[matches.Count - 1].networkId, "", "", "", 0, 0, OnJoinInternetMatch);
-
-    // if join match success, call
-    // MatchInfo hostInfo = matchInfo;
-    // NetworkManager.singleton.StartClient(hostInfo);
-
-    // SearchingForMatches
-    //   * Try Listing Matches
-    //     * If None Found, Go To CreatingMatch 
-    //     * If Found, Go To JoiningMatch
-    // 
-    // CreatingMatch
-    //   * Try Creating Match
-    //     * FAIL: Go To SearchingForMatches
-    //     * PASS: Create SimpleServer, Go To ServerWaitingForPlayers
-    //
-    // JoiningMatch 
-    //   * Try To Connect To MatchInfo
-    //     * FAIL: Go To SearchingForMatches
-    //     * PASS: ClientConnectToServer
-    //
-    // ClientConnectToServer
-    //   * Try Connecting To Server MatchInfo (Creates NetworkClient?)
-    //     * FAIL: Go To SearchingForMatches
-    //     * PASS: Go To ClientWaitingForPlayers
-    // 
-    // ServerWaitingForPlayers
-    //   * Waiting for all players to join
-    //   * When New Player connects send reconnect info
-    //   * If player sends back Ready, then mark them ready
-    //   * When you get Ready from all players, then go to ServerReady
-    //     * Close down matchmaker?
-    // 
-    // ClientWaitingForPlayers
-    //   * 
-    // 
-    // ClientConnectToServer
-    // ClientSendPlayerInfo
-    // ClientWaitingForReconnectInfo
-    // ClientReady
-    // 
-    //
-    // 
-    // 
-    //
-    // StopWaitingForPlayers()
-    //
-    // Server Has Dictionary<Connect, PlayerInfo>
-    // 	PlayerInfo { Connect, PlayerId, HasSentReconnect, HasReceivedReady, IsServer }
-    // Events
-    //   PlayerConnected
-    //   PlayerDropped (if server, then start reconnect)
-//}
-
-// should you ever call "NetworkMatch.DestroyMatch"???
-// 
-// public static void Leave()
-// {
-//     // NetworkMatch.DropConnection
-// }
-// 
-//
-// State (Searching, Join, ConnectingAsClient, Connected)
-//
-// When first Initializing the user gives params (RoomName, Elo, Stage, Etc)
-//   When everyone is connected, create reconnect params, and if lose connection
-//   then use the reconnect info.
-//
-// List Matches
-// If don't find one, then go into server mode CreateMatch, if successful, make NetworkServerSimple
-// Else, go to JoinMatch, if successful, make NetworkClient
-// Register messages
-// List Players;
-// event PlayersReady  (before sending this, make sure the server sends reconnect information)
-//
-//
-
-
-//// --------------------------------------------------------------------------------
-//// # Message Room
-//// --------------------------------------------------------------------------------
-//// 
-//// #### Lan
-//// ---------------------
-////   Host
-////     NetworkDiscovery Server Port: 4001  // sends out { IP, Room Name, Room GUID, Depth, ConnectionCount }  (Depth 0 = Host, Depth 1 = 1st Slave)
-////     NetworkServer Listen Port: 4000
-////     
-////   Client
-////     Find Rooms
-////       Sorts by depth, then by connection count, as long as there are less than 10, it connects
-//// 
-//// 
-////     Starts Up NetworkDiscovery Server on port localhost: 4001  // sends out { IP, Room Name, Room GUID, Depth, ConnectionCount }  Only does this once connected to a 
-////     Starts A NetworkServerSimple(Client) on HOST_IP:4001
-////     Starts NetworkServerSimple(Server) Port localhost:4000    // any connects will be 
-////     
-////     When receive message from server, send along to all clients
-//// 
-////  - FindMatch(if non, then StartMatch RoomName = Guid.New();)
-////  
-////  - Once server gets all 4 people in a room, creates a secret and sends it to all players, then tells card server to create a game with RoomName and Secret and all the player ids
-////  
-////  - Server then sends out to players the ready command and they all get the game state from the card server
-////    * Card server uses playfab to authenticate before give the player their cards?
-////    
-////  - On Server Disconnect, hit up MatchMaker with RoomName and Secret and wait for all clients to join to resume
-////    * If room name already exists, then you're no longer the server, try to join
-////    
-////  - On Client Disconnect, try to hit up MatchMaker with previous connection info, if that won't connect, try to make the room again with password, if it already exists, then connect to that room
-////  
-////  - BIG QUESITONS: When does the matchmaking room stop working? Automatically shuts down when full?
-//// 
-////     public class MyNetworkClient : NetworkClient
-//// {
-////     public MyNetworkClient()
-////     {
-////         // Connect(MatchInfo matchInfo) or Connect(string serverIp, int serverPort)
-//// 
-////     }
-//// 
-////     public override void Disconnect()
-////     {
-////         base.Disconnect();
-////     }
-//// 
-////     // Send(short msgType, MessageBase msg)
-////     // SendUnreliable(short msgType, MessageBase msg)
-////     // RegisterHandler(short msgType, NetworkMessageDelegate handler)
-////     // UnregisterHandler(short msgType)
-////     // public bool isConnected { get { return m_AsyncConnect == ConnectState.Connected; }}
-//// 
-////     // I have zero clue how you know when the connection finally succeds
-////     // Overloading update will be hard too since it's internal "internal virtual void Update()"
-//// }
-//// 
-//// 
-//// // or instead of inheriting, just use it like the NetworkManager does
-//// /*NetworkClient client = new NetworkClient();
-//// client.Configure(m_ConnectionConfig, m_MaxConnections);  // not sure how config get set!?!?
-////     client.Connect(...);
-////     client.RegisterHandler(MsgType.Connect, OnClientConnectInternal);
-////     client.RegisterHandler(MsgType.Disconnect, OnClientDisconnectInternal);
-////     client.RegisterHandler(MsgType.NotReady, OnClientNotReadyMessageInternal);
-////     client.RegisterHandler(MsgType.Error, OnClientErrorInternal);
-////     client.RegisterHandler(MsgType.Scene, OnClientSceneInternal);
-////     // register all other handlers you like
-////  
-////     client.Disconnect();
-////     client.Shutdown();
-//// 
-////     public class MessageType
-//// {
-////     public const short MessageType1 = 100;
-//// }
-//// 
