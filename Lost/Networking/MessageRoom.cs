@@ -13,7 +13,7 @@ namespace Lost
     using UnityEngine.Networking;
     using UnityEngine.Networking.Match;
 
-    public abstract class MessageRoom : MonoBehaviour
+    public abstract class MessageRoom<UserInfo> : MonoBehaviour where UserInfo : UserInfoMessage, new()
     {
         public enum State
         {
@@ -25,7 +25,6 @@ namespace Lost
             DisconnectedAsServer,
 
             Joining,
-            SendingClientInfo,
             ConnectedAsClient,
             DisconnectedAsClient,
 
@@ -56,6 +55,17 @@ namespace Lost
         // used to invalidate debug info and regenerate (so it wont happen every tick)
         private string debugInfoCache = null;
         private bool isDebugInfoDirty = true;
+
+        // tracking user info
+        private UserDisconnected userDisconnectedMessage = new UserDisconnected();
+        private Dictionary<long, UserInfo> otherUsers = new Dictionary<long, UserInfo>();
+        private Dictionary<int, UserInfo> connectionIdToUserInfoMap = new Dictionary<int, UserInfo>();
+        private UserInfo myUserInfo;
+
+        // used for copying messages
+        private byte[] copyBytes;
+        private NetworkWriter copyNetworkWriter;
+        private NetworkReader copyNetworkReader;
 
         private ConnectionConfig ConnectionConfig
         {
@@ -98,21 +108,11 @@ namespace Lost
                 summary.AppendLine(this.roomInfo.RoomPassword);
             }
 
-            if (this.server != null)
-            {
-                int count = 1;
+            int userCount = (this.server != null || this.client != null) ? 1 : 0;
+            userCount += this.otherUsers.Count;
 
-                for (int i = 0; i < this.server.connections.Count; i++)
-                {
-                    if (this.server.connections[i] != null)
-                    {
-                        count++;
-                    }
-                }
-                
-                summary.Append("Room Count: ");
-                summary.AppendLine(count.ToString());
-            }
+            summary.Append("Room Count: ");
+            summary.AppendLine(userCount.ToString());
 
             if (this.client != null)
             {
@@ -125,16 +125,24 @@ namespace Lost
 
             return this.debugInfoCache;
         }
-        
-        public void CreateOrJoinRoom(RoomInfo roomInfo)
+
+        public void CreateOrJoinRoom(RoomInfo roomInfo, UserInfo userInfo)
         {
+            this.myUserInfo = userInfo;
+
             if (this.state != State.Waiting)
             {
                 this.SetState(State.ShuttingDown);
             }
-
+            
             this.roomInfo = roomInfo;
             this.SetState(State.Searching);
+        }
+
+        public void UpdateUserInfo(UserInfo userInfo)
+        {
+            this.myUserInfo = userInfo;
+            this.SendRoomMessage(this.myUserInfo);
         }
 
         public void RegisterMessage<T>() where T : RoomMessage, new()
@@ -154,6 +162,8 @@ namespace Lost
 
         public void SendRoomMessage(RoomMessage roomMessage)
         {
+            roomMessage.UserId = this.myUserInfo.UserId;
+
             // TOOD [bgish]: If temporarily disconnected, should I buffer the messages?
 
             short roomMessageId = roomMessage.GetMessageId();
@@ -251,11 +261,35 @@ namespace Lost
             this.roomInfo = null;
             this.joinMatchInfoSnapshot = null;
             this.serverMatchInfo = null;
+            this.otherUsers.Clear();
+            this.connectionIdToUserInfoMap.Clear();
 
             if (this.state != State.Waiting)
             {
                 this.SetState(State.Waiting);
             }
+        }
+
+        protected virtual ConnectionConfig CreateConnectionConfig()
+        {
+            var config = new ConnectionConfig();
+            config.AddChannel(QosType.Reliable);
+            config.AddChannel(QosType.Unreliable);
+
+            return config;
+        }
+
+        protected void RecycleRoomMessage(RoomMessage roomMessage)
+        {
+            short roomMessageId = roomMessage.GetMessageId();
+
+            if (this.roomMessagePools.ContainsKey(roomMessageId) == false)
+            {
+                Debug.LogErrorFormat("Tried to recycle RoomMessage {0} with Id {1} without registering it!", roomMessage.GetType().Name, roomMessageId);
+                return;
+            }
+
+            this.roomMessagePools[roomMessageId].Add(roomMessage);
         }
 
         protected abstract void RegisterCustomMessages();
@@ -266,85 +300,26 @@ namespace Lost
 
         protected abstract void DisconnectedAsClient();
 
-        private void Awake()
+        protected abstract void UserJoined(UserInfo userInfo);
+
+        protected abstract void UserInfoUpdated(UserInfo userInfo);
+
+        protected abstract void UserLeft(UserInfo userInfo);
+
+        protected virtual void Awake()
         {
-            this.RegisterMessage<ClientConnected>();
-            this.RegisterMessage<ClientsConnected>();
-            this.RegisterMessage<ClientDisconnected>();
-            this.RegisterMessage<ClientIdentity>();
+            this.RegisterMessage<UserInfo>();
+            this.RegisterMessage<UserDisconnected>();
 
             this.RegisterCustomMessages();
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             this.Shutdown();
         }
 
-        private void SetState(State newState)
-        {
-            if (this.state == newState)
-            {
-                Debug.LogErrorFormat("MessageRoom tried to go into state {0} while already in that state.", newState);
-                return;
-            }
-
-            this.isDebugInfoDirty = true;
-            this.state = newState;
-
-            switch (this.state)
-            {
-                case State.Searching:
-                    {
-                        this.listMatchesTask = MatchMakingHelper.ListMatches(this.roomInfo.RoomName, this.roomInfo.RoomPassword, this.roomInfo.Elo, false);
-                        break;
-                    }
-
-                case State.Joining:
-                    {
-                        this.joinMatchTask = MatchMakingHelper.JoinMatch(this.joinMatchInfoSnapshot.networkId, this.roomInfo.RoomPassword, this.roomInfo.Elo);
-                        break;
-                    }
-
-                case State.Creating:
-                    {
-                        this.createMatchTask = MatchMakingHelper.CreateMatch(this.roomInfo.RoomName, this.roomInfo.MaxConnections, true, this.roomInfo.RoomPassword, this.roomInfo.Elo);
-                        break;
-                    }
-
-                case State.SendingClientInfo:
-                    {
-                        // TODO [bgish]: Send the Client info
-                        this.SetState(State.ConnectedAsClient);
-                        break;
-                    }
-
-                case State.DisconnectedAsClient:
-                    {
-                        this.DisconnectedAsClient();
-                        this.SetState(State.ShuttingDown);
-                        break;
-                    }
-
-                case State.DisconnectedAsServer:
-                    {
-                        this.DisconnectedAsServer();
-                        this.SetState(State.ShuttingDown);
-                        break;
-                    }
-
-                case State.ShuttingDown:
-                    {
-                        this.Shutdown();
-                        break;
-                    }
-
-                default:
-                    break;
-            }
-        }
-
-        private void Update()
+        protected virtual void Update()
         {
             switch (this.state)
             {
@@ -367,7 +342,7 @@ namespace Lost
                             else
                             {
                                 Debug.LogErrorFormat("Restarting: Error Trying To List Matches: {0}", this.listMatchesTask.Exception.Message);
-                                this.CreateOrJoinRoom(this.roomInfo);
+                                this.CreateOrJoinRoom(this.roomInfo, this.myUserInfo);
                             }
                         }
 
@@ -399,12 +374,12 @@ namespace Lost
                                 }
 
                                 this.client.Connect(this.matchInfo);
-                                this.SetState(State.SendingClientInfo);
+                                this.SetState(State.ConnectedAsClient);
                             }
                             else
                             {
                                 Debug.LogErrorFormat("Restarting: Error Trying To Join Match: {0}", this.joinMatchTask.Exception.Message);
-                                this.CreateOrJoinRoom(this.roomInfo);
+                                this.CreateOrJoinRoom(this.roomInfo, this.myUserInfo);
                             }
                         }
 
@@ -440,7 +415,7 @@ namespace Lost
                             else
                             {
                                 Debug.LogErrorFormat("Restarting: Error Trying To Create Match: {0}", this.createMatchTask.Exception.Message);
-                                this.CreateOrJoinRoom(this.roomInfo);
+                                this.CreateOrJoinRoom(this.roomInfo, this.myUserInfo);
                             }
                         }
 
@@ -456,19 +431,62 @@ namespace Lost
             }
         }
 
-        protected void RecycleRoomMessage(RoomMessage roomMessage)
+        private void SetState(State newState)
         {
-            short roomMessageId = roomMessage.GetMessageId();
-
-            if (this.roomMessagePools.ContainsKey(roomMessageId) == false)
+            if (this.state == newState)
             {
-                Debug.LogErrorFormat("Tried to recycle RoomMessage {0} with Id {1} without registering it!", roomMessage.GetType().Name, roomMessageId);
+                Debug.LogErrorFormat("MessageRoom tried to go into state {0} while already in that state.", newState);
                 return;
             }
 
-            this.roomMessagePools[roomMessageId].Add(roomMessage);
-        }
+            this.isDebugInfoDirty = true;
+            this.state = newState;
 
+            switch (this.state)
+            {
+                case State.Searching:
+                    {
+                        this.listMatchesTask = MatchMakingHelper.ListMatches(this.roomInfo.RoomName, this.roomInfo.RoomPassword, this.roomInfo.Elo, false);
+                        break;
+                    }
+
+                case State.Joining:
+                    {
+                        this.joinMatchTask = MatchMakingHelper.JoinMatch(this.joinMatchInfoSnapshot.networkId, this.roomInfo.RoomPassword, this.roomInfo.Elo);
+                        break;
+                    }
+
+                case State.Creating:
+                    {
+                        this.createMatchTask = MatchMakingHelper.CreateMatch(this.roomInfo.RoomName, this.roomInfo.MaxConnections, true, this.roomInfo.RoomPassword, this.roomInfo.Elo);
+                        break;
+                    }
+
+                case State.DisconnectedAsClient:
+                    {
+                        this.DisconnectedAsClient();
+                        this.SetState(State.ShuttingDown);
+                        break;
+                    }
+
+                case State.DisconnectedAsServer:
+                    {
+                        this.DisconnectedAsServer();
+                        this.SetState(State.ShuttingDown);
+                        break;
+                    }
+
+                case State.ShuttingDown:
+                    {
+                        this.Shutdown();
+                        break;
+                    }
+
+                default:
+                    break;
+            }
+        }
+        
         private RoomMessage GetRoomMessage(short msgType)
         {
             List<RoomMessage> pool = null;
@@ -501,10 +519,90 @@ namespace Lost
             }
         }
 
+        private void Copy(RoomMessage to, RoomMessage from)
+        {
+            if (this.copyBytes == null)
+            {
+                this.copyBytes = new byte[4096];
+                this.copyNetworkReader = new NetworkReader(this.copyBytes);
+                this.copyNetworkWriter = new NetworkWriter(this.copyBytes);
+            }
+
+            this.copyNetworkWriter.SeekZero();
+            this.copyNetworkReader.SeekZero();
+
+            from.Serialize(this.copyNetworkWriter);
+
+            if (copyNetworkWriter.Position > copyBytes.Length)
+            {
+                // NOTE [bgish]: Because the buffer grew, all 3 of these objects are now hosed (so recreate them)
+                this.copyBytes = null;
+                this.copyNetworkReader = null;
+                this.copyNetworkWriter = null;
+
+                // NOTE [bgish]: If the buffer grows, then we're hosed!  Tell the user that we shouldn't be sending more then 4k!
+                Debug.LogError("UserInfo Message exceeded 4k!  Sending UserInfo will now leak memory.  Please limit size to under 4k");
+
+                NetworkWriter newNetworkWriter = new NetworkWriter();
+                from.Serialize(newNetworkWriter);
+
+                NetworkReader newNetworkReader = new NetworkReader(newNetworkWriter);
+                to.Deserialize(newNetworkReader);
+            }
+            else
+            {
+                to.Deserialize(copyNetworkReader);
+            }
+        }
+
         private void HandleRoomMessage(NetworkMessage networkMessage)
         {
             var roomMessageInstance = this.GetRoomMessage(networkMessage.msgType);
             roomMessageInstance.Deserialize(networkMessage.reader);
+
+            short roomMessageId = roomMessageInstance.GetMessageId();
+
+            // handling the UserInfo message
+            if (roomMessageId == UserInfoMessage.MessageId)
+            {
+                var userInfo = (UserInfo)roomMessageInstance;
+
+                // in a very rare case, the server could send back the clients info (this will make sure we don't do anything with it)
+                if (userInfo.UserId == this.myUserInfo.UserId)
+                {
+                    return;
+                }
+
+                UserInfo currentUserInfo;
+                if (this.otherUsers.TryGetValue(userInfo.UserId, out currentUserInfo))
+                {
+                    this.Copy(currentUserInfo, userInfo);
+                    this.UserInfoUpdated(currentUserInfo);
+                }
+                else
+                {
+                    UserInfo newUser = new UserInfo();
+                    this.Copy(newUser, userInfo);
+                    this.otherUsers.Add(userInfo.UserId, newUser);
+
+                    if (this.server != null)
+                    {
+                        this.connectionIdToUserInfoMap.Add(networkMessage.conn.connectionId, newUser);
+                    }
+
+                    this.UserJoined(newUser);
+
+                    this.isDebugInfoDirty = true;
+                }
+            }
+
+            // handling user disconnected message
+            if (this.client != null && roomMessageId == UserDisconnected.MessageId)
+            {
+                var userDisconnectedInfo = (UserInfo)roomMessageInstance;
+                this.otherUsers.Remove(userDisconnectedInfo.UserId);
+                this.isDebugInfoDirty = true;
+            }
 
             // if we're the server, then lets forward these messages back to all the other clients (except the one that sent it)
             if (this.server != null && roomMessageInstance.RelayToAllClients)
@@ -516,36 +614,20 @@ namespace Lost
                     {
                         if (roomMessageInstance.IsReliable)
                         {
-                            connection.Send(roomMessageInstance.GetMessageId(), roomMessageInstance);
+                            connection.Send(roomMessageId, roomMessageInstance);
                         }
                         else
                         {
-                            connection.SendUnreliable(roomMessageInstance.GetMessageId(), roomMessageInstance);
+                            connection.SendUnreliable(roomMessageId, roomMessageInstance);
                         }
                     }
                 }
             }
-
-            // TODO [bgish]: actually handle these cases
-            switch (networkMessage.msgType)
-            {
-                case ClientConnected.MessageId:
-                case ClientsConnected.MessageId:
-                case ClientDisconnected.MessageId:
-                case ClientIdentity.MessageId:
-                    break;
-            }
             
-            this.OnRoomMessageReceived(roomMessageInstance);
-        }
-                
-        protected virtual ConnectionConfig CreateConnectionConfig()
-        {
-            var config = new ConnectionConfig();
-            config.AddChannel(QosType.Reliable);
-            config.AddChannel(QosType.Unreliable);
-
-            return config;
+            if (roomMessageId != UserInfoMessage.MessageId && roomMessageId != UserDisconnected.MessageId)
+            {
+                this.OnRoomMessageReceived(roomMessageInstance);
+            }
         }
 
         #region Client Callbacks
@@ -554,6 +636,7 @@ namespace Lost
         private void Client_OnConnectInternal(NetworkMessage message)
         {
             Debug.Log("Client_OnConnectInternal");
+            this.SendRoomMessage(this.myUserInfo);
             this.isDebugInfoDirty = true;
         }
 
@@ -567,12 +650,14 @@ namespace Lost
 
         private void Client_OnNotReadyMessageInternal(NetworkMessage message)
         {
+            // TODO [bgish]: Actually have no clue how we should handle this
             Debug.LogError("Client_OnNotReadyMessageInternal");
             this.isDebugInfoDirty = true;
         }
 
         private void Client_OnErrorInternal(NetworkMessage message)
         {
+            // TODO [bgish]: Actually have no clue how we should handle this
             Debug.LogError("Client_OnErrorInternal");
             this.isDebugInfoDirty = true;
         }
@@ -585,34 +670,67 @@ namespace Lost
         {
             // TODO [bgish]: Need to send client disconnected event to everyone
             Debug.LogErrorFormat("Server_OnDisconnectErrorEvent: {0}", error);
+            this.SetState(State.DisconnectedAsServer);
             this.isDebugInfoDirty = true;
         }
 
         private void Server_OnDataErrorEvent(UnityEngine.Networking.NetworkConnection conn, byte error)
         {
+            // TODO [bgish]: Actually have no clue how we should handle this
             Debug.LogErrorFormat("Server_OnDataErrorEvent: {0}", error);
             this.isDebugInfoDirty = true;
         }
 
         private void Server_OnConnectErrorEvent(int connectionId, byte error)
         {
+            // TODO [bgish]: Actually have no clue how we should handle this
             Debug.LogErrorFormat("Server_OnConnectErrorEvent: {0}", error);
             this.isDebugInfoDirty = true;
         }
-
+        
         private void Server_OnConnectedEvent(UnityEngine.Networking.NetworkConnection conn)
         {
-            // conn.connectionId
+            // sending this new user my info
+            conn.Send(this.myUserInfo.GetMessageId(), this.myUserInfo);
 
-            // TODO [bgish]: Need to send client connected event to everyone
-            Debug.Log("Server_OnConnectedEvent");
+            // sending this new user all the other infos I currently know about
+            foreach (var user in this.otherUsers.Values)
+            {
+                conn.Send(user.GetMessageId(), user);
+            }
+
             this.isDebugInfoDirty = true;
         }
-
+        
         private void Server_OnDisconnectedEvent(NetworkConnection conn)
         {
             Debug.Log("Server_OnDisconnectedEvent");
-            this.SetState(State.DisconnectedAsServer);
+
+            UserInfo userInfo;
+            if (this.connectionIdToUserInfoMap.TryGetValue(conn.connectionId, out userInfo))
+            {
+                this.connectionIdToUserInfoMap.Remove(conn.connectionId);
+                this.otherUsers.Remove(userInfo.UserId);
+
+                // sending the disconnect event to all client users
+                this.userDisconnectedMessage.UserId = userInfo.UserId;
+                this.SendRoomMessage(this.userDisconnectedMessage);
+            }
+            else
+            {
+                // Do Nothing, if the client disconnected before they had a chance to send their
+                // UserInfo object, then no need to tell everyone that they've disconnected.
+            }
+
+            // TODO [bgish]: Investigate if the following could happen.  These events would mean that all users
+            //               would think the person exists, even though they've been disconnected already.
+            //
+            // Server get Connected
+            // Client sends UserInfo
+            // Server gets Disconnected
+            // Server then processes UserInfo
+            // 
+
             this.isDebugInfoDirty = true;
         }
 

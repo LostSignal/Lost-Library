@@ -1,15 +1,15 @@
 //-----------------------------------------------------------------------
-// <copyright file="ClientDisconnected.cs" company="Lost Signal LLC">
+// <copyright file="UserDisconnected.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 
 namespace Lost
 {
-    public class ClientDisconnected : RoomMessage
+    public class UserDisconnected : RoomMessage
     {
-        public const short MessageId = 103;
-
+        public const short MessageId = 102;
+        
         public override bool IsReliable
         {
             get { return true; }

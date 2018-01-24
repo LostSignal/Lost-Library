@@ -18,7 +18,7 @@ namespace Lost
         public RoomInfo()
         {
             this.RoomName = string.Empty;
-            this.RoomPassword = null;
+            this.RoomPassword = string.Empty;
             this.Advertise = true;
             this.MaxConnections = 2;
             this.Elo = 0;
