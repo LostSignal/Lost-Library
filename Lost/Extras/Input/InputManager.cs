@@ -11,10 +11,13 @@ namespace Lost
     
     public class InputManager : SingletonGameObject<InputManager>
     {
+        private const int InputCacheSize = 20;
+
         private List<InputHandler> handlers = new List<InputHandler>();
-        private Dictionary<int, Input> fingerInputs = new Dictionary<int, Input>();
-        private List<int> fingerRemoveList = new List<int>(5);
-        private List<Input> touchInputs = new List<Input>(10);
+
+        private List<Input> fingerInputs = new List<Input>(10);
+        private Dictionary<int, Input> fingerIdToInputMap = new Dictionary<int, Input>();
+        private HashSet<int> activeFingerIdsCache = new HashSet<int>();
 
         private Input mouseInput = null;
         private Input penInput = null;
@@ -23,42 +26,37 @@ namespace Lost
         private bool useMouseInput;
         private bool usePenInput;
 
-        public static IEnumerable<Input> EnumerateInputs(List<Input> touch, Input mouse, Input pen)
-        {
-            for (int i = 0; i < touch.Count; i++)
-            {
-                yield return touch[i];
-            }
+        private List<Input> inputCache = new List<Input>(InputCacheSize);
+        private int inputIdCounter = 0;
 
-            if (mouse != null)
-            {
-                yield return mouse;
-            }
-
-            if (pen != null)
-            {
-                yield return pen;
-            }
-        }
-        
         public void AddHandler(InputHandler handler)
         {
-            this.handlers.AddIfNotNullAndUnique(handler);
+            if (handler != null && this.handlers.Contains(handler) == false)
+            {
+                this.handlers.Add(handler);
+            }
         }
-        
+
         public void RemoveHandler(InputHandler handler)
         {
             this.handlers.Remove(handler);
         }
-
+        
         protected override void Awake()
         {
-            base.Awake();
+            // populating the input cache
+            for (int i = 0; i < InputCacheSize; i++)
+            {
+                this.inputCache.Add(new Input());
+            }
 
-            UnityEngine.Input.simulateMouseWithTouches = false;
-            this.useTouchInput = Platform.IsTouchSupported;
-            this.useMouseInput = Platform.IsMousePresent;
-            this.usePenInput = Platform.IsPenPresent;
+            this.useTouchInput = true;
+            this.usePenInput = false;
+            this.useMouseInput =
+                Application.isEditor ||
+                Application.platform == RuntimePlatform.OSXPlayer ||
+                Application.platform == RuntimePlatform.WindowsPlayer ||
+                Application.platform == RuntimePlatform.LinuxPlayer;
         }
 
         private void FixedUpdate()
@@ -77,95 +75,94 @@ namespace Lost
             {
                 this.UpdatePenInput();
             }
-
-            this.touchInputs.Clear();
-            this.touchInputs.AddRange(this.fingerInputs.Values);
-
+            
             // sending inputs to all registered handlers
             for (int i = 0; i < this.handlers.Count; i++)
             {
-                this.handlers[i].HandleInputs(this.touchInputs, this.mouseInput, this.penInput);
+                this.handlers[i].HandleInputs(this.fingerInputs, this.mouseInput, this.penInput);
             }
         }
         
         private void UpdateTouchInputs()
         {
-            // remove all inputs that have been marked as released
-            this.fingerRemoveList.Clear();
+            Debug.Assert(this.fingerInputs.Count == this.fingerIdToInputMap.Count, "Finger Inputs list and map don't match!");
 
-            foreach (int touchId in this.fingerInputs.Keys)
+            // remove all inputs that have been marked as released
+            for (int i = this.fingerInputs.Count - 1; i >= 0; i--)
             {
-                if (this.fingerInputs[touchId].InputState == InputState.Released)
+                if (this.fingerInputs[i].InputState == InputState.Released)
                 {
-                    this.fingerRemoveList.Add(touchId);
+                    Input input = this.fingerInputs[i];
+                    this.RecycleInput(input);
+                    this.fingerInputs.RemoveAt(i);
+                    this.fingerIdToInputMap.Remove(input.UnityFingerId);
                 }
             }
 
-            foreach (int id in this.fingerRemoveList)
-            {
-                this.fingerInputs.Remove(id);
-            }
+            this.activeFingerIdsCache.Clear();
 
-            // going through all the touch inputs and either creating/updating Lost.Inputs
-            foreach (Touch touch in UnityEngine.Input.touches)
+            // going through all the unity touch inputs and either creating/updating Lost.Inputs
+            for (int i = 0; i < UnityEngine.Input.touchCount; i++)
             {
+                Touch touch = UnityEngine.Input.GetTouch(i);
+                this.activeFingerIdsCache.Add(touch.fingerId);
+
                 Input input;
-                if (this.fingerInputs.TryGetValue(touch.fingerId, out input))
+                if (this.fingerIdToInputMap.TryGetValue(touch.fingerId, out input))
                 {
                     input.Update(touch.position);
                 }
                 else
                 {
-                    this.fingerInputs.Add(touch.fingerId, new Input(InputType.Touch, InputButton.Left, touch.position));
+                    Input newInput = this.GetNewInput(touch.fingerId, InputType.Touch, InputButton.Left, touch.position);
+                    this.fingerInputs.Add(newInput);
+                    this.fingerIdToInputMap.Add(newInput.UnityFingerId, newInput);
                 }
             }
 
-            // testing if any of the Lost.Inputs are no longer around and we should call Done() on them
-            foreach (int touchId in this.fingerInputs.Keys)
+            // testing if any of the Lost.Inputs no longer have their unity counterparts and calling Done() on them if that's the case
+            for (int i = 0; i < this.fingerInputs.Count; i++)
             {
-                bool foundTouchId = false;
+                Input input = this.fingerInputs[i];
 
-                foreach (Touch touch in UnityEngine.Input.touches)
+                if (this.activeFingerIdsCache.Contains(input.UnityFingerId) == false)
                 {
-                    if (touch.fingerId == touchId)
-                    {
-                        foundTouchId = true;
-                        break;
-                    }
-                }
-
-                if (foundTouchId == false)
-                {
-                    this.fingerInputs[touchId].Done();
+                    input.Done();
                 }
             }
         }
 
         private void UpdateMouseInput()
         {
-            // defaulting the mouse input to be in the hover state, and making sure we 
+            // defaulting the mouse input to be in the hover state
             if (this.mouseInput == null || this.mouseInput.InputState == InputState.Released)
             {
-                this.mouseInput = new Input(InputType.Mouse, InputButton.Left, UnityEngine.Input.mousePosition);
+                this.RecycleInput(this.mouseInput);
+                this.mouseInput = this.GetNewInput(-1, InputType.Mouse, InputButton.None, UnityEngine.Input.mousePosition);
                 this.mouseInput.UpdateHover(UnityEngine.Input.mousePosition);
             }
             
             if (this.mouseInput.InputState == InputState.Hover)
             {
+                InputButton inputButton = InputButton.None;
+
                 if (UnityEngine.Input.GetMouseButton(0))
                 {
-                    // left mouse
-                    this.mouseInput = new Input(InputType.Mouse, InputButton.Left, UnityEngine.Input.mousePosition);
+                    inputButton = InputButton.Left;
                 }
                 else if (UnityEngine.Input.GetMouseButton(1))
                 {
-                    // right mouse
-                    this.mouseInput = new Input(InputType.Mouse, InputButton.Right, UnityEngine.Input.mousePosition);
+                    inputButton = InputButton.Right;
                 }
                 else if (UnityEngine.Input.GetMouseButton(2))
                 {
-                    // middle mouse
-                    this.mouseInput = new Input(InputType.Mouse, InputButton.Middle, UnityEngine.Input.mousePosition);
+                    inputButton = InputButton.Middle;
+                }
+
+                if (inputButton != InputButton.None)
+                {
+                    this.RecycleInput(this.mouseInput);
+                    this.mouseInput = this.GetNewInput(-1, InputType.Mouse, inputButton, UnityEngine.Input.mousePosition);
                 }
                 else
                 {
@@ -216,7 +213,28 @@ namespace Lost
 
         private void UpdatePenInput()
         {
-            //// TODO implement (may need platform dependent code)
+            // TODO implement (may need platform dependent code)
+        }
+
+        private void RecycleInput(Input input)
+        {
+            if (input != null)
+            {
+                this.inputCache.Add(input);
+            }
+        }
+
+        private Input GetNewInput(int unityFingerId, InputType inputType, InputButton inputButton, Vector2 position)
+        {
+            Debug.Assert(this.inputCache.Count != 0, "InputManager's input cache has run out!  Figure out why we're leaking inputs.");
+
+            int lastIndex = this.inputCache.Count - 1;
+            Input lastInput = this.inputCache[lastIndex];
+            this.inputCache.RemoveAt(lastIndex);
+
+            lastInput.Reset(this.inputIdCounter++, unityFingerId, inputType, inputButton, position);
+
+            return lastInput;
         }
     }
 }

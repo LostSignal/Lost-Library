@@ -71,9 +71,9 @@ namespace Lost
         
         // project
         [SerializeField] private BuildNumberType buildNumberType;
-        [SerializeField] private bool warningsAsErrors = true;
+        [SerializeField] private bool warningsAsErrors = false;
         [SerializeField] private LineEndings projectLineEndings = LineEndings.Windows;
-        [SerializeField] private bool overrideTemplateCShardFiles = true;
+        [SerializeField] private bool overrideTemplateCShardFiles = false;
 
         // asset bundles
         [SerializeField] private bool buildAssetBundles;
@@ -85,9 +85,9 @@ namespace Lost
         [SerializeField] private SourceControlType sourceControl = SourceControlType.None;
 
         // Perforce
-        [SerializeField] private bool useP4IgnoreFile = true;
+        [SerializeField] private bool useP4IgnoreFile = false;
         [SerializeField] private string p4IgnoreFileName = ".p4ignore";
-        [SerializeField] private bool setP4IgnoreVariableAtStartup = true;
+        [SerializeField] private bool setP4IgnoreVariableAtStartup = false;
         
         //// TODO [bgish]:  Need add these settings
         //// ftp -  (string assetBundleRelativeDirectory, string ftpUrl, string username, string password)

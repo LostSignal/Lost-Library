@@ -79,7 +79,7 @@ namespace Lost
                 return this.connectionConfig;
             }
         }
-        
+
         public string GetDebugSummary()
         {
             if (this.state == State.Waiting)
@@ -90,12 +90,12 @@ namespace Lost
             {
                 return this.debugInfoCache;
             }
-            
+
             StringBuilder summary = new StringBuilder();
 
             summary.Append("State: ");
             summary.AppendLine(this.state.ToString());
-            
+
             if (this.roomInfo != null)
             {
                 summary.Append("Room: ");
@@ -134,7 +134,7 @@ namespace Lost
             {
                 this.SetState(State.ShuttingDown);
             }
-            
+
             this.roomInfo = roomInfo;
             this.SetState(State.Searching);
         }
@@ -149,7 +149,7 @@ namespace Lost
         {
             RoomMessage roomMessage = new T();
             short roomMessageId = roomMessage.GetMessageId();
-            
+
             if (this.roomMessageTypes.ContainsKey(roomMessageId))
             {
                 Debug.LogErrorFormat(this, "RoomMessage Type {0} Has Duplicate Id {0}", roomMessage.GetType().Name, roomMessageId);
@@ -218,7 +218,7 @@ namespace Lost
                 this.joinMatchTask.Cancel();
                 this.joinMatchTask = null;
             }
-            
+
             if (this.client != null)
             {
                 // unregistering all handlers
@@ -464,15 +464,15 @@ namespace Lost
 
                 case State.DisconnectedAsClient:
                     {
-                        this.DisconnectedAsClient();
                         this.SetState(State.ShuttingDown);
+                        this.DisconnectedAsClient();
                         break;
                     }
 
                 case State.DisconnectedAsServer:
                     {
-                        this.DisconnectedAsServer();
                         this.SetState(State.ShuttingDown);
+                        this.DisconnectedAsServer();
                         break;
                     }
 
@@ -486,7 +486,7 @@ namespace Lost
                     break;
             }
         }
-        
+
         private RoomMessage GetRoomMessage(short msgType)
         {
             List<RoomMessage> pool = null;
@@ -583,7 +583,7 @@ namespace Lost
                 {
                     UserInfo newUser = new UserInfo();
                     this.Copy(newUser, userInfo);
-                    this.otherUsers.Add(userInfo.UserId, newUser);
+                    this.otherUsers.Add(newUser.UserId, newUser);
 
                     if (this.server != null)
                     {
@@ -591,17 +591,23 @@ namespace Lost
                     }
 
                     this.UserJoined(newUser);
-
                     this.isDebugInfoDirty = true;
                 }
             }
 
-            // handling user disconnected message
+            // handling user disconnected message (only happens on clients)
             if (this.client != null && roomMessageId == UserDisconnected.MessageId)
             {
-                var userDisconnectedInfo = (UserInfo)roomMessageInstance;
-                this.otherUsers.Remove(userDisconnectedInfo.UserId);
-                this.isDebugInfoDirty = true;
+                var userDisconnectedInfo = (UserDisconnected)roomMessageInstance;
+
+                UserInfo userInfo;
+                if (this.otherUsers.TryGetValue(userDisconnectedInfo.DisconnectedUserId, out userInfo))
+                {
+                    this.otherUsers.Remove(userDisconnectedInfo.DisconnectedUserId);
+
+                    this.UserLeft(userInfo);
+                    this.isDebugInfoDirty = true;
+                }
             }
 
             // if we're the server, then lets forward these messages back to all the other clients (except the one that sent it)
@@ -623,7 +629,7 @@ namespace Lost
                     }
                 }
             }
-            
+
             if (roomMessageId != UserInfoMessage.MessageId && roomMessageId != UserDisconnected.MessageId)
             {
                 this.OnRoomMessageReceived(roomMessageInstance);
@@ -687,7 +693,7 @@ namespace Lost
             Debug.LogErrorFormat("Server_OnConnectErrorEvent: {0}", error);
             this.isDebugInfoDirty = true;
         }
-        
+
         private void Server_OnConnectedEvent(UnityEngine.Networking.NetworkConnection conn)
         {
             // sending this new user my info
@@ -701,7 +707,7 @@ namespace Lost
 
             this.isDebugInfoDirty = true;
         }
-        
+
         private void Server_OnDisconnectedEvent(NetworkConnection conn)
         {
             Debug.Log("Server_OnDisconnectedEvent");
@@ -713,8 +719,10 @@ namespace Lost
                 this.otherUsers.Remove(userInfo.UserId);
 
                 // sending the disconnect event to all client users
-                this.userDisconnectedMessage.UserId = userInfo.UserId;
+                this.userDisconnectedMessage.DisconnectedUserId = userInfo.UserId;
                 this.SendRoomMessage(this.userDisconnectedMessage);
+
+                this.UserLeft(userInfo);
             }
             else
             {

@@ -214,6 +214,11 @@ namespace Lost
             }
         }
 
+        public virtual void SetCamera(Camera camera)
+        {
+            this.canvas.worldCamera = camera;
+        }
+
         public void SetSortingLayerAndOrder(string layerName, int order = 0)
         {
             this.canvas.sortingLayerName = layerName;

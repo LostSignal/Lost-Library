@@ -45,7 +45,7 @@ namespace Lost
             }
             
             // testing if we should set the p4ignore variable
-            if (appSettings.UseP4IgnoreFile && appSettings.SetP4IgnoreVariableAtStartup && appSettings.P4IgnoreFileName != GetCurrentP4IgnoreVariable())
+            if (appSettings.SourceControl == SourceControlType.Perforce && appSettings.UseP4IgnoreFile && appSettings.SetP4IgnoreVariableAtStartup && appSettings.P4IgnoreFileName != GetCurrentP4IgnoreVariable())
             {
                 SetP4IgnoreFileVariable(appSettings.P4IgnoreFileName);
             }

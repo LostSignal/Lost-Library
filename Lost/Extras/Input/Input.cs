@@ -9,7 +9,7 @@ namespace Lost
     using System;
     using UnityEngine;
     
-    public enum InputState
+    public enum InputState : byte
     {
         Hover,
         Pressed,
@@ -17,26 +17,29 @@ namespace Lost
         Released
     }
     
-    public enum InputType
+    public enum InputType : byte
     {
         Touch,
         Pen,
         Mouse
     }
     
-    public enum InputButton
+    public enum InputButton : byte
     {
+        None,
         Left,
         Middle,
         Right,
-        Eraser
+        Eraser,
     }
     
     [System.Serializable]
     public class Input
     {
-        public Input(InputType inputType, InputButton inputButton, Vector2 position)
+        public void Reset(int id, int unityFingerId, InputType inputType, InputButton inputButton, Vector2 position)
         {
+            this.Id = id;
+            this.UnityFingerId = unityFingerId;
             this.StartPosition = position;
             this.PreviousPosition = position;
             this.CurrentPosition = position;
@@ -45,6 +48,10 @@ namespace Lost
             this.InputButton = inputButton;
             this.FirstPressed = DateTime.Now;
         }
+
+        public int Id { get; private set; }
+
+        public int UnityFingerId { get; private set; }
 
         public InputState InputState { get; private set; }
 

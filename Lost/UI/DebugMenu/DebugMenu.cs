@@ -178,6 +178,12 @@ namespace Lost
 
         #endregion
 
+        public override void SetCamera(Camera camera)
+        {
+            this.cameraCache = camera;
+            base.SetCamera(camera);
+        }
+
         protected override void Awake()
         {
             base.Awake();
