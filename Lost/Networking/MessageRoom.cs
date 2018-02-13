@@ -13,6 +13,13 @@ namespace Lost
     using UnityEngine.Networking;
     using UnityEngine.Networking.Match;
 
+    public enum NetworkingState
+    {
+        NotConnected,
+        Client,
+        Server,
+    }
+
     public abstract class MessageRoom<UserInfo> : MonoBehaviour where UserInfo : UserInfoMessage, new()
     {
         public enum State
@@ -31,11 +38,27 @@ namespace Lost
             ShuttingDown,
         }
 
+        public NetworkingState NetworkingState
+        {
+            get
+            {
+                if (this.server != null)
+                {
+                    return NetworkingState.Server;
+                }
+                else if (this.client != null)
+                {
+                    return NetworkingState.Client;
+                }
+                else
+                {
+                    return NetworkingState.NotConnected;
+                }
+            }
+        }
+
         // connection
         private ConnectionConfig connectionConfig;
-        private NetworkClient client;
-        private SimpleServer server;
-        private MatchInfo matchInfo;
         private RoomInfo roomInfo;
         private State state;
 
@@ -44,9 +67,14 @@ namespace Lost
         private UnityTask<MatchInfo> createMatchTask;
         private UnityTask<MatchInfo> joinMatchTask;
 
-        // client / server state
-        private MatchInfo serverMatchInfo;
+        // client state
         private MatchInfoSnapshot joinMatchInfoSnapshot;
+        private MatchInfo clientMatchInfo;
+        private NetworkClient client;
+
+        // server state
+        private MatchInfo serverMatchInfo;
+        private SimpleServer server;
 
         // messages
         private Dictionary<short, Type> roomMessageTypes = new Dictionary<short, Type>();
@@ -66,6 +94,11 @@ namespace Lost
         private byte[] copyBytes;
         private NetworkWriter copyNetworkWriter;
         private NetworkReader copyNetworkReader;
+
+        public UserInfo MyUserInfo
+        {
+            get { return this.myUserInfo; }
+        }
 
         private ConnectionConfig ConnectionConfig
         {
@@ -95,17 +128,54 @@ namespace Lost
 
             summary.Append("State: ");
             summary.AppendLine(this.state.ToString());
-
-            if (this.roomInfo != null)
+            
+            if (this.state == State.Searching)
             {
-                summary.Append("Room: ");
-                summary.AppendLine(this.roomInfo.RoomName);
+                if (this.roomInfo.RoomSearchName.IsNullOrWhitespace() == false)
+                {
+                    summary.Append("Room Search Name: ");
+                    summary.AppendLine(this.roomInfo.RoomSearchName);
+                }
+
+                if (this.roomInfo.RoomSearchPassword.IsNullOrWhitespace() == false)
+                {
+                    summary.Append("Room Search Password: ");
+                    summary.AppendLine(this.roomInfo.RoomSearchPassword);
+                }
             }
-
-            if (this.roomInfo != null && string.IsNullOrEmpty(this.roomInfo.RoomPassword) == false)
+            else if (this.state == State.Creating || this.state == State.ConnectedAsServer)
             {
-                summary.Append("Room Password: ");
-                summary.AppendLine(this.roomInfo.RoomPassword);
+                if (this.roomInfo.NewRoomName.IsNullOrWhitespace() == false)
+                {
+                    summary.Append("New Room Name: ");
+                    summary.AppendLine(this.roomInfo.NewRoomName);
+                }
+
+                if (this.roomInfo.NewRoomPassword.IsNullOrWhitespace() == false)
+                {
+                    summary.Append("New Room Password: ");
+                    summary.AppendLine(this.roomInfo.NewRoomPassword);
+                }
+            }
+            else if (this.state == State.Joining || this.state == State.ConnectedAsClient)
+            {
+                if (this.roomInfo.RoomSearchName.IsNullOrWhitespace() == false)
+                {
+                    summary.Append("Room Search Name: ");
+                    summary.AppendLine(this.roomInfo.RoomSearchName);
+                }
+
+                if (this.roomInfo.RoomSearchPassword.IsNullOrWhitespace() == false)
+                {
+                    summary.Append("Room Search Password: ");
+                    summary.AppendLine(this.roomInfo.RoomSearchPassword);
+                }
+
+                if (this.joinMatchInfoSnapshot != null)
+                {
+                    summary.Append("Room Name: ");
+                    summary.AppendLine(this.joinMatchInfoSnapshot.name);
+                }
             }
 
             int userCount = (this.server != null || this.client != null) ? 1 : 0;
@@ -198,7 +268,7 @@ namespace Lost
             }
         }
 
-        public void Shutdown()
+        public virtual void Shutdown()
         {
             // stopping all match tasks
             if (this.createMatchTask != null)
@@ -236,6 +306,10 @@ namespace Lost
                 this.client.Disconnect();
                 this.client.Shutdown();
                 this.client = null;
+
+                // tell the match maker we're shutting down
+                MatchMakingHelper.DropConnection(this.clientMatchInfo);
+                this.clientMatchInfo = null;
             }
 
             if (this.server != null)
@@ -255,18 +329,35 @@ namespace Lost
                 this.server.ClearHandlers();
                 this.server = null;
 
+                // tell the match maker we're shutting down
                 MatchMakingHelper.DestroyMatch(this.serverMatchInfo);
+                this.serverMatchInfo = null;
             }
 
             this.roomInfo = null;
             this.joinMatchInfoSnapshot = null;
-            this.serverMatchInfo = null;
             this.otherUsers.Clear();
             this.connectionIdToUserInfoMap.Clear();
 
             if (this.state != State.Waiting)
             {
                 this.SetState(State.Waiting);
+            }
+        }
+
+        protected virtual void SetCurrentRoomInvisible()
+        {
+            if (this.NetworkingState == NetworkingState.Server)
+            {
+                MatchMakingHelper.SetMatchAttributes(this.serverMatchInfo, false);
+            }
+        }
+
+        protected virtual void SetCurrentRoomVisible()
+        {
+            if (this.NetworkingState == NetworkingState.Server)
+            {
+                MatchMakingHelper.SetMatchAttributes(this.serverMatchInfo, true);
             }
         }
 
@@ -295,6 +386,12 @@ namespace Lost
         protected abstract void RegisterCustomMessages();
 
         protected abstract void OnRoomMessageReceived(RoomMessage roomMessage);
+
+        protected abstract MatchInfoSnapshot ChoseMatchInfoSnapshot(List<MatchInfoSnapshot> matches);
+
+        protected abstract void ConnectedAsServer();
+
+        protected abstract void ConnectedAsClient();
 
         protected abstract void DisconnectedAsServer();
 
@@ -335,8 +432,17 @@ namespace Lost
                                 }
                                 else
                                 {
-                                    this.joinMatchInfoSnapshot = this.listMatchesTask.Value[0];
-                                    this.SetState(State.Joining);
+                                    MatchInfoSnapshot matchInfoSnapShot = this.ChoseMatchInfoSnapshot(this.listMatchesTask.Value);
+                                    
+                                    if (matchInfoSnapShot != null)
+                                    {
+                                        this.joinMatchInfoSnapshot = matchInfoSnapShot;
+                                        this.SetState(State.Joining);
+                                    }
+                                    else
+                                    {
+                                        this.SetState(State.Creating);
+                                    }
                                 }
                             }
                             else
@@ -357,7 +463,7 @@ namespace Lost
                             {
                                 Debug.Assert(this.client == null, "Creating client, when old client was never cleanded up!");
 
-                                this.matchInfo = joinMatchTask.Value;
+                                this.clientMatchInfo = joinMatchTask.Value;
 
                                 this.client = new NetworkClient();
                                 this.client.Configure(this.ConnectionConfig, this.joinMatchInfoSnapshot.maxSize);
@@ -373,7 +479,7 @@ namespace Lost
                                     this.client.RegisterHandler(roomMessageId, this.HandleRoomMessage);
                                 }
 
-                                this.client.Connect(this.matchInfo);
+                                this.client.Connect(this.clientMatchInfo);
                                 this.SetState(State.ConnectedAsClient);
                             }
                             else
@@ -446,19 +552,31 @@ namespace Lost
             {
                 case State.Searching:
                     {
-                        this.listMatchesTask = MatchMakingHelper.ListMatches(this.roomInfo.RoomName, this.roomInfo.RoomPassword, this.roomInfo.Elo, false);
+                        this.listMatchesTask = MatchMakingHelper.ListMatches(this.roomInfo.RoomSearchName, this.roomInfo.RoomSearchPassword, this.roomInfo.Elo, false);
                         break;
                     }
 
                 case State.Joining:
                     {
-                        this.joinMatchTask = MatchMakingHelper.JoinMatch(this.joinMatchInfoSnapshot.networkId, this.roomInfo.RoomPassword, this.roomInfo.Elo);
+                        this.joinMatchTask = MatchMakingHelper.JoinMatch(this.joinMatchInfoSnapshot.networkId, this.roomInfo.RoomSearchPassword, this.roomInfo.Elo);
                         break;
                     }
 
                 case State.Creating:
                     {
-                        this.createMatchTask = MatchMakingHelper.CreateMatch(this.roomInfo.RoomName, this.roomInfo.MaxConnections, true, this.roomInfo.RoomPassword, this.roomInfo.Elo);
+                        this.createMatchTask = MatchMakingHelper.CreateMatch(this.roomInfo.NewRoomName, this.roomInfo.MaxConnections, true, this.roomInfo.NewRoomPassword, this.roomInfo.Elo);
+                        break;
+                    }
+
+                case State.ConnectedAsServer:
+                    {
+                        this.ConnectedAsServer();
+                        break;
+                    }
+
+                case State.ConnectedAsClient:
+                    {
+                        this.ConnectedAsClient();
                         break;
                     }
 

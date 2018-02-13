@@ -7,31 +7,69 @@
 namespace Lost
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Text;
+    using UnityEngine;
     using UnityEngine.Networking.Match;
     using UnityEngine.Networking.Types;
 
     public static class MatchMakingHelper
     {
         // TODO [bgish]:  Might be worth it to make this localizable someday
-        private const string validCharacters = "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789";
+        public static readonly string ValidMatchNameCharacters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+        public static readonly string[] AvailableMatchHosts = new string[] { "us1-mm.unet.unity3d.com",
+                                                                             "eu1-mm.unet.unity3d.com",
+                                                                             "ap1-mm.unet.unity3d.com" };
+
+        private static readonly System.Random random;
 
         // matchmaking configuration
         private static NetworkMatch matchMaker = null;
-        private static string matchHost = "mm.unet.unity3d.com";
-        private static int matchPort = 443;
-        
+        private static int closestMatchHostIndex = -1;
+        private static int currentMatchHostIndex = -1;
+        private static bool isInitializationRunning;
+        private static bool isInitialized;
+
         public static int RequestDomain { get; set; }
-        
+
+        public static int CurrentMatchHostIndex
+        {
+            get { return currentMatchHostIndex; }
+        }
+
+        public static int ClosestMatchHostIndex
+        {
+            get { return closestMatchHostIndex; }
+        }
+
+        static MatchMakingHelper()
+        {
+            // generating a new good random number
+            byte[] guidByteArray = Guid.NewGuid().ToByteArray();
+            int seed = guidByteArray[0] << 24 | guidByteArray[1] << 16 | guidByteArray[2] << 8 | guidByteArray[3];
+            random = new System.Random(seed);
+        }
+
+        public static void SetMatchHostIndex(int index)
+        {
+            currentMatchHostIndex = index;
+
+            if (matchMaker != null)
+            {
+                matchMaker.baseUri = new Uri("https://" + AvailableMatchHosts[currentMatchHostIndex] + ":443");
+            }
+        }
+
         public static string GenerateRandomRoomName(int size)
         {
             StringBuilder roomName = new StringBuilder(size);
 
             for (int i = 0; i < size; i++)
             {
-                int randomIndex = UnityEngine.Random.Range(0, validCharacters.Length);
-                roomName.Append(validCharacters[randomIndex]);
+                int randomIndex = random.Next(0, AvailableMatchHosts.Length);
+                roomName.Append(AvailableMatchHosts[randomIndex]);
             }
 
             return roomName.ToString();
@@ -41,7 +79,7 @@ namespace Lost
         {
             return UnityTask<MatchInfo>.Run(CreateMatchCoroutine(matchName, matchSize, matchAdvertise, matchPassword, eloScore));
         }
-        
+
         public static UnityTask<List<MatchInfoSnapshot>> ListMatches(string matchName, string matchPassword, int eloScore, bool filterOutPrivateMatches)
         {
             return UnityTask<List<MatchInfoSnapshot>>.Run(ListMatchesCoroutine(matchName, matchPassword, eloScore, filterOutPrivateMatches));
@@ -60,22 +98,35 @@ namespace Lost
         public static UnityTask<bool> DestroyMatch(MatchInfo matchInfo)
         {
             return UnityTask<bool>.Run(DestroyMatchCoroutine(matchInfo));
-        }        
+        }
 
         public static UnityTask<bool> DropConnection(MatchInfo matchInfo)
         {
             return UnityTask<bool>.Run(DropConnectionCoroutine(matchInfo));
         }
 
+        public static UnityTask<bool> SetMatchAttributes(MatchInfo matchInfo, bool isListed)
+        {
+            return UnityTask<bool>.Run(SetMatchAttributesCoroutine(matchInfo, isListed));
+        }
+
         private static IEnumerator<MatchInfo> CreateMatchCoroutine(string matchName, uint matchSize, bool matchAdvertise, string matchPassword, int eloScore)
         {
-            InitializeMatchMaker();
+            if (isInitialized == false)
+            {
+                var initialize = InitializeMatchMaker();
+
+                while (initialize.MoveNext())
+                {
+                    yield return default(MatchInfo);
+                }
+            }
 
             bool isDone = false;
             bool successResult = false;
             string extendedInfoResult = null;
             MatchInfo matchInfoResult = null;
-                        
+
             matchMaker.CreateMatch(
                 matchName,
                 matchSize,
@@ -110,7 +161,15 @@ namespace Lost
 
         private static IEnumerator<List<MatchInfoSnapshot>> ListMatchesCoroutine(string matchName, string matchPassword, int eloScore, bool filterOutPrivateMatches)
         {
-            InitializeMatchMaker();
+            if (isInitialized == false)
+            {
+                var initialize = InitializeMatchMaker();
+
+                while (initialize.MoveNext())
+                {
+                    yield return default(List<MatchInfoSnapshot>);
+                }
+            }
 
             bool isDone = false;
             bool successResult = false;
@@ -149,7 +208,15 @@ namespace Lost
 
         private static IEnumerator<bool> DoesMatchExistCoroutine(string matchName)
         {
-            InitializeMatchMaker();
+            if (isInitialized == false)
+            {
+                var initialize = InitializeMatchMaker();
+
+                while (initialize.MoveNext())
+                {
+                    yield return default(bool);
+                }
+            }
 
             bool isDone = false;
             bool successResult = false;
@@ -188,7 +255,15 @@ namespace Lost
 
         private static IEnumerator<MatchInfo> JoinMatchCoroutine(NetworkID networkId, string matchPassword, int eloScoreForClient)
         {
-            InitializeMatchMaker();
+            if (isInitialized == false)
+            {
+                var initialize = InitializeMatchMaker();
+
+                while (initialize.MoveNext())
+                {
+                    yield return default(MatchInfo);
+                }
+            }
 
             bool isDone = false;
             bool successResult = false;
@@ -227,14 +302,22 @@ namespace Lost
 
         private static IEnumerator<bool> DestroyMatchCoroutine(MatchInfo matchInfo)
         {
-            InitializeMatchMaker();
+            if (isInitialized == false)
+            {
+                var initialize = InitializeMatchMaker();
+
+                while (initialize.MoveNext())
+                {
+                    yield return default(bool);
+                }
+            }
 
             bool isDone = false;
             bool successResult = false;
             string extendedInfoResult = null;
 
             matchMaker.DestroyMatch(
-                matchInfo.networkId, 
+                matchInfo.networkId,
                 matchInfo.domain,
                 (bool success, string extendedInfo) =>
                 {
@@ -260,7 +343,15 @@ namespace Lost
 
         private static IEnumerator<bool> DropConnectionCoroutine(MatchInfo matchInfo)
         {
-            InitializeMatchMaker();
+            if (isInitialized == false)
+            {
+                var initialize = InitializeMatchMaker();
+
+                while (initialize.MoveNext())
+                {
+                    yield return default(bool);
+                }
+            }
 
             bool isDone = false;
             bool successResult = false;
@@ -292,41 +383,103 @@ namespace Lost
             }
         }
 
-        private static void InitializeMatchMaker()
+        private static IEnumerator<bool> SetMatchAttributesCoroutine(MatchInfo matchInfo, bool isListed)
         {
-            if (matchMaker != null)
+            if (isInitialized == false)
             {
-                return;
+                var initialize = InitializeMatchMaker();
+
+                while (initialize.MoveNext())
+                {
+                    yield return default(bool);
+                }
             }
 
-            var networkMatchObject = SingletonUtil.GetOrCreateSingletonChildObject("NetworkMatch").gameObject;
-            matchMaker = networkMatchObject.AddComponent<NetworkMatch>();
+            bool isDone = false;
+            bool successResult = false;
+            string extendedInfoResult = null;
 
-            SetMatchHost(matchHost, matchPort, matchPort == 443);
+            matchMaker.SetMatchAttributes(
+                matchInfo.networkId,
+                isListed,
+                matchInfo.domain,
+                (bool success, string extendedInfo) =>
+                {
+                    successResult = success;
+                    extendedInfoResult = extendedInfo;
+                    isDone = true;
+                });
+
+            while (isDone == false)
+            {
+                yield return default(bool);
+            }
+
+            if (successResult == false)
+            {
+                throw new MatchMakingException(extendedInfoResult);
+            }
+            else
+            {
+                yield return true;
+            }
         }
 
-        private static void SetMatchHost(string newHost, int port, bool isHttps)
+        private static IEnumerator InitializeMatchMaker()
         {
-            if (newHost == "127.0.0.1")
+            if (isInitializationRunning == true)
             {
-                newHost = "localhost";
-            }
-            
-            if (newHost.StartsWith("http://"))
-            {
-                newHost = newHost.Replace("http://", "");
+                yield return null;
             }
 
-            if (newHost.StartsWith("https://"))
+            if (isInitialized)
             {
-                newHost = newHost.Replace("https://", "");
+                yield break;
             }
 
-            string prefix = isHttps ? "https://" : "http://";
-            matchHost = newHost;
-            matchPort = port;
+            isInitializationRunning = true;
 
-            matchMaker.baseUri = new Uri(prefix + matchHost + ":" + matchPort);
+            // creating match maker
+            if (matchMaker == null)
+            {
+                var networkMatchObject = SingletonUtil.GetOrCreateSingletonChildObject("NetworkMatch").gameObject;
+                matchMaker = networkMatchObject.AddComponent<NetworkMatch>();
+            }
+
+            // finding closest match making host
+            if (closestMatchHostIndex == -1)
+            {
+                int minMatchHostIndex = -1;
+                int minPing = int.MaxValue;
+
+                for (int i = 0; i < AvailableMatchHosts.Length; i++)
+                {
+                    Ping ping = new Ping(AvailableMatchHosts[i]);
+
+                    while (ping.isDone == false)
+                    {
+                        yield return null;
+                    }
+
+                    if (ping.time < minPing)
+                    {
+                        minMatchHostIndex = i;
+                        minPing = ping.time;
+                    }
+                }
+
+                closestMatchHostIndex = minMatchHostIndex;
+            }
+
+            if (currentMatchHostIndex == -1)
+            {
+                currentMatchHostIndex = closestMatchHostIndex;
+            }
+
+            SetMatchHostIndex(currentMatchHostIndex);
+
+            isInitialized = matchMaker != null && closestMatchHostIndex != -1;
+            isInitializationRunning = false;
         }
     }
 }

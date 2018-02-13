@@ -20,15 +20,11 @@ namespace Lost
 
         public override void Serialize(NetworkWriter writer)
         {
-            base.Serialize(writer);
-
             writer.Write(this.UserId);
         }
 
         public override void Deserialize(NetworkReader reader)
         {
-            base.Deserialize(reader);
-
             this.UserId = reader.ReadInt64();
         }
     }

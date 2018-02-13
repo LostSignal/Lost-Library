@@ -11,6 +11,14 @@ namespace Lost
     
     public static class GameObjectExtensions
     {
+        public static void SafeSetActive(this GameObject gameObject, bool active)
+        {
+            if (gameObject.activeSelf != active)
+            {
+                gameObject.SetActive(active);
+            }
+        }
+
         public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
         {
             T component = gameObject.GetComponent<T>();

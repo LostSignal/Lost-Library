@@ -51,24 +51,48 @@ namespace Lost
                 return GameObject.Instantiate(prefab, parent);
             }
         }
-        
+
         public static T Instantiate<T>(T prefab) where T : UnityEngine.MonoBehaviour
         {
-            return Instantiate<T>(prefab, null);
+            return Instantiate<T>(prefab, null, false);
         }
-    
+
+        public static T Instantiate<T>(T prefab, bool reset) where T : UnityEngine.MonoBehaviour
+        {
+            return Instantiate<T>(prefab, null, reset);
+        }
+
         public static T Instantiate<T>(T prefab, Transform parent) where T : UnityEngine.MonoBehaviour
+        {
+            return Instantiate<T>(prefab, parent, false);
+        }
+
+        public static T Instantiate<T>(T prefab, Transform parent, bool reset) where T : UnityEngine.MonoBehaviour
         {
             int instanceId = prefab.gameObject.GetInstanceID();
             Pool pool = null;
 
             if (pools.TryGetValue(instanceId, out pool))
             {
-                return pool.GetObjectFromPool(prefab.gameObject, parent).GetComponent<T>();
+                var obj = pool.GetObjectFromPool(prefab.gameObject, parent).GetComponent<T>();
+
+                if (reset)
+                {
+                    obj.transform.Reset();
+                }
+
+                return obj;
             }
             else
             {
-                return GameObject.Instantiate(prefab, parent);
+                var obj = GameObject.Instantiate(prefab, parent);
+
+                if (reset)
+                {
+                    obj.transform.Reset();
+                }
+
+                return obj;
             }
         }
 
