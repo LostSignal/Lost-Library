@@ -10,6 +10,6 @@ namespace Lost
     
     public interface InputHandler
     {
-        void HandleInputs(List<Input> touch, Input mouse, Input pen);
+        void HandleInputs(List<Input> touches, Input mouse, Input pen);
     }
 }
