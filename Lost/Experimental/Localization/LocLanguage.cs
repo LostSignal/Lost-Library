@@ -8,7 +8,7 @@ namespace Lost
 {
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public class LocLanguage
     {
         public static readonly LocLanguage English = CreateLocLanguage(1, "English", "Eng");
@@ -56,7 +56,7 @@ namespace Lost
                 default: return English;
             }
         }
-        
+
         private static LocLanguage CreateLocLanguage(ushort id, string name, string shortName)
         {
             LocLanguage newLan = new LocLanguage
@@ -67,7 +67,7 @@ namespace Lost
             };
 
             AllLanguages.Add(newLan);
-            
+
             return newLan;
         }
     }

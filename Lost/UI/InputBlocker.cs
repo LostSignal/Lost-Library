@@ -24,7 +24,7 @@ namespace Lost
         {
             get { return this.onClick; }
         }
-        
+
         private void Awake()
         {
             this.rectTransform = this.GetComponent<RectTransform>();
@@ -42,12 +42,12 @@ namespace Lost
                 Debug.LogError("InputBlocker doesn't live under a GraphicRaycaster and will not work!", this);
             }
         }
-        
+
         private void Reset()
         {
             this.Setup();
         }
-        
+
         private void Setup()
         {
             if (this.rectTransform.anchorMin != Vector2.zero)

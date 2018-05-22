@@ -7,7 +7,7 @@
 namespace Lost
 {
     using UnityEngine;
-    
+
     public class CameraShake : MonoBehaviour
     {
         #pragma warning disable 0649
@@ -17,7 +17,7 @@ namespace Lost
 
         private float currentShakeTime;
         private Vector3 originalPosition;
-        
+
         public static void Shake()
         {
             foreach (var cameraShake in ObjectTracker.GetObjects<CameraShake>())
@@ -25,13 +25,13 @@ namespace Lost
                 cameraShake.PrivateShake();
             }
         }
-        
+
         private void PrivateShake()
         {
             this.currentShakeTime = this.shakeTime;
             this.originalPosition = this.transform.localPosition;
         }
-        
+
         private void Update()
         {
             if (this.currentShakeTime > 0.0f)
@@ -40,12 +40,12 @@ namespace Lost
                 this.currentShakeTime -= Time.deltaTime;
             }
         }
-        
+
         private void OnEnable()
         {
             ObjectTracker.Register<CameraShake>(this);
         }
-        
+
         private void OnDisable()
         {
             ObjectTracker.Deregister<CameraShake>(this);

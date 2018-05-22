@@ -8,14 +8,14 @@ namespace Lost
 {
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public class ConcurrentList<T>
     {
         private readonly object itemsLock = new object();
 
         [SerializeField]
         private List<T> items = new List<T>();
-                
+
         public void Add(T item)
         {
             lock (this.itemsLock)
@@ -23,7 +23,7 @@ namespace Lost
                 this.items.Add(item);
             }
         }
-        
+
         public T[] GetCopy()
         {
             lock (this.itemsLock)
@@ -31,7 +31,7 @@ namespace Lost
                 return this.items.ToArray();
             }
         }
-        
+
         public void RemoveAll(T[] itemsToRemove)
         {
             if (itemsToRemove == null || itemsToRemove.Length == 0)

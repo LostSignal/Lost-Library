@@ -9,7 +9,7 @@ namespace Lost
     public class UserInfoMessage : RoomMessage
     {
         public const short MessageId = 101;
-        
+
         public override bool IsReliable
         {
             get { return true; }

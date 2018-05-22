@@ -30,7 +30,7 @@ namespace Lost
         // cached values
         [NonSerialized]
         private float minimumPixelMovementSquared;
-        
+
         public float ZRotation
         {
             get
@@ -124,7 +124,7 @@ namespace Lost
         protected override void Awake()
         {
             base.Awake();
-            
+
             this.minimumPixelMovementSquared = Input.GetMinimumPixelMovementSquared();
         }
 

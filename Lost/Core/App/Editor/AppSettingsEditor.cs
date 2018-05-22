@@ -20,12 +20,12 @@ namespace Lost
         private static Grid oneColumnGrid;
         private static Grid twoColumnGrid;
         private static Grid twoColumnGridWithHeader;
-        
+
         public static void UpdateProjectDefines()
         {
             UpdateProjectDefines(AppSettings.Instance, true);
         }
-        
+
         public void OnEnable()
         {
             if (oneColumnGrid == null)
@@ -59,7 +59,7 @@ namespace Lost
                 twoColumnGridWithHeader = new Grid(gridDefinition);
             }
         }
-        
+
         public override void OnInspectorGUI()
         {
             var appSettings = this.target as AppSettings;
@@ -101,7 +101,7 @@ namespace Lost
                     UpdateProjectDefines(appSettings, true);
                 }
             }
-            
+
             // making sure we mark the data dirty if it changed
             if (GUI.changed)
             {
@@ -127,7 +127,7 @@ namespace Lost
                     GUILayout.Label("Product Name", GUILayout.Width(labelWidth));
                     PlayerSettings.productName = EditorGUILayout.TextField(GUIContent.none, PlayerSettings.productName, GUILayout.Width(200));
                 }
-                
+
                 using (new BeginHorizontalHelper())
                 {
                     GUILayout.Label("Company", GUILayout.Width(labelWidth));
@@ -137,7 +137,7 @@ namespace Lost
                 using (new BeginHorizontalHelper())
                 {
                     GUILayout.Label("Bundle Identifier", GUILayout.Width(labelWidth));
-                    
+
                     string newIdentifier = EditorGUILayout.TextField(GUIContent.none, appSettings.BundleIdentifier, GUILayout.Width(200));
 
                     if (newIdentifier != appSettings.BundleIdentifier)
@@ -152,13 +152,13 @@ namespace Lost
                     GUILayout.Label("Code Namespace", GUILayout.Width(labelWidth));
                     EditorSettings.projectGenerationRootNamespace = EditorGUILayout.TextField(GUIContent.none, EditorSettings.projectGenerationRootNamespace, GUILayout.Width(200));
                 }
-                
+
                 using (new BeginHorizontalHelper())
                 {
                     GUILayout.Label("App Orientation", GUILayout.Width(labelWidth));
                     appSettings.AppOrientation = (AppOrientation)EditorGUILayout.EnumPopup(GUIContent.none, appSettings.AppOrientation, GUILayout.Width(200));
                 }
-                
+
                 using (new BeginHorizontalHelper())
                 {
                     GUILayout.Label("App Build Number Type", GUILayout.Width(labelWidth));
@@ -228,7 +228,7 @@ namespace Lost
                                 if (isOnAfter)
                                 {
                                     UpdateBundleIdentifier(appSettings);
-                                }                                
+                                }
                             }
                         }
                     }
@@ -344,18 +344,18 @@ namespace Lost
                 GUILayout.Label("Use P4IGNORE File", GUILayout.Width(labelWidth));
                 appSettings.UseP4IgnoreFile = EditorGUILayout.Toggle(appSettings.UseP4IgnoreFile);
             }
-            
+
             if (appSettings.UseP4IgnoreFile == false)
             {
                 return;
             }
-            
+
             using (new BeginHorizontalHelper())
             {
                 GUILayout.Label("Set P4IGNORE Variable At Startup", GUILayout.Width(labelWidth));
                 appSettings.SetP4IgnoreVariableAtStartup = EditorGUILayout.Toggle(appSettings.SetP4IgnoreVariableAtStartup);
             }
-            
+
             if (appSettings.SetP4IgnoreVariableAtStartup)
             {
                 using (new BeginHorizontalHelper())
@@ -390,7 +390,7 @@ namespace Lost
                     }
                 }
             }
-            
+
             GUILayout.Label("");
         }
 
@@ -444,7 +444,7 @@ namespace Lost
                 }
             }
         }
-        
+
         private static void DrawBuildConfigs(int foldoutId, AppSettings appSettings)
         {
             GUILayout.Label("");
@@ -504,7 +504,7 @@ namespace Lost
 
                     DrawBuildConfig(config);
                 }
-                
+
                 index++;
             }
         }
@@ -540,7 +540,7 @@ namespace Lost
                 config.PlayfabSecretId = EditorGUILayout.TextField(GUIContent.none, config.PlayfabSecretId, GUILayout.Width(250));
             }
             #endif
-            
+
             #if USE_PLAYFAB_ANDROID_SDK
             using (new BeginHorizontalHelper())
             {
@@ -558,7 +558,7 @@ namespace Lost
                 config.DisableIOSBitCode = EditorGUILayout.Toggle(GUIContent.none, config.DisableIOSBitCode, GUILayout.Width(25));
                 GUILayout.Label("Disable BitCode");
             }
-            
+
             using (new BeginHorizontalHelper())
             {
                 GUILayout.Label("", GUILayout.Width(10));
@@ -581,7 +581,7 @@ namespace Lost
                 }
             }
         }
-        
+
         private static void ValidateBuildConfigs(AppSettings appSettings)
         {
             // making sure a config is set active
@@ -688,7 +688,7 @@ namespace Lost
                 {
                     continue;
                 }
-                
+
                 PlayerSettings.SetApplicationIdentifier(GetBuildTargetGroup(supportedPlatform), appSettings.BundleIdentifier);
             }
         }

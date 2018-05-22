@@ -14,7 +14,7 @@ namespace Lost
         Consumable,
         Durable,
     }
-    
+
     [Serializable]
     public class CatalogItem
     {
@@ -57,7 +57,7 @@ namespace Lost
             get { return this.description; }
             set { this.description = value; }
         }
-        
+
         public int RealMoneyCost
         {
             get { return this.realMoneyCost; }
@@ -69,7 +69,7 @@ namespace Lost
             get { return this.isStackable; }
             set { this.isStackable = value; }
         }
-        
+
         public bool IsIapItem
         {
             get { return this.RealMoneyCost > 0; }

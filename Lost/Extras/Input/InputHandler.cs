@@ -7,7 +7,7 @@
 namespace Lost
 {
     using System.Collections.Generic;
-    
+
     public interface InputHandler
     {
         void HandleInputs(List<Input> touches, Input mouse, Input pen);

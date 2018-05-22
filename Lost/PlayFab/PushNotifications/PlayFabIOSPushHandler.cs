@@ -15,7 +15,7 @@ namespace Lost
     using UnityEngine;
     using UnityEngine.iOS;
     using NotificationServices = UnityEngine.iOS.NotificationServices;
-    
+
     public class PlayFabIOSPushHandler : MonoBehaviour
     {
         private const float QueryTimerMax = 3.0f;
@@ -25,7 +25,7 @@ namespace Lost
         private PlayFabPushHandler pushHandler;
         private float currentQueryTime = 0.0f;
         private string deviceToken = null;
-        
+
         public void ScheduleLocalPushNotification(string title, string message, DateTime dateTime)
         {
             NotificationServices.ScheduleLocalNotification(new UnityEngine.iOS.LocalNotification()
@@ -42,9 +42,9 @@ namespace Lost
         }
 
         private IEnumerator Start()
-        {        
+        {
             NotificationServices.RegisterForNotifications(NotificationType.Alert | NotificationType.Badge | NotificationType.Sound, true);
-        
+
             int retryCount = 0;
             while (this.deviceToken == null)
             {
@@ -52,14 +52,14 @@ namespace Lost
                 {
                     this.deviceToken = BitConverter.ToString(NotificationServices.deviceToken).Replace("-", "").ToLower();
                 }
-        
+
                 retryCount++;
-        
+
                 if (retryCount > RetryCountMax)
                 {
                     yield break;
                 }
-        
+
                 yield return WaitForUtil.Seconds(RetryWaitTime);
             }
 
@@ -74,8 +74,8 @@ namespace Lost
             }
 
             PlayFabClientAPI.RegisterForIOSPushNotification(
-                new RegisterForIOSPushNotificationRequest { DeviceToken = this.deviceToken }, 
-                (result) => 
+                new RegisterForIOSPushNotificationRequest { DeviceToken = this.deviceToken },
+                (result) =>
                 {
                     Debug.Log("Push Notification Registration Successful!");
                 },
@@ -87,7 +87,7 @@ namespace Lost
                     Debug.Log(error.ErrorDetails);
                 });
         }
-        
+
         private void Update()
         {
             // no point checking if we don't have a device token yet
@@ -97,16 +97,16 @@ namespace Lost
             }
 
             this.currentQueryTime += Time.deltaTime;
-            
+
             // early out if haven't met the query time
             if (this.currentQueryTime < QueryTimerMax)
             {
                 return;
             }
-        
+
             // reset timer
             this.currentQueryTime = 0.0f;
-        
+
             // https://forum.unity3d.com/threads/using-the-new-notification-system.127016/
             if (NotificationServices.remoteNotificationCount != 0)
             {

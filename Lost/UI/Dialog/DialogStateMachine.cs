@@ -12,7 +12,7 @@ namespace Lost
     {
         private static readonly int ShownHash = Animator.StringToHash("Show");
         private static readonly int HiddenHash = Animator.StringToHash("Hide");
-        
+
         private State state;
 
         public bool IsDoneShowing
@@ -24,11 +24,11 @@ namespace Lost
         {
             get { return this.state == State.Hidden; }
         }
-        
+
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             base.OnStateUpdate(animator, stateInfo, layerIndex);
-        
+
             if (stateInfo.shortNameHash == ShownHash && stateInfo.normalizedTime >= 1.0f)
             {
                 this.state = State.Shown;

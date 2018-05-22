@@ -1,16 +1,16 @@
 //// using UnityEngine;
-//// 
+////
 //// [ExecuteInEditMode]
 //// public class PrefabPlacer : MonoBehaviour, ISerializationCallbackReceiver
 //// {
 ////     public GameObject Prefab;
 ////     private GameObject prefabInstance;
-//// 
+////
 ////     void ISerializationCallbackReceiver.OnAfterDeserialize()
 ////     {
 ////         this.Initialize();
 ////     }
-//// 
+////
 ////     void ISerializationCallbackReceiver.OnBeforeSerialize()
 ////     {
 ////         if (this.prefabInstance != null)
@@ -19,12 +19,12 @@
 ////             this.prefabInstance = null;
 ////         }
 ////     }
-////     
+////
 ////     void Update()
 ////     {
 ////         this.Initialize();
 ////     }
-//// 
+////
 ////     void Initialize()
 ////     {
 ////         if (this.prefabInstance == null && this.Prefab != null)
@@ -36,4 +36,4 @@
 ////         }
 ////     }
 //// }
-//// 
+////

@@ -9,7 +9,7 @@ namespace Lost
     using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
-    
+
     //// [AddComponentMenu("Lost/Editor Helpers/Apply Mesh Colliders Helper")]
     public class ApplyMeshCollidersHelper : MonoBehaviour
     {
@@ -34,11 +34,11 @@ namespace Lost
         //// {
         ////     Debug.Log("Something");
         //// }
-        //// 
+        ////
         //// [ContextMenu("Another Context Menu")]
         //// public void AnotherContextMenu()
         //// {
-        //// 
+        ////
         //// }
     }
 }

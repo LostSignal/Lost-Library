@@ -5,13 +5,13 @@
 //-----------------------------------------------------------------------
 
 #if USE_TEXTMESH_PRO
-    
+
 namespace Lost
 {
     using System.Collections;
     using TMPro;
     using UnityEngine;
-        
+
     public static class TextMenuUGUIExtensions
     {
         public static IEnumerator FadeTextAlpha(this TextMeshProUGUI text, float startAlpha, float endAlpha, float timeLengthInSeconds, float delayInSeconds = 0.0f)

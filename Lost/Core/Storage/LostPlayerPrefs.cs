@@ -33,7 +33,7 @@ namespace Lost
             isDirty = true;
             PlayerPrefs.SetString(key, value);
         }
-        
+
         public static void Save()
         {
             if (isDirty)

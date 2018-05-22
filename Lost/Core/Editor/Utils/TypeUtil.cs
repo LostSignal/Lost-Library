@@ -8,11 +8,11 @@ namespace Lost
 {
     using System;
     using System.Collections.Generic;
-    
+
     public static class TypeUtil
     {
         private static Dictionary<Type, HashSet<Type>> typesCache = new Dictionary<Type, HashSet<Type>>();
-        
+
         public static IEnumerable<Type> GetAllTypesOf<T>()
         {
             Type type = typeof(T);
@@ -25,7 +25,7 @@ namespace Lost
                     if (typesCache.TryGetValue(type, out types) == false)
                     {
                         types = new HashSet<Type>();
-                        
+
                         foreach (System.Reflection.Assembly assembly in System.AppDomain.CurrentDomain.GetAssemblies())
                         {
                             foreach (Type assemblyType in assembly.GetTypes())
@@ -39,7 +39,7 @@ namespace Lost
                                 }
                             }
                         }
-                        
+
                         typesCache.Add(type, types);
                     }
                 }

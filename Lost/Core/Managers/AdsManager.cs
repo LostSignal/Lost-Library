@@ -46,7 +46,7 @@ namespace Lost
                 #endif
             }
         }
-        
+
         public bool IsAdReady
         {
             get
@@ -58,7 +58,7 @@ namespace Lost
                 #endif
             }
         }
-        
+
         public void ShowAd(Action<AdWatchedResult> watchResultCallback)
         {
             #if UNITY_ADS
@@ -89,7 +89,7 @@ namespace Lost
                         }
                     })
                 };
-                
+
                 Advertisement.Show(null, options);
             }
             else

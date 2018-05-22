@@ -10,7 +10,7 @@ namespace Lost
     using UnityEditor;
     #endif
     using UnityEngine;
-    
+
     public class AssetBundleUtility
     {
         public const string AssetBundlesFolderName = "AssetBundles";
@@ -74,7 +74,7 @@ namespace Lost
                 case RuntimePlatform.OSXPlayer:
                     return "OSX";
 
-                // Add more build targets for your own.  If you add more targets, don't forget to 
+                // Add more build targets for your own.  If you add more targets, don't forget to
                 // add the same platforms to GetPlatformForAssetBundles(RuntimePlatform) function.
                 default:
                     return null;

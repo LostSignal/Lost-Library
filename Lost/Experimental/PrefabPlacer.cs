@@ -51,7 +51,7 @@ namespace Lost
     //// public GameObject Prefab;
     //// private GameObject prefabInstance;
     //// private GameObject currentSelection;
-    //// 
+    ////
     //// #if UNITY_EDITOR
     //// void Update()
     //// {
@@ -64,7 +64,7 @@ namespace Lost
     ////     }
     //// }
     //// #endif
-    //// 
+    ////
     //// void Awake()
     //// {
     ////     if (Application.isPlaying)
@@ -75,7 +75,7 @@ namespace Lost
     ////         instance.transform.localPosition = this.transform.localPosition;
     ////         instance.transform.localRotation = this.transform.localRotation;
     ////         instance.transform.localScale = this.transform.localScale;
-    //// 
+    ////
     ////         int index = this.transform.GetSiblingIndex();
     ////         Pooler.DestroyImmediate(this.gameObject);
     ////         instance.transform.SetSiblingIndex(index);

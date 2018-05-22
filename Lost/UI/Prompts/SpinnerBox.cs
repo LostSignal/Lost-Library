@@ -24,7 +24,7 @@ namespace Lost
         [SerializeField] private Text body;
         [SerializeField] private Button cancelButton;
         #pragma warning restore 0649
-        
+
         private Action cancelButtonAction;
 
         public void SetupDefault()
@@ -50,7 +50,7 @@ namespace Lost
         {
             this.PrivateShow(title, body, true, cancelButtonAction);
         }
-       
+
         public void UpdateBodyText(string body)
         {
             this.body.text = body;
@@ -66,7 +66,7 @@ namespace Lost
                 return;
             }
             #endif
-            
+
             Debug.Assert(this.body != null, "SpinnerBox didn't specify body text", this);
             Debug.Assert(this.cancelButton != null, "SpinnerBox didn't specify cancelButton", this);
 

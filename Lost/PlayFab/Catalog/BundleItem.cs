@@ -63,7 +63,7 @@ namespace Lost
             get { return this.realMoneyCost; }
             set { this.realMoneyCost = value; }
         }
-        
+
         public bool IsIapItem
         {
             get { return this.RealMoneyCost > 0; }
@@ -77,7 +77,7 @@ namespace Lost
             [SerializeField] private BundleItemType type;
             [SerializeField] private int count;
             #pragma warning restore 0649
-            
+
             public string Id
             {
                 get { return this.id; }

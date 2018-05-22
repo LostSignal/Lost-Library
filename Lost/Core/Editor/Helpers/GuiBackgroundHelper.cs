@@ -8,7 +8,7 @@ namespace Lost
 {
     using System;
     using UnityEngine;
-    
+
     public class GuiBackgroundHelper : IDisposable
     {
         private Color oldColor;
@@ -18,7 +18,7 @@ namespace Lost
             this.oldColor = GUI.backgroundColor;
             GUI.backgroundColor = newColor;
         }
-        
+
         public void Dispose()
         {
             GUI.backgroundColor = oldColor;

@@ -8,7 +8,7 @@ namespace Lost
 {
     using System;
     using UnityEngine;
-    
+
     public enum SwipeDirection
     {
         Up,
@@ -20,7 +20,7 @@ namespace Lost
         DownLeft,
         DownRight,
     }
-    
+
     public static class TouchSwipeUtil
     {
         public static bool WasSwiped(SwipeDirection direction, Vector2 swipingVector, double cosDegrees)

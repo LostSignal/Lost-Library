@@ -16,7 +16,7 @@ namespace Lost
         #pragma warning restore 0649
 
         private Graphic[] graphics;
-        
+
         public Color TintColor
         {
             get

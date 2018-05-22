@@ -17,7 +17,7 @@ namespace Lost
         {
             this.SendIdentityEventAsTrackEvent(gender, age, eventData);
         }
-        
+
         public override void Screen(string screenName, Dictionary<string, object> eventData)
         {
             this.SendScreenEventAsTrackEvent(screenName, eventData);
@@ -43,8 +43,8 @@ namespace Lost
                 {
                     EventName = eventName,
                     Body = eventData
-                }, 
-                response => { }, 
+                },
+                response => { },
                 error => { });
             }
         }

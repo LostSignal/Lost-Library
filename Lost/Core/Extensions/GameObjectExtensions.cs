@@ -8,7 +8,7 @@ namespace Lost
 {
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public static class GameObjectExtensions
     {
         public static void SafeSetActive(this GameObject gameObject, bool active)
@@ -56,7 +56,7 @@ namespace Lost
 
             return results;
         }
-        
+
         public static GameObject GetChild(this GameObject gameObject, string name)
         {
             Transform childTransform = gameObject.transform.Find(name);
@@ -66,7 +66,7 @@ namespace Lost
         /// <summary>
         /// Creates a child game object with the given name attached to this GameObject, or finds the game object
         /// if it already exists.  It will make sure that one of each of the given component types exist on the child.
-        /// It only makes sure 1 component of that type exists though.  If you need multiple components then use the 
+        /// It only makes sure 1 component of that type exists though.  If you need multiple components then use the
         /// GetOrAddComponents method on the returned game object.
         /// </summary>
         /// <param name="gameObject">The game object to search.</param>
@@ -101,12 +101,12 @@ namespace Lost
                 return childGameObject;
             }
         }
-        
+
         public static void SetLayerRecursively(this GameObject gameObject, string layerName)
         {
             PrivateSetLayerRecursively(gameObject, LayerMask.NameToLayer(layerName));
         }
-        
+
         public static void SetLayerRecursively(this GameObject gameObject, int layer)
         {
             PrivateSetLayerRecursively(gameObject, layer);
@@ -126,7 +126,7 @@ namespace Lost
                 PrivateSetLayerRecursively(gameObject.transform.GetChild(i).gameObject, layer);
             }
         }
-        
+
         private static void PrivateDestroyAllRecursively(GameObject gameObject)
         {
             for (int i = 0; i < gameObject.transform.childCount; i++)

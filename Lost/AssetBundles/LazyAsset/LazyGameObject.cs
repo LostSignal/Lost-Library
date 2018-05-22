@@ -11,6 +11,6 @@ namespace Lost
 
     [Serializable]
     public class LazyGameObject : LazyAsset<GameObject>
-    { 
+    {
     }
 }

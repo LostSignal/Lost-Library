@@ -8,21 +8,21 @@ namespace Lost
 {
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public class Pool
     {
         private List<GameObject> active = new List<GameObject>();
         private List<GameObject> inactive = new List<GameObject>();
         private Transform inactivePoolParent;
-        
+
         public string PrefabName { get; private set; }
 
         public int InstanceId { get; private set; }
-        
+
         // TODO [bgish]: these will need to come in later sometime
         // public int InitialSize { get; set; }
-        // public int MaxSize { get; set; } 
-        
+        // public int MaxSize { get; set; }
+
         public Pool(GameObject prefab, int initialCount = 0)
         {
             this.PrefabName = prefab.name;
@@ -79,7 +79,7 @@ namespace Lost
                 var last = this.inactive[lastIndex];
                 this.inactive.RemoveAt(lastIndex);
                 this.active.Add(last);
-                
+
                 last.transform.SetParent(parent);
                 last.SetActive(true);
                 last.GetComponent<PooledObject>().State = PooledObjectState.Active;
@@ -104,11 +104,11 @@ namespace Lost
         {
             Debug.Assert(pooledObject.State == PooledObjectState.Active, "Tried returning an already inactive object to the pool.");
             Debug.Assert(pooledObject.Pool == this, "Tried returning object to the wrong pool.");
-            
+
             pooledObject.State = PooledObjectState.Inactive;
             pooledObject.transform.SetParent(this.inactivePoolParent);
             pooledObject.gameObject.SetActive(false);
-            
+
             this.active.Remove(pooledObject.gameObject);
             this.inactive.Add(pooledObject.gameObject);
         }

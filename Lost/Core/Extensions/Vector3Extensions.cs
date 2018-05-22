@@ -7,7 +7,7 @@
 namespace Lost
 {
     using UnityEngine;
-    
+
     public static class Vector3Extensions
     {
         public static Vector3 SetX(this Vector3 lhs, float val)
@@ -15,7 +15,7 @@ namespace Lost
             lhs.x = val;
             return lhs;
         }
-        
+
         public static Vector3 SetY(this Vector3 lhs, float val)
         {
             lhs.y = val;
@@ -34,19 +34,19 @@ namespace Lost
             lhs.z = val;
             return lhs;
         }
-        
+
         public static Vector3 AddToX(this Vector3 lhs, float val)
         {
             lhs.x += val;
             return lhs;
         }
-        
+
         public static Vector3 AddToY(this Vector3 lhs, float val)
         {
             lhs.y += val;
             return lhs;
         }
-        
+
         public static Vector3 AddToZ(this Vector3 lhs, float val)
         {
             lhs.z += val;

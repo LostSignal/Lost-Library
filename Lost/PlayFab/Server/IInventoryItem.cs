@@ -13,7 +13,7 @@ namespace Lost
         string Id { get; }
 
         int Count { get; }
-        
+
         Dictionary<string, string> Data { get; }
     }
 }

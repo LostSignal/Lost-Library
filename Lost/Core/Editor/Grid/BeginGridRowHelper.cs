@@ -7,7 +7,7 @@
 namespace Lost
 {
     using System;
-    
+
     public class BeginGridRowHelper : IDisposable
     {
         private Grid grid;
@@ -17,7 +17,7 @@ namespace Lost
             this.grid = grid;
             this.grid.BeginRow();
         }
-        
+
         public void Dispose()
         {
             this.grid.EndRow();

@@ -30,15 +30,15 @@ namespace Lost
                 return this.rectTransform;
             }
         }
-        
+
         protected override void Awake()
         {
             base.Awake();
-            
+
             this.actions.AddRange(this.GetComponentsInChildren<UIAction>());
             this.actions.Sort((x, y) => { return x.Order.CompareTo(y.Order); });
         }
-        
+
         protected override void DoStateTransition(SelectionState state, bool instant)
         {
             base.DoStateTransition(state, instant);
@@ -49,16 +49,16 @@ namespace Lost
                 return;
             }
             #endif
-            
+
             if (this.selectionState != state)
             {
                 this.UpdateButtonActions(this.selectionState, state);
                 this.selectionState = state;
             }
         }
-        
+
         private void UpdateButtonActions(SelectionState oldState, SelectionState newState)
-        {            
+        {
             // there's nothing to revert on the first state change
             if (this.isFirstStateChange == false)
             {
@@ -68,13 +68,13 @@ namespace Lost
                     action.Revert();
                 }
             }
-            
+
             // apply the new button actions
             foreach (var action in this.actions.Where(x => (int)x.State == (int)newState))
             {
                 action.Apply();
             }
-            
+
             this.isFirstStateChange = false;
         }
     }

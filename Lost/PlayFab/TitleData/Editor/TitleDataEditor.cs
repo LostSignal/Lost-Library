@@ -79,7 +79,7 @@ namespace Lost
             this.GetEndpoint();
             PlayFabEditorHttp.MakeApiCall("/Admin/SetTitleData", this.GetEndpoint(), req, resultCb, errorCb);
         }
-        
+
         private string GetEndpoint()
         {
             PlayFabEditorDataService.SharedSettings.TitleId = AppSettings.ActiveConfig.PlayfabTitleId;

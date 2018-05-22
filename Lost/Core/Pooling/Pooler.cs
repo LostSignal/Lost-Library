@@ -8,7 +8,7 @@ namespace Lost
 {
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public static class Pooler
     {
         // TODO [bgish]: need to figure out how to add items to the pool (scriptable object?  components register object?)
@@ -22,7 +22,7 @@ namespace Lost
         public static void PoolPrefab(GameObject prefab, int initialCount = 0)
         {
             int instanceId = prefab.GetInstanceID();
-            
+
             if (pools.ContainsKey(instanceId))
             {
                 Debug.LogWarningFormat("Tried pooling the same Prefab \"{0}\"multiple times.", prefab.name);

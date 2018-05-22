@@ -16,7 +16,7 @@ namespace Lost
         {
             string[] dictionaryAssetGuids = AssetDatabase.FindAssets("DefaultDictionary");
             Assert.True(dictionaryAssetGuids.Length == 1, "Couldn't find default dictionary to test with.");
-            
+
             string dictionaryAssetPath = AssetDatabase.GUIDToAssetPath(dictionaryAssetGuids[0]);
             var dictionary = AssetDatabase.LoadAssetAtPath(dictionaryAssetPath, typeof(Dictionary)) as Dictionary;
 

@@ -31,7 +31,7 @@ namespace Lost
                 CoroutineRunner.Start(this.LoadAssetsFromQueue(assetQueue));
             }
         }
-        
+
         private IEnumerator LoadAssetsFromQueue(Queue<ILazyAsset> assetQueue)
         {
             while (assetQueue.Count != 0)

@@ -61,7 +61,7 @@ namespace Lost
         {
             this.UpdateText();
         }
-        
+
         private void UpdateText()
         {
             // update text can be called before Awake is called, so this is very necessary, but this will get called again OnEnable

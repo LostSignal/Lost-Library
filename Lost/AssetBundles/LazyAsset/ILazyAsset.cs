@@ -7,7 +7,7 @@
 namespace Lost
 {
     using System.Collections;
-    
+
     public interface ILazyAsset
     {
         string AssetGuid { get; }

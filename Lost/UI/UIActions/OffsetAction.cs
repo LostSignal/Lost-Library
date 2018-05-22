@@ -34,7 +34,7 @@ namespace Lost
             get { return this.actionObject; }
             set { this.actionObject = (Transform)value; }
         }
-        
+
         public override Type ActionValueType
         {
             get { return typeof(Vector3); }

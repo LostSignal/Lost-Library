@@ -43,7 +43,7 @@ namespace Lost
 
                 DrawInOutTangents(point1);
                 DrawInOutTangents(point2);
-                
+
                 Handles.DrawBezier(
                     point1.transform.position,
                     point2.transform.position,

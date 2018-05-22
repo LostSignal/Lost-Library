@@ -11,7 +11,7 @@ namespace Lost.PlantGenerator
     using UnityEngine;
 
     /// <summary>
-    /// A game object that takes a bunch of parameters like materials and branch prefabs and generates 
+    /// A game object that takes a bunch of parameters like materials and branch prefabs and generates
     /// a nice looking random plants.
     /// </summary>
     public class PlantGenerator : MonoBehaviour
@@ -25,7 +25,7 @@ namespace Lost.PlantGenerator
         /// Stores the layer id the branches will live on.
         /// </summary>
         private static int layerId = -1;
-        
+
         /// <summary>
         /// Parameters associated with creating a group of branches.
         /// </summary>
@@ -63,7 +63,7 @@ namespace Lost.PlantGenerator
             public int RotationalWidth = 10;
 
             /// <summary>
-            /// The materials that a branch can be randomly assigned.  All renderers of the 
+            /// The materials that a branch can be randomly assigned.  All renderers of the
             /// branch prefab will be set to the random material.
             /// </summary>
             public Material[] Materials;
@@ -83,7 +83,7 @@ namespace Lost.PlantGenerator
         /// All the branch parameters associated with this plant generator.
         /// </summary>
         public BranchGroupParameters[] GroupParameters = new BranchGroupParameters[1] { new BranchGroupParameters() };
-        
+
         /// <summary>
         /// The random seed used to generate the looks of this generated plant.
         /// </summary>
@@ -97,7 +97,7 @@ namespace Lost.PlantGenerator
         public bool IsGenerated = false;
 
         /// <summary>
-        /// Used to keep track if this object created it's children itself and thus needs to 
+        /// Used to keep track if this object created it's children itself and thus needs to
         /// destroy them when this object is destroyed.
         /// </summary>
         private bool destroyChildren = false;
@@ -152,7 +152,7 @@ namespace Lost.PlantGenerator
         }
 
         /// <summary>
-        /// Clears the children and regenerates them.  Useful if you already generated 
+        /// Clears the children and regenerates them.  Useful if you already generated
         /// the plant but changed the branch prefab, or plant parameters.
         /// </summary>
         public void Refresh()
@@ -248,7 +248,7 @@ namespace Lost.PlantGenerator
                         Debug.LogError("Plant has invalid number of Variations.  Must have at least 1.", this.gameObject);
                         return;
                     }
-                    
+
                     // creating the new branch
                     int variationIndex = rand.Next(groupParameters.Variations.Length);
                     GameObject prototypePlant = groupParameters.Variations[variationIndex];
@@ -311,7 +311,7 @@ namespace Lost.PlantGenerator
         }
 
         /// <summary>
-        /// Called when the engine destroys this object.  Makes sure that all 
+        /// Called when the engine destroys this object.  Makes sure that all
         /// children that this object instance are destroyed as well.
         /// </summary>
         private void OnDestroy()

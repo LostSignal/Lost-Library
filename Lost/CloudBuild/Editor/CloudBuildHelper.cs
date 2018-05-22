@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // <copyright file="CloudBuildHelper.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
@@ -11,7 +11,7 @@ namespace Lost
     using UnityEditor;
     using UnityEditor.Callbacks;
     using UnityEngine;
-            
+
     public static class CloudBuildHelper
     {
         public static void PreExport(string configName)
@@ -80,7 +80,7 @@ namespace Lost
 
             // The following code used to live inside AssetBundleManager, but I moved it out to here
             bool shouldCheckODR = EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS || EditorUserBuildSettings.activeBuildTarget == BuildTarget.tvOS;
-            
+
             if (shouldCheckODR)
             {
                 #if ENABLE_IOS_ON_DEMAND_RESOURCES
@@ -89,12 +89,12 @@ namespace Lost
                     options |= BuildAssetBundleOptions.UncompressedAssetBundle;
                 }
                 #endif
-            
+
                 #if ENABLE_IOS_APP_SLICING
                 options |= BuildAssetBundleOptions.UncompressedAssetBundle;
                 #endif
             }
-            
+
             return options;
         }
 
@@ -139,7 +139,7 @@ namespace Lost
                 Debug.LogErrorFormat("Unable to find BuildConfig {0}!", configName);
                 return;
             }
-            
+
             // updating AppSettings and saving
             activeConfig.IsActive = true;
             EditorUtility.SetDirty(AppSettings.Instance);
@@ -157,7 +157,7 @@ namespace Lost
             Debug.LogFormat("CloudBuildHelper.DisableBitCode({0}, {1})", buildTarget, path);
             Debug.LogFormat("Active Config = {0}", AppSettings.ActiveConfig.Name);
             Debug.LogFormat("DisableBitCode = {0}", AppSettings.ActiveConfig.DisableIOSBitCode);
-            
+
             if (buildTarget == BuildTarget.iOS && AppSettings.ActiveConfig.DisableIOSBitCode)
             {
                 #if UNITY_IOS
@@ -178,7 +178,7 @@ namespace Lost
         // https://forum.unity3d.com/threads/how-to-put-ios-entitlements-file-in-a-unity-project.442277/
         [PostProcessBuild]
         private static void EnableIOSPushNotifications(BuildTarget buildTarget, string buildPath)
-        {            
+        {
             if (buildTarget != BuildTarget.iOS || AppSettings.ActiveConfig.IOSPushNotificationType == IOSPushNotificationType.None)
             {
                 return;
@@ -207,7 +207,7 @@ namespace Lost
             var pbxProjectPath = UnityEditor.iOS.Xcode.PBXProject.GetPBXProjectPath(buildPath);
             var pbxProject = new UnityEditor.iOS.Xcode.PBXProject();
             pbxProject.ReadFromFile(pbxProjectPath);
-            
+
             string fileName = "Push.entitlements";
             string targetName = UnityEditor.iOS.Xcode.PBXProject.GetUnityTargetName();
             string targetGuid = pbxProject.TargetGuidByName(targetName);
@@ -227,7 +227,7 @@ namespace Lost
 
             // saving the pbx project back to disk
             pbxProject.WriteToFile(pbxProjectPath);
-            
+
             #endif
         }
     }

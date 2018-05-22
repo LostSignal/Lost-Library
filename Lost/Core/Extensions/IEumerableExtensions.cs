@@ -7,7 +7,7 @@
 namespace Lost
 {
     using System.Collections.Generic;
-    
+
     public static class IEumerableExtensions
     {
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source)

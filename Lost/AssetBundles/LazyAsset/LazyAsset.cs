@@ -22,7 +22,7 @@ namespace Lost
         [SerializeField] private string assetPath;
         [SerializeField] private string assetBundleName;
         #pragma warning restore 0649
-        
+
         private bool isLoading;
         private T asset;
 
@@ -82,9 +82,9 @@ namespace Lost
         {
             get { return this.assetBundleName; }
         }
-        
+
         #if UNITY_EDITOR
-        
+
         public static string FindAssetBundleName(string assetPath)
         {
             if (string.IsNullOrEmpty(assetPath))
@@ -114,7 +114,7 @@ namespace Lost
 
             this.assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(this.assetGuid);
             this.assetBundleName = FindAssetBundleName(this.assetPath);
-            
+
             if (string.IsNullOrEmpty(this.assetGuid) == false && string.IsNullOrEmpty(this.assetPath))
             {
                 Debug.LogErrorFormat("LazyAsset {0} has invalid GUID.  Couldn't find AssetPath.", this.assetGuid);
@@ -155,7 +155,7 @@ namespace Lost
                 {
                     yield return LoadWithAssetBundleManager();
                 }
-                
+
                 #else
 
                 yield return LoadWithAssetBundleManager();
@@ -191,7 +191,7 @@ namespace Lost
                 this.asset = UnityEditor.AssetDatabase.LoadAssetAtPath(this.assetPath, typeof(T)) as T;
             }
         }
-        
+
         #endif
 
         private IEnumerator LoadWithAssetBundleManager()

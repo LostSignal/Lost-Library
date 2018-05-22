@@ -24,7 +24,7 @@ namespace Lost
         /// </summary>
         [SerializeField]
         private List<Entry> entries = new List<Entry>();
-                
+
         #if UNITY_EDITOR
 
         /// <summary>
@@ -40,14 +40,14 @@ namespace Lost
         {
             get { return this.entries[index]; }
         }
-        
+
         public ushort AddNewText(string newText)
         {
             ushort newId = this.entries.Count > 0 ? (ushort)(this.entries.Last().Id + 1) : (ushort)1;
             this.AddNewText(newId, newText);
             return newId;
         }
-        
+
         public void AddNewText(ushort newId, string newText)
         {
             if (newId == NullId)
@@ -66,7 +66,7 @@ namespace Lost
             {
                 this.entries.Add(new Entry(newId, newText));
 
-                this.entries.Sort(delegate(Entry e1, Entry e2) 
+                this.entries.Sort(delegate(Entry e1, Entry e2)
                 {
                     return e1.Id.CompareTo(e2.Id);
                 });

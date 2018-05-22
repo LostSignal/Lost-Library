@@ -14,7 +14,7 @@ namespace Lost
     {
         private const int ColumnCount = 10;
         private static Grid grid;
-        
+
         // Use this for initialization
         static GridTest()
         {
@@ -24,7 +24,7 @@ namespace Lost
             {
                 gridDefinition.AddColumn("Column " + (i + 1), 100);
             }
-            
+
             grid = new Grid(gridDefinition);
         }
 
@@ -66,7 +66,7 @@ namespace Lost
                         grid.DrawColor(Color.white);
                     }
                 }
-                
+
                 using (new BeginGridRowHelper(grid))
                 {
                     for (int i = 0; i < ColumnCount; i++)
@@ -74,7 +74,7 @@ namespace Lost
                         grid.DrawLabel("Label " + (i + 1));
                     }
                 }
-                
+
                 using (new BeginGridRowHelper(grid))
                 {
                     for (int i = 0; i < ColumnCount; i++)
@@ -98,7 +98,7 @@ namespace Lost
                         grid.DrawString("String " + (i + 1));
                     }
                 }
-                
+
                 using (new BeginGridRowHelper(grid))
                 {
                     for (int i = 0; i < ColumnCount; i++)

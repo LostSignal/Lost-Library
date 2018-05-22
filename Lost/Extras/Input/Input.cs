@@ -8,7 +8,7 @@ namespace Lost
 {
     using System;
     using UnityEngine;
-    
+
     public enum InputState : byte
     {
         Hover,
@@ -16,14 +16,14 @@ namespace Lost
         Moved,
         Released
     }
-    
+
     public enum InputType : byte
     {
         Touch,
         Pen,
         Mouse
     }
-    
+
     public enum InputButton : byte
     {
         None,
@@ -32,36 +32,36 @@ namespace Lost
         Right,
         Eraser,
     }
-    
+
     [System.Serializable]
     public class Input
     {
         /// <summary>
         /// Returns the minimum squared pixel movement needed to consider an input movement intentional.
-        /// 
-        /// Example: 
-        ///   bool didFingerMove = 
+        ///
+        /// Example:
+        ///   bool didFingerMove =
         ///       (input.PreviousPosition - input.CurrentPosition).sqrMagnatude > Input.GetMinimumPixelMovementSquared();
-        ///   
+        ///
         /// </summary>
         /// <returns>The minimum squared pixel movement.</returns>
         public static float GetMinimumPixelMovementSquared()
         {
-            //// NOTE [bgish]: Originally I was going to do the below code that took into account dpi and fixed 
-            ////               delta time because input uses FixedUpdate and Unity defaults to 0.02.  But once 
-            ////               tested on device it seems that my pixel 2 xl does a really good job at returning 
+            //// NOTE [bgish]: Originally I was going to do the below code that took into account dpi and fixed
+            ////               delta time because input uses FixedUpdate and Unity defaults to 0.02.  But once
+            ////               tested on device it seems that my pixel 2 xl does a really good job at returning
             ////               subpixel movement and knowing when a finger moves, so it turns out that not needed.
             ////
             //// float minDpi = 96.0f;
             //// float maxDpi = 538.0f;
             //// float dpi = Mathf.Clamp(Screen.dpi == 0.0f ? 160.0f : Screen.dpi, minDpi, maxDpi);
             //// float fixedTimeMultiplier = 1.0f;
-            //// 
+            ////
             //// if (Time.fixedDeltaTime > 0.02f)
             //// {
             ////     fixedTimeMultiplier = Time.fixedDeltaTime / 0.02f;
             //// }
-            //// 
+            ////
             //// return Mathf.Lerp(2.0f, 10.0f, (dpi - minDpi) / (maxDpi - minDpi)) * fixedTimeMultiplier;
 
             return 2.0f;
@@ -85,10 +85,10 @@ namespace Lost
 
             float previousPixelLength = (input1.PreviousPosition - input2.PreviousPosition).sqrMagnitude;
             float currentPixelLength = (input1.CurrentPosition - input2.CurrentPosition).sqrMagnitude;
-            
+
             return (previousPixelLength != 0.0f ? currentPixelLength / previousPixelLength : 1.0f) - 1.0f;
         }
-        
+
         public void Reset(int id, int unityFingerId, InputType inputType, InputButton inputButton, Vector2 position)
         {
             this.Id = id;

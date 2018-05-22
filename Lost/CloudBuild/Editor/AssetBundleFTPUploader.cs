@@ -34,7 +34,7 @@ namespace Lost
                 UploadToFTP(newFtpFile, file.FullName, username, password);
             }
         }
-        
+
         private static FtpStatusCode CreateFolderOnFTP(String fullFtpDirectoryPath, String inUsername, String inPassword)
         {
             FtpWebRequest request = (FtpWebRequest)FtpWebRequest.Create(fullFtpDirectoryPath);

@@ -75,7 +75,7 @@ namespace Lost
             // catalog items
             var catalogItemsRequest = this.GetUpdateCatalogItemsRequest(catalog);
             this.UpdateCatalogItems(catalogItemsRequest, (result) => Debug.Log("Upload Catalog Items Successful"), (error) => Debug.LogErrorFormat("Upload Catalog Items Failed: {0}", error.ToString()));
-             
+
             // adding stores
             foreach (var store in catalog.Stores)
             {
@@ -83,7 +83,7 @@ namespace Lost
                 this.SetStoreItems(updateStoreItemRequest, (result) => Debug.LogFormat("Upload Store Items {0} Successful", store.Id), (error) => Debug.LogErrorFormat("Upload Store Items {0} Failed: {1}", store.Id, error.ToString()));
             }
         }
-        
+
         private AddVirtualCurrencyTypesRequest GetAddVirtualCurrenciesRequest(Catalog catalog)
         {
             var request = new AddVirtualCurrencyTypesRequest();
@@ -103,7 +103,7 @@ namespace Lost
 
             return request;
         }
-        
+
         private UpdateCatalogItemsRequest GetUpdateCatalogItemsRequest(Catalog catalog)
         {
             var request = new UpdateCatalogItemsRequest
@@ -111,7 +111,7 @@ namespace Lost
                 CatalogVersion = catalog.Version,
                 Catalog = new List<PlayFab.AdminModels.CatalogItem>(),
             };
-            
+
             foreach (var catalogItem in catalog.CatalogItems)
             {
                 request.Catalog.Add(new PlayFab.AdminModels.CatalogItem
@@ -168,7 +168,7 @@ namespace Lost
                     Bundle = bundleInfo,
                 });
             }
-            
+
             return request;
         }
 
@@ -204,7 +204,7 @@ namespace Lost
         {
             PlayFabEditorHttp.MakeApiCall("/Admin/UpdateCatalogItems", this.GetEndpoint(), req, resultCb, errorCb);
         }
-        
+
         private void SetStoreItems(UpdateStoreItemsRequest req, Action<UpdateStoreItemsResult> resultCb, Action<PlayFab.PfEditor.EditorModels.PlayFabError> errorCb)
         {
             this.GetEndpoint();

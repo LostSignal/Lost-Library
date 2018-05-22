@@ -8,11 +8,11 @@ namespace Lost
 {
     using System;
     using System.Collections.Generic;
-    
+
     public static class IdGeneratorUtil
     {
         private static Random rand = new Random((int)System.DateTime.Now.ToFileTimeUtc());
-        
+
         public static ushort GenerateUniqueUshort(HashSet<ushort> taken)
         {
             var valid = new List<ushort>(256);

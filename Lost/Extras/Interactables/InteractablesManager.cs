@@ -36,7 +36,7 @@ namespace Lost
             this.mainCamera = Camera.main;
             this.layer = 1 << layerNumber;
         }
-        
+
         private void OnInput(Input input)
         {
             if (input == null || input.InputState != InputState.Pressed)

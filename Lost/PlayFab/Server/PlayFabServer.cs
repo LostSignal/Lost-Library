@@ -230,7 +230,7 @@ namespace Lost
             LostPlayerPrefs.DeleteKey(DeviceIdKey);
             LostPlayerPrefs.Save();
         }
-        
+
         public bool HasInventoryItem(string itemId)
         {
             return this.GetInventoryCount(itemId) > 0;
@@ -241,7 +241,7 @@ namespace Lost
             var inventoryItem = this.userInventory.FirstOrDefault(x => x.Id == itemId);
             return inventoryItem != null ? inventoryItem.Count : 0;
         }
-        
+
         public int GetVirtualCurrency(string virtualCurrencyId)
         {
             int value;
@@ -252,7 +252,7 @@ namespace Lost
 
             return -1;
         }
-        
+
         public UnityTask<GetUserInventoryResult> RefreshVirtualCurrency()
         {
             return PF.Do(new GetUserInventoryRequest());
@@ -293,7 +293,7 @@ namespace Lost
                 Debug.LogErrorFormat("Tried to add unknown virtual currency to inventory {0}", virtualCurrencyId);
                 return;
             }
-            
+
             this.virtualCurrencies[virtualCurrencyId] += amountToAdd;
 
             this.OnVirtualCurrencyChanged();
@@ -316,7 +316,7 @@ namespace Lost
 
             this.OnVirtualCurrencyChanged();
         }
-        
+
         protected void InternalAddCatalogItemToInventory(string catalogItemId, int count)
         {
             var inventoryItem = this.userInventory.FirstOrDefault(x => x.Id == catalogItemId);
@@ -388,7 +388,7 @@ namespace Lost
                 Debug.LogErrorFormat("PlayFabServer.InternalAddStoreItemToInventory found unknown StoreItemType {0} on store item id {1}", storeItem.Type, storeItem.ItemId);
             }
         }
-        
+
         protected void OnUserInventoryChanged()
         {
             if (this.UserInventoryChanged != null)
@@ -468,7 +468,7 @@ namespace Lost
                 if (UnityPurchasingManager.Instance.IsIAPInitialized == false)
                 {
                     var initializeIap = UnityPurchasingManager.Instance.InitializeUnityPurchasing();
-                    
+
                     PlayFabMessages.ShowConnectingToStoreSpinner();
 
                     while (initializeIap.IsDone == false)
@@ -524,15 +524,15 @@ namespace Lost
                 }
 
                 #else
-                
+
                 throw new NotImplementedException("Trying to buy IAP Store Item when UNITY_PURCHASING is not defined!");
-                
+
                 #endif
             }
             else
             {
                 bool hasSufficientFunds = this.virtualCurrencies[storeItem.CostCurrencyId] >= storeItem.Cost;
-                
+
                 if (showPurchaseItemDialog)
                 {
                     var purchaseItemDialog = PurchaseItem.Instance.ShowStoreItem(storeItem, hasSufficientFunds);
@@ -547,7 +547,7 @@ namespace Lost
                         yield break;
                     }
                 }
-                
+
                 if (hasSufficientFunds == false)
                 {
                     var messageBoxDialog = PlayFabMessages.ShowInsufficientCurrency();
@@ -564,10 +564,10 @@ namespace Lost
                             showStore.Invoke();
                         }
                     }
-                    
+
                     yield break;
                 }
-                
+
                 var coroutine = PF.Do(new PurchaseItemRequest
                 {
                     ItemId = storeItem.ItemId,
@@ -677,7 +677,7 @@ namespace Lost
             this.UpdateUserInventory(result.Inventory);
             this.UpdateVirtualCurrencies(result.VirtualCurrency, result.VirtualCurrencyRechargeTimes);
         }
-        
+
         private void PlayfabEvents_OnGetTimeResultEvent(GetTimeResult result)
         {
             serverRealtimeSinceStartup = Time.realtimeSinceStartup;
@@ -725,7 +725,7 @@ namespace Lost
 
             this.OnUserInventoryChanged();
         }
-        
+
         private void OnServerNeedsRelogin()
         {
             if (this.ServerNeedsRelogin != null)
@@ -733,7 +733,7 @@ namespace Lost
                 this.ServerNeedsRelogin();
             }
         }
-                
+
         private IEnumerator ProcessPurchaseCoroutine(PurchaseEventArgs e)
         {
             Debug.AssertFormat(e.purchasedProduct.hasReceipt, "Purchased item {0} doesn't have a receipt", e.purchasedProduct.definition.id);
@@ -749,7 +749,7 @@ namespace Lost
             var store = (string)receipt["Store"];
             var transactionID = (string)receipt["TransactionID"];
             var payload = (string)receipt["Payload"];
-            
+
             Debug.AssertFormat(string.IsNullOrEmpty(store) == false, "Unable to parse store from {0}", e.purchasedProduct.receipt);
             Debug.AssertFormat(string.IsNullOrEmpty(transactionID) == false, "Unable to parse transactionID from {0}", e.purchasedProduct.receipt);
             Debug.AssertFormat(string.IsNullOrEmpty(payload) == false, "Unable to parse payload from {0}", e.purchasedProduct.receipt);
@@ -787,7 +787,7 @@ namespace Lost
 
                 var receiptJson = (string)details["json"];
                 var signature = (string)details["signature"];
-                
+
                 var validate = PF.Do(new ValidateGooglePlayPurchaseRequest()
                 {
                     CurrencyCode = e.purchasedProduct.metadata.isoCurrencyCode,
@@ -829,7 +829,7 @@ namespace Lost
                 this.InternalAddCatalogItemToInventory(catalogItem.Id, 1);
             }
         }
-        
+
         private IEnumerator DebugPurchaseStoreItem(PurchaseEventArgs e)
         {
             var coroutine = PF.ExecuteCloudScript("DebugPurchaseItem", new
@@ -837,7 +837,7 @@ namespace Lost
                 itemId = e.purchasedProduct.definition.id,
                 catalogVersion = PF.CatalogVersion,
             });
-               
+
             while (coroutine.keepWaiting)
             {
                 yield return null;
@@ -862,7 +862,7 @@ namespace Lost
                 }
             }
         }
-        
+
         private class InventoryItem : IInventoryItem
         {
             public string Id { get; set; }

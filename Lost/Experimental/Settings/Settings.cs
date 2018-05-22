@@ -9,7 +9,7 @@ namespace Lost
     using System;
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public abstract class Settings
     {
         #region settings definition
@@ -93,7 +93,7 @@ namespace Lost
                 settings[key] = value;
             }
         }
-        
+
         #endregion
 
         #region settings implementation
@@ -139,14 +139,14 @@ namespace Lost
             [SerializeField] public Dictionary<int, DateTime> DateTimeValues = new Dictionary<int, DateTime>();
             #pragma warning restore 0649
         }
-        
+
         private readonly List<ISetting> settings = new List<ISetting>();
-        
+
         private readonly object readWriteLock = new object();
-        
+
         [SerializeField]
         private SettingsData data;
-        
+
         protected Settings(string json)
         {
             if (string.IsNullOrEmpty(json))
@@ -158,42 +158,42 @@ namespace Lost
                 this.data = JsonUtility.FromJson<SettingsData>(json);
             }
         }
-        
+
         protected IBoolSetting GetBoolSetting(int key, bool defaultValue)
         {
             var setting = new BoolSetting(this.data.BooleanValues, key, defaultValue);
             this.settings.Add(setting);
             return setting;
         }
-        
+
         protected IStringSetting GetStringSetting(int key, string defaultValue)
         {
             var setting = new StringSetting(this.data.StringValues, key, defaultValue);
             this.settings.Add(setting);
             return setting;
         }
-        
+
         protected IIntSetting GetIntSetting(int key, int defaultValue)
         {
             var setting = new IntSetting(this.data.IntValues, key, defaultValue);
             this.settings.Add(setting);
             return setting;
         }
-        
+
         protected IFloatSetting GetFloatSetting(int key, float defaultValue)
         {
             var setting = new FloatSetting(this.data.FloatValues, key, defaultValue);
             this.settings.Add(setting);
             return setting;
         }
-        
+
         protected IDateTimeSetting GetDateTimeSetting(int key, DateTime defaultValue)
         {
             var setting = new DateTimeSetting(this.data.DateTimeValues, key, defaultValue);
             this.settings.Add(setting);
             return setting;
         }
-        
+
         public bool IsDirty
         {
             get
@@ -207,7 +207,7 @@ namespace Lost
                             return true;
                         }
                     }
-                        
+
                     return false;
                 }
             }
@@ -220,7 +220,7 @@ namespace Lost
                 foreach (var setting in this.settings) setting.Commit();
             }
         }
-        
+
         public void Revert()
         {
             lock (readWriteLock)
@@ -228,7 +228,7 @@ namespace Lost
                 foreach (var setting in this.settings) setting.Revert();
             }
         }
-        
+
         public string SerializeToJson()
         {
             lock (readWriteLock)
@@ -244,4 +244,3 @@ namespace Lost
         }
     }
 }
-  

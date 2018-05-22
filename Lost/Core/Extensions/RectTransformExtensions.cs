@@ -8,7 +8,7 @@ namespace Lost
 {
     using System.Collections;
     using UnityEngine;
-    
+
     public static class RectTransformExtensions
     {
         public static void FitToParent(this RectTransform rectTransform)
@@ -23,7 +23,7 @@ namespace Lost
         {
             lhs.sizeDelta = lhs.sizeDelta.SetX(width);
         }
-        
+
         public static void SetHeight(this RectTransform lhs, float height)
         {
             lhs.sizeDelta = lhs.sizeDelta.SetY(height);
@@ -60,7 +60,7 @@ namespace Lost
                 }
             }
         }
-        
+
         public static IEnumerator Translate(this RectTransform rectTransform, Vector2 start, Vector2 end, float timeLengthInSeconds, float delayInSeconds, AnimationCurve animCurve)
         {
             float percentage = 0.0f;

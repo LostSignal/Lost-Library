@@ -7,10 +7,10 @@
 namespace Lost.PlantGenerator
 {
     using UnityEngine;
- 
+
     /// <summary>
-    /// This class represents a branch of the plant generator.  You setup a mesh with an aim target and this 
-    /// class will make sure the mesh points towards that aim target.  In order for everything to work 
+    /// This class represents a branch of the plant generator.  You setup a mesh with an aim target and this
+    /// class will make sure the mesh points towards that aim target.  In order for everything to work
     /// properly, the branch should be facing down the forward vector (0, 0, 1).
     /// </summary>
     public class PlantGeneratorBranch : MonoBehaviour
@@ -31,12 +31,12 @@ namespace Lost.PlantGenerator
         public Transform Mesh;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         private Rigidbody aimTargetRigidbody;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public void Awake()
         {

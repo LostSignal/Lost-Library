@@ -118,12 +118,12 @@ namespace Lost
                 return rowGuiStyle;
             }
         }
-        
+
         private int RowButtonsWidth
         {
             get { return this.rowButtonCount == 0 ? 0 : (5 + (this.rowButtonCount * 27)); }
         }
-        
+
         public void BeginGrid()
         {
             this.totalWidth = this.GetTotalCellWidth();
@@ -146,12 +146,12 @@ namespace Lost
             ////     {
             ////         EditorGUILayout.Space();
             ////         EditorGUILayout.Space();
-            //// 
+            ////
             ////         addButtonPosition.x += Padding;
             ////         addButtonPosition.y += 3;
             ////         addButtonPosition.width = totalWidth;
             ////         addButtonPosition.height = 13;
-            //// 
+            ////
             ////         if (GUI.Button(addButtonPosition, "+"))
             ////         {
             ////             property.InsertArrayElementAtIndex(property.arraySize);
@@ -159,7 +159,7 @@ namespace Lost
             ////             return true;
             ////         }
             ////     }
-            //// 
+            ////
             ////     return false;
             //// }
 
@@ -169,22 +169,22 @@ namespace Lost
         public void BeginRow()
         {
             this.currentColumnIndex = 0;
-                                        
+
             RowGuiStyle.normal.background = LostEditorUtil.MakeColorTexture(this.GetCurrentRowColor());
 
             EditorGUILayout.BeginHorizontal(RowGuiStyle, GUILayout.Height(RowHeight), GUILayout.Width(this.totalWidth));
-        
+
             //// public BeginGridRowHelper(float width, int height, Color rowColor, out Rect position)
             //// {
             ////     GUIStyle newStyle = new GUIStyle();
             ////     newStyle.padding = new RectOffset();
             ////     newStyle.margin = new RectOffset();
             ////     newStyle.normal.background = LostEditorUtil.MakeTexture(rowColor);
-            //// 
+            ////
             ////     position = EditorGUILayout.BeginHorizontal(newStyle, GUILayout.Height(height), GUILayout.Width(width));
             //// }
         }
-         
+
         public void EndRow()
         {
             this.RowButtonPressed = this.DrawRowButtons();
@@ -194,7 +194,7 @@ namespace Lost
         }
 
         #region Button Drawing
-        
+
         public bool DrawAddButton()
         {
             return GUILayout.Button("+", GUILayout.Width(this.totalWidth - 5));
@@ -302,7 +302,7 @@ namespace Lost
         public string DrawPopup(string[] values, string currentValue)
         {
             var column = this.GetNextColumn();
-            
+
             int currentIndex = Array.IndexOf(values, currentValue);
 
             if (currentIndex < 0)
@@ -328,10 +328,10 @@ namespace Lost
             var enumValues = Enum.GetValues(typeof(T));
             var enumNames = enumValues.OfType<T>().Select(x => x.ToString()).ToList();
             int currentIndex = enumNames.IndexOf(value.ToString());
-        
+
             GUILayout.Space(3);
             int newIndex = EditorGUILayout.Popup(currentIndex, enumNames.ToArray(), GUILayout.Width(column.Width - 3));
-            
+
             return newIndex != currentIndex ? (T)enumValues.GetValue(newIndex) : value;
         }
 
@@ -429,7 +429,7 @@ namespace Lost
         }
 
         #endregion
-        
+
         private void DrawHeader()
         {
             using (new BeginHorizontalHelper())
@@ -502,7 +502,7 @@ namespace Lost
             {
                 return GridButton.MoveDown;
             }
-            
+
             GUILayout.Space(this.rowButtonCount == 1 ? 3 : 4);  // HACK [bgish]: to make 1 button look perfect
 
             return GridButton.None;

@@ -148,11 +148,11 @@ namespace Lost
     //    {
     //        TestSettingsClass testSettings = new TestSettingsClass();
     //        Assert.False(testSettings.IsDirty);
-    //        
+    //
     //        testSettings = new TestSettingsClass();
     //        testSettings.BoolSetting.Value = false;
     //        Assert.True(testSettings.IsDirty);
-    //        
+    //
     //        testSettings = new TestSettingsClass();
     //        testSettings.IntSetting.Value = 50;
     //        Assert.True(testSettings.IsDirty);

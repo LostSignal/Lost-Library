@@ -8,7 +8,7 @@ namespace Lost
 {
     using System.IO;
     using UnityEditor;
-    
+
     public class TemplateScriptAssetProcessor : AssetModificationProcessor
     {
         public static void OnWillCreateAsset(string assetPath)
@@ -26,7 +26,7 @@ namespace Lost
             bool isLostFolder = assetPath.Contains("/Lost/");
             string companyName = "Lost Signal LLC";
             string nameSpace = "Lost";
-            
+
             if (isLostFolder == false)
             {
                 companyName = PlayerSettings.companyName.IsNullOrWhitespace() ? "Player Settings Company Not Defined" : PlayerSettings.companyName;
@@ -36,7 +36,7 @@ namespace Lost
             string fileContents = File.ReadAllText(assetPath);
             fileContents = fileContents.Replace("#COMPANY_NAME#", companyName);
             fileContents = fileContents.Replace("#NAMESPACE#", nameSpace);
-            
+
             File.WriteAllText(assetPath, AppSettingsHelper.ConvertLineEndings(fileContents, appSettings.ProjectLineEndings));
             AssetDatabase.Refresh();
         }

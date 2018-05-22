@@ -15,7 +15,7 @@ namespace Lost
         private string downloadingError;
         private System.Type type;
         private AssetBundleRequest request = null;
-        
+
         public AssetBundleLoadAssetOperationFull(string bundleName, string assetName, System.Type type)
         {
             this.assetBundleName = bundleName;

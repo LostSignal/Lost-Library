@@ -15,7 +15,7 @@ namespace Lost
     using UnityEngine;
 
     /// <summary>
-    /// The AssetBundle Manager provides a High-Level API for working with AssetBundles.  
+    /// The AssetBundle Manager provides a High-Level API for working with AssetBundles.
     /// It will take care of loading dependent asset bundles, including their variants.
     /// </summary>
     public class AssetBundleManager : MonoBehaviour
@@ -35,7 +35,7 @@ namespace Lost
         private static List<string> downloadingBundles = new List<string>();
         private static List<AssetBundleLoadOperation> inProgressOperations = new List<AssetBundleLoadOperation>();
         private static Dictionary<string, string[]> dependencies = new Dictionary<string, string[]>();
-        
+
         public delegate string OverrideBaseDownloadingURLDelegate(string bundleName);
 
         // Implements per-bundle base downloading URL override. The subscribers must return null values for unknown bundle names;
@@ -80,7 +80,7 @@ namespace Lost
         {
             set { assetBundleManifest = value; }
         }
-        
+
         #if UNITY_EDITOR
         // Flag to indicate if we want to simulate assetBundles in Editor without building them actually.
         public static bool SimulateAssetBundleInEditor
@@ -90,7 +90,7 @@ namespace Lost
                 if (simulateAssetBundleInEditor == -1)
                 {
                     simulateAssetBundleInEditor = EditorPrefs.GetBool(SimulateAssetBundles, true) ? 1 : 0;
-                }   
+                }
 
                 return simulateAssetBundleInEditor != 0;
             }
@@ -125,7 +125,7 @@ namespace Lost
                 SetSourceAssetBundleURL(Platform.GetStreamingAssetsURL(AssetBundleUtility.AssetBundlesFolderName));
             }
         }
-        
+
         // Retrieves an asset bundle that has previously been requested via LoadAssetBundle.
         // Returns null if the asset bundle or one of its dependencies have not been downloaded yet.
         public static LoadedAssetBundle GetLoadedAssetBundle(string assetBundleName, out string error)
@@ -133,21 +133,21 @@ namespace Lost
             if (downloadingErrors.TryGetValue(assetBundleName, out error))
             {
                 return null;
-            }   
+            }
 
             LoadedAssetBundle bundle = null;
             loadedAssetBundles.TryGetValue(assetBundleName, out bundle);
             if (bundle == null)
             {
                 return null;
-            }   
+            }
 
             // No dependencies are recorded, only the bundle itself is required.
             string[] dependencies = null;
             if (AssetBundleManager.dependencies.TryGetValue(assetBundleName, out dependencies) == false)
             {
                 return bundle;
-            }   
+            }
 
             // Make sure all dependencies are loaded
             foreach (var dependency in dependencies)
@@ -155,7 +155,7 @@ namespace Lost
                 if (downloadingErrors.TryGetValue(assetBundleName, out error))
                 {
                     return bundle;
-                }   
+                }
 
                 // Wait all the dependent assetBundles being loaded.
                 LoadedAssetBundle dependentBundle;
@@ -163,7 +163,7 @@ namespace Lost
                 if (dependentBundle == null)
                 {
                     return null;
-                }   
+                }
             }
 
             return bundle;
@@ -196,13 +196,13 @@ namespace Lost
 
             // puting this gameobject under the singleton container
             go.transform.SetParent(SingletonUtil.GetSingletonContainer());
-            
+
             #if UNITY_EDITOR
             // If we're in Editor simulation mode, we don't need the manifest assetBundle.
             if (SimulateAssetBundleInEditor)
             {
                 return null;
-            }   
+            }
             #endif
 
             LoadAssetBundle(manifestAssetBundleName, true);
@@ -210,7 +210,7 @@ namespace Lost
             inProgressOperations.Add(operation);
             return operation;
         }
-        
+
         // Unloads assetbundle and its dependencies.
         public static void UnloadAssetBundle(string assetBundleName)
         {
@@ -219,9 +219,9 @@ namespace Lost
             if (SimulateAssetBundleInEditor)
             {
                 return;
-            }   
+            }
             #endif
-            
+
             UnloadAssetBundleInternal(assetBundleName);
             UnloadDependencies(assetBundleName);
         }
@@ -232,7 +232,7 @@ namespace Lost
             Log(LogType.Info, "Loading " + assetName + " from " + assetBundleName + " bundle");
 
             AssetBundleLoadAssetOperation operation = null;
-            
+
             #if UNITY_EDITOR
             if (SimulateAssetBundleInEditor)
             {
@@ -275,7 +275,7 @@ namespace Lost
             Log(LogType.Info, "Loading " + levelName + " from " + assetBundleName + " bundle");
 
             AssetBundleLoadOperation operation = null;
-            
+
             #if UNITY_EDITOR
             if (SimulateAssetBundleInEditor)
             {
@@ -330,7 +330,7 @@ namespace Lost
             if (!isAlreadyProcessed && !isLoadingAssetBundleManifest)
             {
                 LoadDependencies(assetBundleName);
-            }   
+            }
         }
 
         // Returns base downloading URL for the given asset bundle.
@@ -345,7 +345,7 @@ namespace Lost
                     if (res != null)
                     {
                         return res;
-                    }   
+                    }
                 }
             }
 
@@ -353,12 +353,12 @@ namespace Lost
         }
 
         // Checks who is responsible for determination of the correct asset bundle variant
-        // that should be loaded on this platform. 
+        // that should be loaded on this platform.
         //
         // On most platforms, this is done by the AssetBundleManager itself. However, on
         // certain platforms (iOS at the moment) it's possible that an external asset bundle
-        //  variant resolution mechanism is used. In these cases, we use base asset bundle 
-        // name (without the variant tag) as the bundle identifier. The platform-specific 
+        //  variant resolution mechanism is used. In these cases, we use base asset bundle
+        // name (without the variant tag) as the bundle identifier. The platform-specific
         // code is responsible for correctly loading the bundle.
         private static bool UsesExternalBundleVariantResolutionMechanism(string baseAssetBundleName)
         {
@@ -367,7 +367,7 @@ namespace Lost
             if (url.ToLower().StartsWith("res://"))
             {
                 return true;
-            }            
+            }
             #endif
 
             return false;
@@ -384,7 +384,7 @@ namespace Lost
             if (UsesExternalBundleVariantResolutionMechanism(baseName))
             {
                 return baseName;
-            }   
+            }
 
             int bestFit = int.MaxValue;
             int bestFitIndex = -1;
@@ -399,7 +399,7 @@ namespace Lost
                 if (curBaseName != baseName)
                 {
                     continue;
-                }   
+                }
 
                 int found = System.Array.IndexOf(activeVariants, curVariant);
 
@@ -407,7 +407,7 @@ namespace Lost
                 if (found == -1)
                 {
                     found = int.MaxValue - 1;
-                }   
+                }
 
                 if (found < bestFit)
                 {
@@ -449,7 +449,7 @@ namespace Lost
             if (downloadingBundles.Contains(assetBundleName))
             {
                 return true;
-            }   
+            }
 
             string bundleBaseDownloadingURL = GetAssetBundleBaseDownloadingURL(assetBundleName);
 
@@ -480,7 +480,7 @@ namespace Lost
                 if (isLoadingAssetBundleManifest)
                 {
                     download = new WWW(url);
-                }   
+                }
                 else
                 {
                     download = WWW.LoadFromCacheOrDownload(url, assetBundleManifest.GetAssetBundleHash(assetBundleName), 0);
@@ -508,7 +508,7 @@ namespace Lost
             if (dependencies.Length == 0)
             {
                 return;
-            }   
+            }
 
             for (int i = 0; i < dependencies.Length; i++)
             {
@@ -520,16 +520,16 @@ namespace Lost
             for (int i = 0; i < dependencies.Length; i++)
             {
                 LoadAssetBundleInternal(dependencies[i], false);
-            }   
+            }
         }
-        
+
         private static void UnloadDependencies(string assetBundleName)
         {
             string[] dependencies = null;
             if (AssetBundleManager.dependencies.TryGetValue(assetBundleName, out dependencies) == false)
             {
                 return;
-            }   
+            }
 
             // Loop dependencies.
             foreach (var dependency in dependencies)
@@ -547,7 +547,7 @@ namespace Lost
             if (bundle == null)
             {
                 return;
-            }   
+            }
 
             if (--bundle.ReferencedCount == 0)
             {
@@ -601,12 +601,12 @@ namespace Lost
             if (download == null)
             {
                 return;
-            }   
+            }
 
             if (download.Error == null)
             {
                 loadedAssetBundles.Add(download.AssetBundleName, download.AssetBundle);
-            }   
+            }
             else
             {
                 string msg = string.Format("Failed downloading bundle {0} from {1}: {2}", download.AssetBundleName, download.GetSourceURL(), download.Error);

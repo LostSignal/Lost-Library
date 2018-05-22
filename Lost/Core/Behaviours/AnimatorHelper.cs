@@ -17,7 +17,7 @@ namespace Lost
         {
             this.animator.SetBool(paramName, true);
         }
-        
+
         public void SetBoolFalse(string paramName)
         {
             this.animator.SetBool(paramName, false);

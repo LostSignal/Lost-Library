@@ -24,7 +24,7 @@ namespace Lost
             {
                 return;
             }
-            
+
             EditorGUILayout.LabelField("Words in Dictionary", dictionary.WordCount.ToString());
 
             if (GUILayout.Button("Import Dictionary Text File"))

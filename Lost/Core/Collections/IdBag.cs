@@ -36,7 +36,7 @@ namespace Lost
         {
             get { return this.bits != null ? this.bits.Count : 0; }
         }
-        
+
         #endif
 
         public bool ContainsId(int id)
@@ -138,7 +138,7 @@ namespace Lost
                     count += (this.bits[i] & (1 << j)) == 0 ? 0 : 1;
                 }
             }
-            
+
             return count;
         }
     }

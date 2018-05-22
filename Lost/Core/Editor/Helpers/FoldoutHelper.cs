@@ -10,7 +10,7 @@ namespace Lost
     using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
-    
+
     public class FoldoutHelper : IDisposable
     {
         private static Dictionary<int, bool> foldouts = new Dictionary<int, bool>();

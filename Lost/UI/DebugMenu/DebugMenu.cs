@@ -36,7 +36,7 @@ namespace Lost
         [SerializeField] private TextMeshProUGUI lowerLeftText;
         [SerializeField] private TextMeshProUGUI lowerRightText;
         #pragma warning restore 0649
-        
+
         // fps related variables
         private StringBuilder fpsBuilder = new StringBuilder();
         private readonly int fpsUpdateTicks = 10;
@@ -59,7 +59,7 @@ namespace Lost
         {
             this.debugMenu.SetActive(false);
         }
-        
+
         public void AddItem(string name, UnityAction customAction)
         {
             var newItem = Pooler.Instantiate<DebugMenuItem>(this.debugMenuItemPrefab);
@@ -111,7 +111,7 @@ namespace Lost
                 this.ShowFPS();
             }
         }
-        
+
         public void SetFpsCornerAndColor(Corner fpsCorner, Color fpsColor)
         {
             this.fpsCorner = fpsCorner;
@@ -189,7 +189,7 @@ namespace Lost
             base.Awake();
             this.HideMenu();
             this.Show();
-            
+
             // setting the canvas sorting layer
             if (SortingLayer.NameToID(this.sortingLayerName) == -1)
             {
@@ -200,7 +200,7 @@ namespace Lost
                 this.Canvas.sortingLayerName = this.sortingLayerName;
             }
         }
-        
+
         private void Update()
         {
             if (!this.cameraCache)

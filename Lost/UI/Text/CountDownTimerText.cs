@@ -25,7 +25,7 @@ namespace Lost
         private DateTime target;
         private Text text;
         private float timer;
-        
+
         public DateTime Target
         {
             get

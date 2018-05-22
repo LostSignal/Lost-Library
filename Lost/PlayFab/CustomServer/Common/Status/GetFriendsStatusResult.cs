@@ -4,4 +4,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Lost{    public class GetFriendsStatusResult    {    }}
+namespace Lost
+{
+    public class GetFriendsStatusResult
+    {
+    }
+}

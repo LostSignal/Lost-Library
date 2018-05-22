@@ -7,7 +7,7 @@
 namespace Lost
 {
     using UnityEngine;
-    
+
     public static class TransformExtensions
     {
         public static void Reset(this Transform transform)

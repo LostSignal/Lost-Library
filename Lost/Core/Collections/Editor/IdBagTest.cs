@@ -31,7 +31,7 @@ namespace Lost
         {
             IdBag idBag = new IdBag();
             Assert.True(idBag.BitsListCount == 0);
-            
+
             idBag.AddId(0);
             Assert.True(idBag.BitsListCount == 1);
 
@@ -44,7 +44,7 @@ namespace Lost
             idBag.AddId(64);
             Assert.True(idBag.BitsListCount == 3);
         }
-        
+
         [Test]
         public void InternalCalculatedBitCount()
         {
@@ -56,7 +56,7 @@ namespace Lost
 
             idBag.AddId(1);
             Assert.True(idBag.CalculatedBitCount == 2);
-            
+
             idBag.AddId(100);
             Assert.True(idBag.CalculatedBitCount == 3);
         }
@@ -66,7 +66,7 @@ namespace Lost
         {
             IdBag idBag = new IdBag();
             Assert.True(idBag.Count == 0);
-            
+
             idBag.AddId(0);
             Assert.True(idBag.Count == 1);
             Assert.True(idBag.ContainsId(0));
@@ -110,7 +110,7 @@ namespace Lost
             idBag.RemoveId(1);
             Assert.True(idBag.Count == 1);
             Assert.False(idBag.ContainsId(1));
-            
+
             idBag.RemoveId(0);
             Assert.True(idBag.Count == 0);
             Assert.False(idBag.ContainsId(0));

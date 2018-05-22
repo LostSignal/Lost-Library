@@ -24,13 +24,13 @@ namespace Lost
             files.AddRange(Directory.GetFiles(".", "*.asset", SearchOption.AllDirectories));
             files.AddRange(Directory.GetFiles(".", "*.prefab", SearchOption.AllDirectories));
             files.AddRange(Directory.GetFiles(".", "*.unity", SearchOption.AllDirectories));
-            
+
             foreach (var file in files)
             {
                 foreach (var line in File.ReadAllLines(file))
                 {
                     var trimmedLine = line.Trim();
-                    
+
                     if (trimmedLine.StartsWith(assetGuidString))
                     {
                         var guid = trimmedLine.Replace(assetGuidString, string.Empty).Trim();

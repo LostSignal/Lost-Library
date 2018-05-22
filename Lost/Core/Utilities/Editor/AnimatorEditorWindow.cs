@@ -39,9 +39,9 @@ namespace Lost
             {
                 return;
             }
-            
+
             this.animationClipName = EditorGUILayout.TextField("Animation Clip Name", this.animationClipName);
-            
+
             if (GUILayout.Button("Add"))
             {
                 AssetDatabase.AddObjectToAsset(new AnimationClip() { name = animationClipName }, animator);

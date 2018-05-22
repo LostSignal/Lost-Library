@@ -38,7 +38,7 @@ namespace Lost
         public bool DrawHeader { get; set; }
 
         public bool AlternateColors { get; set; }
-        
+
         public GridButton RowButtons { get; set; }
 
         public int RowButtonCount
@@ -55,7 +55,7 @@ namespace Lost
         {
             get { return this.columns[index]; }
         }
-                
+
         public void AddColumn(string name, int width, string tooltip = null)
         {
             this.columns.Add(new Column(name, width, tooltip));
@@ -69,7 +69,7 @@ namespace Lost
                 this.Width = width;
                 this.Tooltip = tooltip;
             }
-            
+
             public string Name { get; private set; }
 
             public int Width { get; set; }

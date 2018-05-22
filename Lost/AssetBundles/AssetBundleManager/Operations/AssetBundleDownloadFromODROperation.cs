@@ -7,7 +7,7 @@
 namespace Lost
 {
     #if ENABLE_IOS_ON_DEMAND_RESOURCES
-    
+
     using UnityEngine.iOS;
 
     /// <summary>
@@ -42,7 +42,7 @@ namespace Lost
             if (this.Error != null)
             {
                 return;
-            }   
+            }
 
             var path = "res://" + this.AssetBundleName;
             var bundle = UnityEngine.AssetBundle.LoadFromFile(path);
@@ -57,7 +57,7 @@ namespace Lost
 
                 // At the time of unload request is already set to null, so capture it to local variable.
                 var localRequest = this.request;
-                
+
                 // Dispose of request only when bundle is unloaded to keep the ODR pin alive.
                 this.AssetBundle.Unload += () =>
                 {

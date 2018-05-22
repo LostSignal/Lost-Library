@@ -14,7 +14,7 @@ namespace Lost
     {
         private Dictionary<string, object> dictionary;
         private string json;
-        
+
         private CloudBuildManifest(string json)
         {
             this.json = json;
@@ -62,27 +62,27 @@ namespace Lost
         //// {
         ////     get { return this.GetString("buildStartTime");  } // "2016-01-14T07:32:24.000Z" or "1/14/2016 7:32:24 AM"
         //// }
-        //// 
+        ////
         //// public string AssetBundlesHostingOption
         //// {
         ////     get { return this.GetString("assetBundles.hostingOption"); }
         //// }
-        //// 
+        ////
         //// public string AssetBundlesRelativePath
         //// {
         ////     get { return this.GetString("assetBundles.relativePath"); }
         //// }
-        //// 
+        ////
         //// TODO [bgish] - These also need to be added
         //// "assetBundles.localBundlesRelativePath":"AssetBundles/Android",
         //// "assetBundles.localBundles":["Android","redcircus"]
-        //// 
+        ////
 
         public static CloudBuildManifest Find()
         {
             var resourcesManifest = Resources.Load<TextAsset>("UnityCloudBuildManifest.json");
             var buildManifestJson = Path.Combine(Directory.GetCurrentDirectory(), "build_manifest.json");
-            
+
             if (resourcesManifest != null)
             {
                 return new CloudBuildManifest(resourcesManifest.text);

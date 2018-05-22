@@ -4,4 +4,12 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Lost{    using UnityEngine;    public class CalledByUnityEventBuildVerification    {    }}
+namespace Lost
+{
+    using UnityEngine;
+
+    public class CalledByUnityEventBuildVerification
+    {
+
+    }
+}

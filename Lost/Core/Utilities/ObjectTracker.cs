@@ -9,11 +9,11 @@ namespace Lost
     using System;
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public static class ObjectTracker
     {
         private static Dictionary<Type, List<object>> objects = new Dictionary<Type, List<object>>();
-        
+
         public static void Register<T>(T obj) where T : class
         {
             if (obj == null)
@@ -66,7 +66,7 @@ namespace Lost
                 Debug.LogErrorFormat(obj as UnityEngine.Object, "ObjectTracker tried to remove object of type {0} before adding it!", objectType.Name);
             }
         }
-        
+
         public static IEnumerable<T> GetObjects<T>() where T : class
         {
             List<object> objectsList = null;

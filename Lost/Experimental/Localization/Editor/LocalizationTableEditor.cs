@@ -26,7 +26,7 @@ namespace Lost
             }
         }
     }
-    
+
     public class LocalizationTableEditorWindow : EditorWindow
     {
         //// private static NewGrid entriesGrid;
@@ -36,7 +36,7 @@ namespace Lost
             //// var gridDefinition = new GridDefinition();
             //// gridDefinition.AddColumn("Id", 60);
             //// gridDefinition.AddColumn("Text", 600);
-            //// 
+            ////
             //// entriesGrid = new NewGrid(gridDefinition);
         }
 
@@ -44,16 +44,16 @@ namespace Lost
         {
             // TODO [bgish]: Re-implement with new grid rendering system
             //// LocTable locTable = UnityEditor.Selection.activeObject as LocTable;
-            //// 
+            ////
             //// if (locTable != null)
             //// {
             ////     if (GUILayout.Button("Add Localized Text"))
             ////     {
             ////         locTable.AddNewText("");
             ////     }
-            //// 
+            ////
             ////     SerializedObject serializedObject = new SerializedObject(locTable);
-            //// 
+            ////
             ////     using (new BeginVerticalHelper())
             ////     {
             ////         using (new BoxHelper(entriesGrid.GetGridWitdh(), "Entries"))

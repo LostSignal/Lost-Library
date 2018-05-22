@@ -8,7 +8,7 @@ namespace Lost
 {
     using UnityEditor;
     using UnityEngine;
-    
+
     public class PrintGlobalPosition : MonoBehaviour
     {
         [MenuItem("CONTEXT/Transform/Print Global Position")]

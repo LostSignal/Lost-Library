@@ -8,7 +8,7 @@ namespace Lost
 {
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public class InputManager : SingletonGameObject<InputManager>
     {
         private const int InputCacheSize = 20;
@@ -41,7 +41,7 @@ namespace Lost
         {
             this.handlers.Remove(handler);
         }
-        
+
         protected override void Awake()
         {
             // populating the input cache
@@ -75,14 +75,14 @@ namespace Lost
             {
                 this.UpdatePenInput();
             }
-            
+
             // sending inputs to all registered handlers
             for (int i = 0; i < this.handlers.Count; i++)
             {
                 this.handlers[i].HandleInputs(this.fingerInputs, this.mouseInput, this.penInput);
             }
         }
-        
+
         private void UpdateTouchInputs()
         {
             Debug.Assert(this.fingerInputs.Count == this.fingerIdToInputMap.Count, "Finger Inputs list and map don't match!");
@@ -141,7 +141,7 @@ namespace Lost
                 this.mouseInput = this.GetNewInput(-1, InputType.Mouse, InputButton.None, UnityEngine.Input.mousePosition);
                 this.mouseInput.UpdateHover(UnityEngine.Input.mousePosition);
             }
-            
+
             if (this.mouseInput.InputState == InputState.Hover)
             {
                 InputButton inputButton = InputButton.None;

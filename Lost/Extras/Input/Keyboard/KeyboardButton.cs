@@ -7,7 +7,7 @@
 namespace Lost
 {
     using System;
-    
+
     public enum ButtonState
     {
         Idle,
@@ -15,12 +15,12 @@ namespace Lost
         Held,
         Released
     }
-    
+
     public class KeyboardButton
-    {        
+    {
         private DateTime pressedDateTime;
         private DateTime releasedDateTime;
-        
+
         public ButtonState State
         {
             get; private set;
@@ -28,19 +28,19 @@ namespace Lost
 
         public bool IsDown
         {
-            get { return this.State == ButtonState.Held || this.State == ButtonState.Pressed; }            
+            get { return this.State == ButtonState.Held || this.State == ButtonState.Pressed; }
         }
-        
+
         public bool IsUp
         {
             get { return this.State == ButtonState.Idle || this.State == ButtonState.Released; }
         }
-        
+
         public bool IsPressed
         {
             get { return this.State == ButtonState.Pressed; }
         }
-        
+
         public float PressedTime
         {
             get
@@ -63,7 +63,7 @@ namespace Lost
                 }
             }
         }
-        
+
         public void Update(bool isPressed)
         {
             if (this.State == ButtonState.Idle)

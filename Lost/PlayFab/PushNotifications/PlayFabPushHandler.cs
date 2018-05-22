@@ -57,19 +57,19 @@ namespace Lost
         public void ScheduleLocalPushNotification(string title, string message, DateTime dateTime)
         {
             #if UNITY_IOS
-            
+
             if (this.iOSPushHandler)
             {
                 this.iOSPushHandler.ScheduleLocalPushNotification(title, message, dateTime);
             }
 
             #elif UNITY_ANDROID
-            
+
             if (this.androidPushHandler)
             {
                 this.androidPushHandler.ScheduleLocalPushNotification(title, message, dateTime);
             }
-            
+
             #endif
         }
     }

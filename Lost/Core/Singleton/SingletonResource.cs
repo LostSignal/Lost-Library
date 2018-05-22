@@ -25,7 +25,7 @@ namespace Lost
                 return instance;
             }
         }
-        
+
         public static bool IsInitialized
         {
             get { return instance != null; }

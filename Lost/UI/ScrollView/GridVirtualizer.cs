@@ -53,7 +53,7 @@ namespace Lost
         private int columnCount;
         private int rowCount;
         private int count;
-                
+
         private bool isInitialized = false;
 
         private Vector3 GetUpperLeftCornerOfItemContainer()
@@ -68,7 +68,7 @@ namespace Lost
             this.count = count;
             this.Initialize();
             this.CalculateRowAndColumnCount();
-            
+
             if (this.growType == GrowType.Vertically)
             {
                 float height = ((this.cellSize.y + this.cellSpacing.y) * this.rowCount) - this.cellSpacing.y;
@@ -79,7 +79,7 @@ namespace Lost
                 float width = ((this.cellSize.x + this.cellSpacing.x) * this.columnCount) - this.cellSpacing.x;
                 this.itemContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
             }
-            
+
             if (this.manualContentFitter && Application.isPlaying)
             {
                 this.manualContentFitter.Resize();
@@ -102,7 +102,7 @@ namespace Lost
             }
 
             this.activePool.Clear();
-            
+
             for (int i = this.activeTopRow; i <= this.activeBottomRow; i++)
             {
                 for (int j = activeLeftColumn; j <= activeRightColumn; j++)
@@ -121,7 +121,7 @@ namespace Lost
 
             topRow = Mathf.Max(topRow, 0);
             bottomRow = Mathf.Min(bottomRow, this.rowCount - 1);
-            
+
             // TODO [bgish]:  We're assuming that all columns are always present.  These really need to be calculated.
             // calculating left/right columns
             leftColumn = 0;
@@ -135,7 +135,7 @@ namespace Lost
             {
                 return;
             }
-            
+
             this.ForceInitialize();
             this.CalculateRowAndColumnCount();
 
@@ -143,7 +143,7 @@ namespace Lost
             Vector3 lowerLeftWorldPosition = viewportLocalToWorld.MultiplyPoint(this.lowerLeftBounds);
             Vector3 upperRightWorldPosition = viewportLocalToWorld.MultiplyPoint(this.upperRightBounds);
             this.DrawRect(lowerLeftWorldPosition, upperRightWorldPosition);
-            
+
             for (int i = 0; i < this.columnCount; i++)
             {
                 for (int j = 0; j < this.rowCount; j++)
@@ -196,7 +196,7 @@ namespace Lost
             this.activePool.Add(newItem);
             newItem.transform.Reset();
             newItem.transform.localPosition = localPosition;
-            
+
             if (this.OnShowItem != null)
             {
                 this.OnShowItem(newItem, index);
@@ -243,7 +243,7 @@ namespace Lost
 
             Vector3 startOffset = new Vector3(this.cellSize.x / 2.0f, -this.cellSize.y / 2.0f);
             this.cellStartPosition = containerCorners[1] + startOffset;
-            
+
             // calculating cell bounds
             Vector3[] viewportCorners = new Vector3[4];
             this.scrollRect.viewport.GetWorldCorners(viewportCorners);
@@ -259,11 +259,11 @@ namespace Lost
         private void CalculateRowAndColumnCount()
         {
             float containerWidth = this.itemContainer.rect.width;
-            float containerHeight = this.itemContainer.rect.height; 
-            
+            float containerHeight = this.itemContainer.rect.height;
+
             this.columnCount = Mathf.FloorToInt((containerWidth + this.cellSpacing.x) / (this.cellSize.x + this.cellSpacing.x));
             this.rowCount = Mathf.FloorToInt((containerHeight + this.cellSpacing.y) / (this.cellSize.y + this.cellSpacing.y));
-            
+
             if (this.growType == GrowType.Vertically)
             {
                 this.rowCount = Application.isPlaying ? Mathf.CeilToInt(this.count / (float)this.columnCount) : (this.rowCount + 1);
@@ -284,7 +284,7 @@ namespace Lost
             {
                 return;
             }
-            
+
             this.contentOffset = this.GetUpperLeftCornerOfItemContainer() - this.itemContainerStartPosition;
 
             int newActiveTopRow = 0;
@@ -308,7 +308,7 @@ namespace Lost
 
             // TODO [bgish]: Calculate what rows/columns were hidden/shows and only show those
             // TODO [bgish]: If the delta between rows > this.rowCount or delta between columns > this.columnCount, then destroy all children and redraw everything
-            
+
             if (refreshAll)
             {
                 this.ReplaceAllVisibleTiles();

@@ -50,8 +50,8 @@ namespace Lost
                 var contentRectTransform = content.GetComponent<RectTransform>();
                 contentRectTransform.FitToParent();
             }
-        }       
-        
+        }
+
         #endif
     }
 }

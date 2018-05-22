@@ -22,17 +22,17 @@ namespace Lost
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             SerializedProperty assetGuid = property.FindPropertyRelative("assetGuid");
-            
+
             var currentValue = this.GetAsset(assetGuid.stringValue);
             var newValue = EditorGUI.ObjectField(position, label, currentValue, typeof(T), false);
-            
+
             if (currentValue != newValue)
             {
                 assetGuid.stringValue = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(newValue));
-                
+
                 SerializedProperty assetPath = property.FindPropertyRelative("assetPath");
                 assetPath.stringValue = AssetDatabase.GUIDToAssetPath(assetGuid.stringValue);
-                
+
                 SerializedProperty assetAssetBundleName = property.FindPropertyRelative("assetBundleName");
                 assetAssetBundleName.stringValue = LazyAsset<Object>.FindAssetBundleName(assetPath.stringValue);
             }

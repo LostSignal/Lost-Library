@@ -8,12 +8,12 @@ namespace Lost
 {
     using System;
     using UnityEditor;
-    
+
     public class UpdatePropertiesHelper : IDisposable
     {
         private SerializedObject serializedObject;
         private bool changed = false;
-        
+
         public UpdatePropertiesHelper(SerializedObject serializedObj)
         {
             this.serializedObject = serializedObj;

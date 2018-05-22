@@ -7,7 +7,7 @@
 namespace Lost
 {
     using System.Collections.Generic;
-    
+
     public static class DictionaryExtensions
     {
         public static void AddOrOverwrite<K, V>(this Dictionary<K, V> dictionary, K key, V value)

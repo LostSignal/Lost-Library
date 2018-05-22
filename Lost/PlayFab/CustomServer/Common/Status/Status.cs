@@ -4,4 +4,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Lost{    public class Status    {    }}
+namespace Lost
+{
+    public class Status
+    {
+    }
+}

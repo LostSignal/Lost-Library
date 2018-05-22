@@ -8,14 +8,14 @@ namespace Lost
 {
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public class ConcurrentQueue<T>
     {
         private readonly object itemsLock = new object();
 
         [SerializeField]
         private Queue<T> items = new Queue<T>();
-                
+
         public bool TryDequeue(out T output)
         {
             lock (this.itemsLock)

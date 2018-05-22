@@ -19,7 +19,7 @@ namespace Lost
 
         /// <summary>
         /// Invokes the given function and returns the result.  It also makes sure that this
-        /// only happens once every for the given Type.  You should not call this frequently, 
+        /// only happens once every for the given Type.  You should not call this frequently,
         /// you should only call it once and cache off the value.
         /// </summary>
         /// <typeparam name="T">The class to create.</typeparam>
@@ -37,7 +37,7 @@ namespace Lost
                 return instances[typeof(T)] as T;
             }
         }
-        
+
         public static Transform GetSingletonContainer()
         {
             if (singletonRoot == null)

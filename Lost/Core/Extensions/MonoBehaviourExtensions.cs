@@ -16,7 +16,7 @@ namespace Lost
         {
             return behaviour.GetComponent<T>() ?? behaviour.gameObject.AddComponent<T>();
         }
-        
+
         public static void DrawGizmoCube(this MonoBehaviour lhs, Color color, float width, float height, Vector2 offset)
         {
             #if UNITY_EDITOR
@@ -49,7 +49,7 @@ namespace Lost
             yield return WaitForUtil.EndOfFrame;
             action.InvokeIfNotNull();
         }
-        
+
         private static IEnumerator DelayInSecondsCoroutine(float delayInSeconds, Action action)
         {
             yield return WaitForUtil.Seconds(delayInSeconds);

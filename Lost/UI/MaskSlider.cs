@@ -7,13 +7,13 @@
 namespace Lost
 {
     using UnityEngine;
-    
+
     [RequireComponent(typeof(RectTransform))]
     public class MaskSlider : MonoBehaviour
     {
         private RectTransform rectTransform;
         private float width;
-        
+
         public float Value
         {
             set { this.rectTransform.SetWidth(this.width * value); }

@@ -16,7 +16,7 @@ namespace Lost
         #pragma warning disable 0649
         [SerializeField] private List<Catalog> catalogs =new List<Catalog> { new Catalog() };
         #pragma warning restore 0649
-        
+
         public List<Catalog> AllCatalogs
         {
             get { return this.catalogs; }

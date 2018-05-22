@@ -8,7 +8,7 @@ namespace Lost
 {
     using System.Collections.Generic;
     using UnityEngine;
-        
+
     public abstract class AnalyticsProvider
     {
         public abstract void Identify(string userId, Dictionary<string, object> eventData, Gender gender, int age);
@@ -16,15 +16,15 @@ namespace Lost
         public abstract void Screen(string screenName, Dictionary<string, object> eventData = null);
 
         public abstract void Track(string eventName, Dictionary<string, object> eventData);
-        
+
         public abstract void TrackPosition(string eventName, Vector3 position);
 
         public abstract void Transaction(string productId, decimal amount, string currency);
-        
+
         protected void SendIdentityEventAsTrackEvent(Gender gender, int age, Dictionary<string, object> eventData)
         {
             var eventDataCopy = eventData == null ? new Dictionary<string, object>() : new Dictionary<string, object>(eventData);
-            
+
             eventDataCopy.AddOrOverwrite("Gender", gender);
             eventDataCopy.AddOrOverwrite("Age", age);
 

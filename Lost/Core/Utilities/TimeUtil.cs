@@ -8,7 +8,7 @@ namespace Lost
 {
     using System;
     using UnityEngine;
-    
+
     public static class TimeUtil
     {
         public static float DeltaTime

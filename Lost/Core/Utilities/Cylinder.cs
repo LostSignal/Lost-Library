@@ -7,7 +7,7 @@
 namespace Lost
 {
     using UnityEngine;
-    
+
     [System.Serializable]
     public class Cylinder
     {
@@ -39,7 +39,7 @@ namespace Lost
             get { return this.height; }
             set { this.height = value; }
         }
-        
+
         public bool IsInside(Vector3 position, Vector3 point)
         {
             float sqrMagnitude = (position - point).sqrMagnitude;

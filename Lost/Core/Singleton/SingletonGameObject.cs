@@ -25,7 +25,7 @@ namespace Lost
                 return instance;
             }
         }
-        
+
         public static bool IsInitialized
         {
             get { return instance != null; }
@@ -48,7 +48,7 @@ namespace Lost
                 {
                     return;
                 }
-                
+
                 T[] objects = GameObject.FindObjectsOfType<T>();
                 string className = typeof(T).Name;
 

@@ -7,7 +7,7 @@
 namespace Lost
 {
     using UnityEngine;
-    
+
     #if USE_TEXTMESH_PRO
     using Text = TMPro.TextMeshProUGUI;
     #else

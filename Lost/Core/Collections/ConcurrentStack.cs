@@ -8,14 +8,14 @@ namespace Lost
 {
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public class ConcurrentStack<T>
     {
         private readonly object itemsLock = new object();
 
         [SerializeField]
         private Stack<T> items = new Stack<T>();
-                
+
         public void Push(T t)
         {
             lock (this.itemsLock)
@@ -23,7 +23,7 @@ namespace Lost
                 this.items.Push(t);
             }
         }
-        
+
         public bool TryPop(out T t)
         {
             lock (this.itemsLock)

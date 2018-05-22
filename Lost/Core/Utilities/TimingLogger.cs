@@ -7,7 +7,7 @@
 namespace Lost
 {
     using System;
-    
+
     public class TimingLogger : IDisposable
     {
         private DateTime startTime;
@@ -22,7 +22,7 @@ namespace Lost
         {
             this.Initialize(message);
         }
-        
+
         public TimingLogger(string message, params string[] args)
         {
             this.Initialize(string.Format(message, args));

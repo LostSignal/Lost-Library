@@ -312,7 +312,7 @@ namespace Lost.Serialization
                 writer.Write(value);
             }
         }
-        
+
         public static void WriteMember(this BinaryWriter writer, byte memberId, string value)
         {
             WriteMember(writer, memberId, value, default(string));
@@ -424,7 +424,7 @@ namespace Lost.Serialization
                 writer.Write(value);
             }
         }
-        
+
         public static void WriteMember(this BinaryWriter writer, byte memberId, int value)
         {
             WriteMember(writer, memberId, value, default(int));

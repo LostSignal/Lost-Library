@@ -111,7 +111,7 @@ namespace Lost
                 Application.logMessageReceived += Application_logMessageReceived;
             }
         }
-        
+
         private void OnApplicationFocus(bool focus)
         {
             if (focus)
@@ -144,7 +144,7 @@ namespace Lost
         private Dictionary<string, object> GetAllEventData(Dictionary<string, object> eventData)
         {
             var contantDataCopy = this.CopyDictionary(this.ConstantEventData);
-            
+
             // appending all the event data
             if (eventData != null)
             {

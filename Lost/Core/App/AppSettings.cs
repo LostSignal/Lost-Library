@@ -11,7 +11,7 @@ namespace Lost
     using System.Linq;
     using UnityEngine;
 
-    //// TODO [bgish]: Maybe some day specify project cache server here and it will auto connect to it for you (if available),  
+    //// TODO [bgish]: Maybe some day specify project cache server here and it will auto connect to it for you (if available),
     ////               instead of forcing the user to manually apply it in the Preferences.
     //// Cache Server  (https://github.com/MattRix/UnityDecompiled/blob/master/UnityEditor/UnityEditor/CacheServerPreferences.cs)
     //// bool useCacheServer
@@ -68,7 +68,7 @@ namespace Lost
         [SerializeField] private List<BuildConfig> buildConfigs = new List<BuildConfig>();
         [SerializeField] private List<Define> lostDefines = new List<Define>();
         [SerializeField] private List<string> projectDefines = new List<string>();
-        
+
         // project
         [SerializeField] private BuildNumberType buildNumberType;
         [SerializeField] private bool warningsAsErrors = false;
@@ -80,7 +80,7 @@ namespace Lost
         [SerializeField] private bool copyToStreamingAssets;
         [SerializeField] private bool uploadAssetBundles;
         [SerializeField] private AssetBundleUploadType uploadType;
-        
+
         // Source Control
         [SerializeField] private SourceControlType sourceControl = SourceControlType.None;
 
@@ -88,13 +88,13 @@ namespace Lost
         [SerializeField] private bool useP4IgnoreFile = false;
         [SerializeField] private string p4IgnoreFileName = ".p4ignore";
         [SerializeField] private bool setP4IgnoreVariableAtStartup = false;
-        
+
         //// TODO [bgish]:  Need add these settings
         //// ftp -  (string assetBundleRelativeDirectory, string ftpUrl, string username, string password)
         //// s3 -   (string accessKey, string secretKey, string bucket, string folder, string key)
         //// playfab - (string directoryName)
         #pragma warning restore 0649
-            
+
         private CloudBuildManifest cloudBuildManifest;
         private bool configuredLostDefines;
         private string versionAndBuildNumber;
@@ -134,20 +134,20 @@ namespace Lost
             get { return Application.version; }
             #endif
         }
-        
+
         public string BundleIdentifier
         {
             get { return this.bundleIdentifier; }
-            
+
             #if UNITY_EDITOR
             set { this.bundleIdentifier = value; }
             #endif
         }
-        
+
         public AppOrientation AppOrientation
         {
             get { return this.appOrientation; }
-            
+
             #if UNITY_EDITOR
             set { this.appOrientation = value; }
             #endif
@@ -156,7 +156,7 @@ namespace Lost
         public BuildNumberType BuildNumberType
         {
             get { return this.buildNumberType; }
-            
+
             #if UNITY_EDITOR
             set { this.buildNumberType = value; }
             #endif
@@ -175,7 +175,7 @@ namespace Lost
                 {
                     this.cloudBuildManifest = CloudBuildManifest.Find();
                 }
-                
+
                 if (this.cloudBuildManifest == null)
                 {
                     return 0;
@@ -202,7 +202,7 @@ namespace Lost
                 return 0;
             }
         }
-        
+
         public string VersionAndBuildNumber
         {
             get
@@ -233,7 +233,7 @@ namespace Lost
         public DevicePlatform SupoortedPlatforms
         {
             get { return this.supportedPlatforms; }
-            
+
             #if UNITY_EDITOR
             set { this.supportedPlatforms = value; }
             #endif
@@ -247,7 +247,7 @@ namespace Lost
             set { this.warningsAsErrors = value; }
             #endif
         }
-        
+
         public LineEndings ProjectLineEndings
         {
             get { return this.projectLineEndings; }
@@ -256,7 +256,7 @@ namespace Lost
             set { this.projectLineEndings = value; }
             #endif
         }
-        
+
         public bool OverrideTemplateCShardFiles
         {
             get { return this.overrideTemplateCShardFiles; }
@@ -275,7 +275,7 @@ namespace Lost
             set { this.sourceControl = value; }
             #endif
         }
-        
+
         public bool UseP4IgnoreFile
         {
             get { return this.useP4IgnoreFile; }
@@ -312,7 +312,7 @@ namespace Lost
             set { this.buildAssetBundles = value; }
             #endif
         }
-        
+
         public bool CopyToStreamingAssets
         {
             get { return this.copyToStreamingAssets; }
@@ -321,7 +321,7 @@ namespace Lost
             set { this.copyToStreamingAssets = value; }
             #endif
         }
-        
+
         public bool UploadAssetBundles
         {
             get { return this.uploadAssetBundles; }
@@ -343,7 +343,7 @@ namespace Lost
         //// TODO implement later when have custom property drawers
         //// public LocLanguage DefaultLanguage;
         //// public LocLanguage[] SupportedLanguages;
-        //// 
+        ////
         //// [Serializable]
         //// public class Version
         //// {
@@ -351,12 +351,12 @@ namespace Lost
         ////     [FormerlySerializedAs("VersionString")]
         ////     [SerializeField] private string versionString;
         ////     #pragma warning restore 0649
-        //// 
+        ////
         ////     public string VersionString
         ////     {
         ////         get { return this.versionString; }
         ////     }
-        //// 
+        ////
         ////     //// TODO implement later when have custom property drawers
         ////     //// public LocString Summary;
         ////     //// public LocString[] Features;
@@ -391,7 +391,7 @@ namespace Lost
             [Header("iOS Related Properties")]
             [SerializeField] private bool disableIOSBitCode;
             [SerializeField] private IOSPushNotificationType iosPushNotificationType;
-            
+
             #if USE_PLAYFAB_SDK
             [SerializeField] private string playfabTitleId;
             [SerializeField] private string catalogVersion;
@@ -404,7 +404,7 @@ namespace Lost
             #if USE_PLAYFAB_ANDROID_SDK
             [SerializeField] private string googleAppId;
             #endif
-            
+
             [SerializeField] private List<Define> defines = new List<Define>();
             #pragma warning restore 0649
 
@@ -419,7 +419,7 @@ namespace Lost
                 get { return this.name; }
                 set { this.name = value; }
             }
-            
+
             public bool DisableIOSBitCode
             {
                 get { return this.disableIOSBitCode; }
@@ -473,7 +473,7 @@ namespace Lost
                 get { return this.defines; }
             }
         }
-        
+
         [Serializable]
         public class Define
         {
@@ -481,7 +481,7 @@ namespace Lost
             [SerializeField] private string name;
             [SerializeField] private bool enabled;
             #pragma warning restore 0649
-            
+
             public Define(string name)
             {
                 this.name = name;
@@ -490,7 +490,7 @@ namespace Lost
             public string Name
             {
                 get { return this.name; }
-                
+
                 #if UNITY_EDITOR
                 set { this.name = value; }
                 #endif

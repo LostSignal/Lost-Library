@@ -21,7 +21,7 @@ namespace Lost
 
             string templateFileName = "p4ignore.txt";
             string p4IgnoreFileTemplate = FindLostFile(templateFileName);
-            
+
             if (File.Exists(p4IgnoreFileTemplate) == false)
             {
                 Debug.LogErrorFormat("Unable to create file {0}.  Couldn't find template file \"{1}\".", AppSettings.Instance.P4IgnoreFileName, templateFileName);
@@ -89,7 +89,7 @@ namespace Lost
             // invalidating the cached P4IGNORE variable
             EditorPrefs.SetString(p4IngnoreEditorPref, string.Empty);
         }
-        
+
         private static string GetCurrentP4IgnoreVariableWindows()
         {
             try

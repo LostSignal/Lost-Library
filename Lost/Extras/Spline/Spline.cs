@@ -123,13 +123,13 @@ namespace Lost
                    3 * (1.0f - t) * t * t * p2 +
                    t * t * t * p3;
         }
-        
+
         #if UNITY_EDITOR
         private void Update()
         {
             this.AutoOrientChildPoints();
         }
-        
+
         private void AutoOrientChildPoints()
         {
             int childCount = this.transform.childCount;

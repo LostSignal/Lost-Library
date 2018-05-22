@@ -10,7 +10,7 @@ namespace Lost
     using System.Linq;
     using UnityEditor;
     using UnityEngine;
-    
+
     public class CatalogEditor : EditorWindow
     {
         private static int foldoutId = 38565739;
@@ -27,13 +27,13 @@ namespace Lost
         private string[] virtualCurrenciesCache;
         private string[] catalogItemsCache;
         private string[] bundleItemsCache;
-        
+
         // scroll view
         private Vector2 scrollViewPosition = Vector2.zero;
 
         // store
         private int currentStoreIndex = -1;
-        
+
         public Catalogs ActiveCatalogs { get; private set; }
 
         public Catalog ActiveCatalog { get; private set; }
@@ -47,7 +47,7 @@ namespace Lost
                 this.UpdateCache();
             }
         }
-        
+
         private void OnEnable()
         {
             this.scrollViewPosition = Vector2.zero;
@@ -124,7 +124,7 @@ namespace Lost
                 storeGrid = new Grid(gridDefinition);
             }
         }
-        
+
         private void OnGUI()
         {
             this.scrollViewPosition = GUILayout.BeginScrollView(this.scrollViewPosition, GUILayout.Width(1500));
@@ -218,7 +218,7 @@ namespace Lost
 
                         index++;
                     }
-                    
+
                     if (grid.DrawAddButton())
                     {
                         gridItems.Add(string.Empty);
@@ -430,7 +430,7 @@ namespace Lost
                     this.ActiveCatalog.Stores.Add(new Store() { Id = "New Store " + this.ActiveCatalog.Stores.Count });
                     this.currentStoreIndex = this.ActiveCatalog.Stores.Count - 1;
                 }
-                
+
                 if (GUILayout.Button("Delete Selected Store", GUILayout.Width(200)))
                 {
 
@@ -444,7 +444,7 @@ namespace Lost
                     else
                     {
                         this.currentStoreIndex = Mathf.Max(0, this.currentStoreIndex - 1);
-                    }   
+                    }
                 }
 
                 GUILayout.Label("");

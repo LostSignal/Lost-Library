@@ -61,7 +61,7 @@ namespace Lost
 
             return results;
         }
-        
+
         #if UNITY_EDITOR
         public void SetWords(string[] words)
         {
@@ -88,7 +88,7 @@ namespace Lost
                 charCounts[leters[i] - 'a']++;
             }
         }
-        
+
         private void ResetCharCounts(int[] chars)
         {
             for (int i = 0; i < chars.Length; i++)

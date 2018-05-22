@@ -25,10 +25,10 @@ namespace Lost
             // Using BeginProperty / EndProperty on the parent property means that
             // prefab override logic works on the entire property.
             EditorGUI.BeginProperty(position, label, property);
-            
+
             // Draw label
             position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
-            
+
             // Don't make child fields be indented
             int indent = EditorGUI.indentLevel;
             EditorGUI.indentLevel = 0;
@@ -37,7 +37,7 @@ namespace Lost
             float locTableRectWidth = position.width - 55;
             Rect locTableRect = new Rect(position.x, position.y, locTableRectWidth, 16);
             Rect locTextIdRect = new Rect(position.x + locTableRectWidth + 5, position.y, 50, 16);
-            
+
             // Draw fields - pass GUIContent.none to each so they are drawn without labels
             var locTableProp = property.FindPropertyRelative("localizationTable");
             var locTextIdProp = property.FindPropertyRelative("localizationTextId");
@@ -51,19 +51,19 @@ namespace Lost
             //if (locTable != null)
             //{
             //    var strings = new List<string>(locTable.Count);
-            //    
+            //
             //    for (int i = 0; i < locTable.Count; i++)
             //    {
             //        strings.Add(locTable[i].Text);
             //    }
-            //    
+            //
             //    position.y += 16;
             //    EditorGUI.Popup(position, 0, strings.ToArray());
             //}
-            
+
             // Set indent back to what it was
             EditorGUI.indentLevel = indent;
-                    
+
             EditorGUI.EndProperty();
         }
     }

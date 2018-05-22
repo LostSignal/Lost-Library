@@ -32,7 +32,7 @@ namespace Lost
                 this.canvasScaler.enabled = value;
             }
         }
-        
+
         private void Awake()
         {
             this.Setup();
@@ -54,14 +54,14 @@ namespace Lost
             {
                 this.canvas = this.GetComponent<Canvas>();
             }
-            
+
             if (this.canvasScaler == null)
             {
                 this.canvasScaler = this.GetComponent<CanvasScaler>();
                 this.canvasScaler.hideFlags = HideFlags.HideInInspector;
             }
         }
-        
+
         private void Setup()
         {
             this.CacheComponents();
@@ -82,7 +82,7 @@ namespace Lost
             {
                 this.canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             }
-            
+
             if (AppSettings.Instance.AppOrientation == AppOrientation.Portrait)
             {
                 if (this.canvasScaler.referenceResolution != new Vector2(1080, 1920))
@@ -101,7 +101,7 @@ namespace Lost
             {
                 Debug.LogErrorFormat(this, "Unknown AppOrientation Type {0}", AppOrientation.Landscape);
             }
-            
+
             if (this.canvasScaler.screenMatchMode != CanvasScaler.ScreenMatchMode.MatchWidthOrHeight)
             {
                 this.canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;

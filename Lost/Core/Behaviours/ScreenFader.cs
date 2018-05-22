@@ -9,12 +9,12 @@ namespace Lost
     using System.Collections;
     using UnityEngine;
     using UnityEngine.UI;
-    
+
     [RequireComponent(typeof(Image))]
     public class ScreenFader : MonoBehaviour
     {
         private Image image;
-        
+
         public static void FadeScreenOut(float seconds = 1.0f)
         {
             foreach (ScreenFader fader in ObjectTracker.GetObjects<ScreenFader>())
@@ -47,7 +47,7 @@ namespace Lost
         {
             ObjectTracker.Deregister<ScreenFader>(this);
         }
-        
+
         private IEnumerator FadeScreenOutCoroutine(float seconds)
         {
             float speed = 1.0f / seconds;
@@ -60,7 +60,7 @@ namespace Lost
                 yield return null;
             }
         }
-        
+
         private IEnumerator FadeScreenInCoroutine(float seconds)
         {
             float speed = 1.0f / seconds;

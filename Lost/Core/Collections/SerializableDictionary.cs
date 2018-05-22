@@ -14,7 +14,7 @@ namespace Lost
     {
         [SerializeField, HideInInspector] private List<T> keys;
         [SerializeField, HideInInspector] private List<V> values;
-        
+
         public void OnBeforeSerialize()
         {
             this.keys = new List<T>(this.Count);
@@ -26,7 +26,7 @@ namespace Lost
                 this.values.Add(keyValuePair.Value);
             }
         }
-        
+
         public void OnAfterDeserialize()
         {
             this.Clear();

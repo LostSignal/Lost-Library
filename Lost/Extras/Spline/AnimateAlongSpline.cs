@@ -17,12 +17,12 @@ namespace Lost
         #pragma warning restore 0649
 
         private float currentTime;
-        
+
         private void OnEnable()
         {
             this.currentTime = 0.0f;
         }
-        
+
         private void Update()
         {
             this.currentTime += Time.deltaTime;

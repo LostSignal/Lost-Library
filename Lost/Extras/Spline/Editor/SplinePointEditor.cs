@@ -9,7 +9,7 @@ namespace Lost
         //private void OnSceneGUI()
         //{
         //    //var splinePoint = (SplinePoint)target;
-        //    
+        //
         //    //Line line = target as Line;
         //    //
         //    //Handles.color = Color.white;

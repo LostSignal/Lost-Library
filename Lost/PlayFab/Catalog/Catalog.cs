@@ -21,7 +21,7 @@ namespace Lost
         [SerializeField] private List<BundleItem> bundleItems = new List<BundleItem>();
         [SerializeField] private List<Store> stores = new List<Store>();
         #pragma warning restore 0649
-        
+
         public string Version
         {
             get { return this.version; }

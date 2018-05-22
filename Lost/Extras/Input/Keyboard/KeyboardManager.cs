@@ -8,11 +8,11 @@ namespace Lost
 {
     using System.Collections.Generic;
     using UnityEngine;
-    
+
     public class KeyboardManager
     {
         private Dictionary<KeyCode, KeyboardButton> buttons = new Dictionary<KeyCode, KeyboardButton>();
-        
+
         public void Update()
         {
             foreach (KeyValuePair<KeyCode, KeyboardButton> pair in this.buttons)
@@ -21,11 +21,11 @@ namespace Lost
                 pair.Value.Update(pressed);
             }
         }
-        
+
         public KeyboardButton GetButton(KeyCode keyCode)
         {
             KeyboardButton button;
-            
+
             if (this.buttons.TryGetValue(keyCode, out button) == false)
             {
                 button = new KeyboardButton();

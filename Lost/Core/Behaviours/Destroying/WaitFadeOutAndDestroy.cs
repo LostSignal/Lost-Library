@@ -7,7 +7,7 @@
 namespace Lost
 {
     using UnityEngine;
-    
+
     public class WaitFadeOutAndDestroy : MonoBehaviour
     {
         private static Shader diffuseTrnasparentShader;
@@ -19,7 +19,7 @@ namespace Lost
 
         private MeshRenderer meshRenderer;
         private float currentTime;
-        
+
         private void OnEnable()
         {
             this.currentTime = this.waitTime;
@@ -31,7 +31,7 @@ namespace Lost
 
             this.meshRenderer = this.GetComponent<MeshRenderer>();
         }
-        
+
         private void Update()
         {
             this.currentTime -= Time.deltaTime;
@@ -45,7 +45,7 @@ namespace Lost
                         this.meshRenderer.material.shader = diffuseTrnasparentShader;
                     }
 
-                    Color newColor = this.meshRenderer.material.color.OffsetA(-Time.deltaTime * this.fadeSpeed); 
+                    Color newColor = this.meshRenderer.material.color.OffsetA(-Time.deltaTime * this.fadeSpeed);
                     this.meshRenderer.material.color = newColor;
 
                     if (newColor.a <= 0.0f)

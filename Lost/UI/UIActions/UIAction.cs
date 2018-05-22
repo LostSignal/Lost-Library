@@ -16,7 +16,7 @@ namespace Lost
         Pressed,
         Disabled
     }
-    
+
     [ExecuteInEditMode]
     public abstract class UIAction : MonoBehaviour
     {
@@ -26,7 +26,7 @@ namespace Lost
         #pragma warning restore 0649
 
         public abstract string Name { get; }
-        
+
         public int Order
         {
             get { return this.order; }

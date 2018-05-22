@@ -25,7 +25,7 @@ namespace Lost
                 return instance;
             }
         }
-        
+
         public static bool IsInitialized
         {
             get { return instance != null; }
@@ -53,13 +53,13 @@ namespace Lost
 
                 // loading the scriptable object using the class name
                 var resource = Resources.Load<T>(className);
-                
+
                 // instantiating the resource
                 if (resource)
                 {
                     instance = ScriptableObject.Instantiate<T>(resource);
                 }
-                
+
                 if (!instance)
                 {
                     Debug.LogErrorFormat("Couldn't load ScriptablObject {0}.  Is there a resource named \"{0}\" with a component of type {0} in the project?", className);

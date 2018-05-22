@@ -47,7 +47,7 @@ namespace Lost
         [SerializeField] private Text rightButtonText;
         [SerializeField] private Text okButtonText;
         #pragma warning restore 0649
-        
+
         private LeftRightResult result;
 
         public void SetupDefault()
@@ -86,12 +86,12 @@ namespace Lost
         {
             return UnityTask<YesNoResult>.Run(this.ShowYesNoInternal(title, body));
         }
-        
+
         public UnityTask<LeftRightResult> Show(string title, string body, string leftButtonText, string rightButtonText)
         {
             return UnityTask<LeftRightResult>.Run(this.ShowInternal(title, body, leftButtonText, rightButtonText));
         }
-        
+
         protected override void Awake()
         {
             base.Awake();
@@ -198,7 +198,7 @@ namespace Lost
 
             yield return this.result;
         }
-        
+
         private void LeftButtonClicked()
         {
             this.result = LeftRightResult.Left;

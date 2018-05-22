@@ -7,19 +7,19 @@
 namespace Lost
 {
     using UnityEngine;
-    
+
     public static class Matrix4x4Extensions
     {
         public static Quaternion GetRotation(this Matrix4x4 matrix)
         {
             return Quaternion.LookRotation(matrix.GetColumn(2), matrix.GetColumn(1));
         }
-        
+
         public static Vector3 GetPosition(this Matrix4x4 matrix)
         {
             return new Vector3(matrix.m03, matrix.m13, matrix.m23);
         }
-        
+
         public static Vector3 GetScale(this Matrix4x4 m)
         {
             var x = Mathf.Sqrt((m.m00 * m.m00) + (m.m01 * m.m01) + (m.m02 * m.m02));

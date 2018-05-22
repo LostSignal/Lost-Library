@@ -29,7 +29,7 @@ namespace Lost
                 return upTexture;
             }
         }
-        
+
         public static Texture2D DownTexture
         {
             get
@@ -55,7 +55,7 @@ namespace Lost
                 return deleteTexture;
             }
         }
-        
+
         public static bool IsProTheme()
         {
             return EditorGUIUtility.isProSkin;

@@ -7,7 +7,7 @@
 namespace Lost
 {
     using UnityEngine;
-    
+
     [RequireComponent(typeof(Rigidbody))]
     public class RandomVelocityOnAwake : MonoBehaviour
     {

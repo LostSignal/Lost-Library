@@ -53,7 +53,7 @@ namespace Lost.PlantGenerator
             {
                 return rotation;
             }
-            else 
+            else
             {
                 // this given rotation wasn't suitable so looking up and down to find the next suitable one
                 for (int i = 0; i < 180; i++)

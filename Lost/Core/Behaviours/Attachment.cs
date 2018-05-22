@@ -16,7 +16,7 @@ namespace Lost
         [SerializeField] private Vector3 offset;
         [SerializeField] private bool positionOnly = true;
         #pragma warning restore 0649
-        
+
         public GameObject ObjectToAttachTo
         {
             get { return this.objectToAttachTo; }
@@ -28,13 +28,13 @@ namespace Lost
             get { return this.offset; }
             set { this.offset = value; }
         }
-        
+
         public bool PositionOnly
         {
             get { return this.positionOnly; }
             set { this.positionOnly = value; }
         }
-        
+
         public void LateUpdate()
         {
             if (this.objectToAttachTo != null)

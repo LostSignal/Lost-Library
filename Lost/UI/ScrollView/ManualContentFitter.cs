@@ -8,7 +8,7 @@ namespace Lost
 {
     using UnityEngine;
     using UnityEngine.EventSystems;
-    
+
     [RequireComponent(typeof(RectTransform))]
     public class ManualContentFitter : UIBehaviour
     {
@@ -24,7 +24,7 @@ namespace Lost
         [SerializeField] private float bottomPadding;
         [SerializeField] private float rightPadding;
         #pragma warning restore 0649
-        
+
         private RectTransform rectTransform;
 
         public void Resize()
@@ -32,7 +32,7 @@ namespace Lost
             // using a coroutine runner, becuase it has to happen even if the gameobject is disabled
             CoroutineRunner.Instance.ExecuteAtEndOfFrame(this.ResizeInternal);
         }
-        
+
         protected override void Awake()
         {
             base.Awake();

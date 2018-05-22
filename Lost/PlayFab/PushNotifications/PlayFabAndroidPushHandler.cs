@@ -22,7 +22,7 @@ namespace Lost
         {
             Debug.LogError("Trying to use PlayFabAndroidPushHandler without the PlayFab Android PushNotification Plugin Installed.", this);
         }
-        
+
         public void ScheduleLocalPushNotification(string title, string message, DateTime dateTime)
         {
             Debug.LogError("Trying to use PlayFabAndroidPushHandler without the PlayFab Android PushNotification Plugin Installed.", this);
@@ -47,7 +47,7 @@ namespace Lost
         }
 
         private IEnumerator Start()
-        {        
+        {
             PlayFabGoogleCloudMessaging._RegistrationCallback += (token, error) => { this.deviceToken = token; };
 
             PlayFabGoogleCloudMessaging._MessageCallback += (message) => { this.pushHandler.ReceivedPushNotification(message); };
@@ -60,28 +60,28 @@ namespace Lost
                     PlayFabAndroidPlugin.UpdateRouting(false);  // suppress push notifications while app is running
                 }
             };
-            
+
             // TODO [bgish]:  This should probably be located in AppSettings, if not defined print error and early out GameObject.Destroy(this);
             PlayFabAndroidPlugin.Init("GoogleAppId");
-            
+
             int retryCount = 0;
             while (this.deviceToken == null)
             {
                 retryCount++;
-        
+
                 if (retryCount >= RetryCountMax)
                 {
                     break;
                 }
-                
+
                 yield return WaitForUtil.Seconds(RetryWaitTime);
             }
-        
+
             // if we got here and still no deviceToken, then we timed out
             if (this.deviceToken == null)
             {
                 Debug.LogError("PlayFabAndroidPushHandler timed out waiting for the RegistrationCallback to complete.");
-                
+
                 // cleaning up this Android push notification handler so it doesn't take up any cycles
                 GameObject.Destroy(this);
                 yield break;
@@ -89,7 +89,7 @@ namespace Lost
 
             PlayFabClientAPI.AndroidDevicePushNotificationRegistration(
                 new AndroidDevicePushNotificationRegistrationRequest { DeviceToken = this.deviceToken },
-                (result) => 
+                (result) =>
                 {
                     Debug.Log("Push Notification Registration Successful!");
                 },
@@ -101,7 +101,7 @@ namespace Lost
                     Debug.Log(error.ErrorDetails);
                 });
         }
-        
+
         private void OnApplicationFocus(bool focus)
         {
             // checking that we actually got a device token before updating routing
@@ -111,7 +111,7 @@ namespace Lost
                 PlayFabAndroidPlugin.UpdateRouting(!focus);
             }
         }
-        
+
         #endif
     }
 }

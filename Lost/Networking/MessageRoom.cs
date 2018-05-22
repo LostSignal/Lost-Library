@@ -128,7 +128,7 @@ namespace Lost
 
             summary.Append("State: ");
             summary.AppendLine(this.state.ToString());
-            
+
             if (this.state == State.Searching)
             {
                 if (this.roomInfo.RoomSearchName.IsNullOrWhitespace() == false)
@@ -433,7 +433,7 @@ namespace Lost
                                 else
                                 {
                                     MatchInfoSnapshot matchInfoSnapShot = this.ChoseMatchInfoSnapshot(this.listMatchesTask.Value);
-                                    
+
                                     if (matchInfoSnapShot != null)
                                     {
                                         this.joinMatchInfoSnapshot = matchInfoSnapShot;
@@ -855,7 +855,7 @@ namespace Lost
             // Client sends UserInfo
             // Server gets Disconnected
             // Server then processes UserInfo
-            // 
+            //
 
             this.isDebugInfoDirty = true;
         }

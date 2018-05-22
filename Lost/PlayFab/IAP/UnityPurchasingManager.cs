@@ -85,7 +85,7 @@ namespace Lost
 
             return this.builder;
         }
-        
+
         private IEnumerator<bool> InitializeUnityPurchasingCoroutine()
         {
             if (this.initializationState == InitializationState.InitializedSucceeded)
@@ -97,15 +97,15 @@ namespace Lost
             float startTime = Time.realtimeSinceStartup;
             this.initializationState = InitializationState.Initializing;
             UnityPurchasing.Initialize(this, this.GetConfigurationBuilder());
-	
+
             while (this.initializationState == InitializationState.Initializing)
             {
                 yield return default(bool);
-				
-				if (Time.realtimeSinceStartup - startTime > 5.0f)
-				{
-					throw new PurchasingInitializationTimeOutException();
-				}
+
+                if (Time.realtimeSinceStartup - startTime > 5.0f)
+                {
+                    throw new PurchasingInitializationTimeOutException();
+                }
             }
 
             if (this.initializationState == InitializationState.InitializedSucceeded)
@@ -129,7 +129,7 @@ namespace Lost
             this.initializationState = InitializationState.InitializeFailed;
             this.initializationFailureReason = error;
         }
-        
+
         private IEnumerator<PurchaseEventArgs> PurchaseProductCoroutine(StoreItem storeItem)
         {
             Debug.Assert(storeItem != null, "Trying to buy a null store item!");
@@ -164,7 +164,7 @@ namespace Lost
                 throw new PurchasingException(this.purchaseFailureReason);
             }
         }
-        
+
         PurchaseProcessingResult IStoreListener.ProcessPurchase(PurchaseEventArgs e)
         {
             this.purchasingState = PurchasingState.PurchasingSucceeded;

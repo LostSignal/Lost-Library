@@ -36,7 +36,7 @@ namespace Lost
                 this.dialogs.Last.Value.OnBackButtonPressed();
             }
         }
-        
+
         #if UNITY_ANDROID || UNITY_EDITOR
         private void Update()
         {

@@ -28,7 +28,7 @@ namespace Lost
             this.timeoutInSeconds = timeoutInSeconds;
             gameObject.StartCoroutine(this.InternalCoroutine(coroutine));
         }
-        
+
         public Exception Exception { get; private set; }
 
         public bool HasError

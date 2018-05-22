@@ -11,7 +11,7 @@ namespace Lost
     public class UserDisconnected : RoomMessage
     {
         public const short MessageId = 102;
-        
+
         public long DisconnectedUserId { get; set; }
 
         public override bool IsReliable

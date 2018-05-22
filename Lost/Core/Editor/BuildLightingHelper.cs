@@ -21,7 +21,7 @@ namespace Lost
         {
             EditorWindow.GetWindow<BuildLightingHelper>(false, "Build Lighting");
         }
-        
+
         private void OnGUI()
         {
             if (this.scenes == null)
@@ -36,7 +36,7 @@ namespace Lost
             {
                 this.scenes[key] = this.DrawCheckbox(key, this.scenes[key]);
             }
-            
+
             using (new BeginHorizontalHelper())
             {
                 if (GUILayout.Button("Build Lighting"))
@@ -54,7 +54,7 @@ namespace Lost
                 }
             }
         }
-        
+
         private void RefreshSceneList()
         {
             this.scenes = new Dictionary<string, bool>();

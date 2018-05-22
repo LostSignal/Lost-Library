@@ -137,7 +137,7 @@ namespace Lost
         {
             this.UpdateText();
         }
-        
+
         private void UpdateText()
         {
             if (this.text != null)

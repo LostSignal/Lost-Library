@@ -13,7 +13,7 @@ namespace Lost
     {
         public static readonly string LayerName = "Interactable";
         private static List<Transform> children = new List<Transform>();
-        
+
         private Camera currentCamera;
         private Input currentInput;
         private Collider currentCollider;
@@ -37,7 +37,7 @@ namespace Lost
 
                 if (this.isInteractable == false)
                 {
-                    this.ResetInputData(); 
+                    this.ResetInputData();
                 }
             }
         }

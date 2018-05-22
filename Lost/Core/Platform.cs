@@ -9,7 +9,7 @@ namespace Lost
     using System;
     using System.IO;
     using UnityEngine;
-    
+
     [Flags]
     public enum DevicePlatform
     {
@@ -56,7 +56,7 @@ namespace Lost
                 #elif UNITY_ANDROID
                 return DevicePlatform.Android;
                 #endif
-            
+
                 // web
                 #if UNITY_WEBGL
                 return DevicePlatform.WebGL;
@@ -68,33 +68,33 @@ namespace Lost
                 #elif UNITY_STANDALONE_LINUX
                 return DevicePlatform.Linux;
                 #endif
-                
+
                 //// switch (Application.platform)
                 //// {
                 ////     case RuntimePlatform.IPhonePlayer:
                 ////         return DevicePlatform.iOS;
-                //// 
+                ////
                 ////     case RuntimePlatform.Android:
                 ////         return DevicePlatform.Android;
-                //// 
+                ////
                 ////     case RuntimePlatform.BlackBerryPlayer:
                 ////     case RuntimePlatform.FlashPlayer:
-                //// 
+                ////
                 ////     case RuntimePlatform.LinuxPlayer:
-                //// 
+                ////
                 ////     case RuntimePlatform.MetroPlayerARM:
                 ////     case RuntimePlatform.MetroPlayerX64:
                 ////     case RuntimePlatform.MetroPlayerX86:
-                //// 
+                ////
                 ////     case RuntimePlatform.WSAPlayerARM:
                 ////     case RuntimePlatform.WSAPlayerX64:
                 ////     case RuntimePlatform.WSAPlayerX86:
-                //// 
+                ////
                 ////     case RuntimePlatform.OSXPlayer:
-                //// 
+                ////
                 ////     case RuntimePlatform.PS4:
                 ////     case RuntimePlatform.Switch:
-                //// 
+                ////
                 ////     case RuntimePlatform.WindowsPlayer:
                 ////     case RuntimePlatform.XboxOne:
                 ////
@@ -154,7 +154,7 @@ namespace Lost
         {
             get { return UnityEngine.Input.touchSupported; }
         }
-        
+
         public static bool IsMousePresent
         {
             get { return UnityEngine.Input.mousePresent; }
@@ -204,7 +204,7 @@ namespace Lost
 
                 default:
                     return "file://" + Path.Combine(Application.streamingAssetsPath, path).Replace(@"\", "/");
-            }             
+            }
         }
 
         public static void RateApp()
@@ -253,7 +253,7 @@ namespace Lost
         ////             {
         ////                 return PlayerPrefs.HasKey(localFileName);
         ////             }
-        //// 
+        ////
         ////         default:
         ////             {
         ////                 try
@@ -267,7 +267,7 @@ namespace Lost
         ////             }
         ////     }
         //// }
-        //// 
+        ////
         //// public static byte[] GetLocalFile(string localFileName)
         //// {
         ////     switch (CurrentDevicePlatform)
@@ -276,12 +276,12 @@ namespace Lost
         ////         case DevicePlatform.XboxOne:
         ////         case DevicePlatform.WindowsUniversal:
         ////             return Convert.FromBase64String(PlayerPrefs.GetString(localFileName));
-        //// 
+        ////
         ////         default:
         ////             return File.ReadAllBytes(Path.Combine(Application.persistentDataPath, localFileName));
         ////     }
         //// }
-        //// 
+        ////
         //// public static void SaveLocalFile(string localFileName, byte[] fileBytes)
         //// {
         ////     switch (CurrentDevicePlatform)
@@ -292,7 +292,7 @@ namespace Lost
         ////             PlayerPrefs.SetString(localFileName, Convert.ToBase64String(fileBytes));
         ////             PlayerPrefs.Save();
         ////             break;
-        //// 
+        ////
         ////         default:
         ////             File.WriteAllBytes(Path.Combine(Application.persistentDataPath, localFileName), fileBytes);
         ////             break;

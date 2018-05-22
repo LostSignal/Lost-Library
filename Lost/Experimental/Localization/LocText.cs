@@ -23,16 +23,16 @@ namespace Lost
         {
             get { return this.localizationTable; }
         }
-        
-        public ushort Id 
-        { 
-            get { return this.localizationTextId; } 
+
+        public ushort Id
+        {
+            get { return this.localizationTextId; }
         }
-        
+
         public string Text
         {
-            get 
-            { 
+            get
+            {
                 if (string.IsNullOrEmpty(this.textCache) && this.localizationTable != null)
                 {
                     this.textCache = this.localizationTable.GetText(this.localizationTextId);
@@ -41,12 +41,12 @@ namespace Lost
                 return this.textCache;
             }
         }
-        
+
         public string FormatValue(params object[] args)
         {
             return string.Format(this.Text, args);
         }
-        
+
         public void InvalidateCache()
         {
             this.textCache = null;

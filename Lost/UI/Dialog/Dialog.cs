@@ -20,12 +20,12 @@ namespace Lost
     [RequireComponent(typeof(Animator))]
     [RequireComponent(typeof(HDCanvas))]
     [RequireComponent(typeof(GraphicRaycaster))]
-    [RequireComponent(typeof(DialogSetupHelper))]    
+    [RequireComponent(typeof(DialogSetupHelper))]
     public class Dialog : MonoBehaviour
     {
         private static readonly int HideHash = Animator.StringToHash("Hide");
         private static readonly int ShowHash = Animator.StringToHash("Show");
-    
+
         public enum ShowType
         {
             HideThenShow,
@@ -50,7 +50,7 @@ namespace Lost
         [SerializeField] private Dialog showDialogOnBackButtonPressed;
         [SerializeField] private ShowType showType;
         #pragma warning restore 0649
-        
+
         private bool isHibernateMonitorRunning = false;
         private DialogStateMachine dialogStateMachine;
         private RectTransform contentRectTransform;
@@ -60,7 +60,7 @@ namespace Lost
         private HDCanvas hdCanvas;
         private Canvas canvas;
         private bool isShowing;
-        
+
         public Canvas Canvas
         {
             get { return this.canvas; }
@@ -115,11 +115,11 @@ namespace Lost
         {
             get { return this.IsShown == false && this.IsHidden == false;  }
         }
-        
+
         public IEnumerator ShowAndWait()
         {
             this.Show();
-            
+
             while (this.IsHidden == false)
             {
                 yield return null;
@@ -258,7 +258,7 @@ namespace Lost
             {
                 GameObject blockerObject = this.gameObject.GetChild("Blocker");
                 Debug.AssertFormat(blockerObject != null, "Dialog {0} needs a Blocker, but no object of that name exists.", this.name);
-                
+
                 this.blocker = blockerObject.GetComponent<InputBlocker>();
                 Debug.AssertFormat(this.blocker != null, "Dialog {0} has a Blocker object, but no InputBlocker component.", this.name);
             }
@@ -270,7 +270,7 @@ namespace Lost
             else
             {
                 this.SetActive(false);
-            }            
+            }
         }
 
         protected virtual void OnShow()
@@ -280,7 +280,7 @@ namespace Lost
         protected virtual void OnHide()
         {
         }
-        
+
         protected Image DebugCreateImage(GameObject parent, string objectName, Color color, Vector3 localPosition)
         {
             var itemDescriptionText = new GameObject(objectName, typeof(Image));

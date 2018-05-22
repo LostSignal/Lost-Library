@@ -37,7 +37,7 @@ namespace Lost
         {
             this.dateTimeLong = this.dateTime.ToBinary();
         }
-        
+
         public override bool Equals(object obj)
         {
             return this.dateTime.Equals(obj);

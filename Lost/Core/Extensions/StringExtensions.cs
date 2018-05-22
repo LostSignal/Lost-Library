@@ -7,7 +7,7 @@
 namespace Lost
 {
     public static class StringExtensions
-    {   
+    {
         public static bool IsNullOrWhitespace(this string str)
         {
             if (string.IsNullOrEmpty(str) == false)
@@ -51,7 +51,7 @@ namespace Lost
         //// public static byte[] GetSHA256Hash(this string str)
         //// {
         ////     var hasher = Windows.Security.Cryptography.Core.HashAlgorithmProvider.OpenAlgorithm("SHA256");
-        //// 
+        ////
         ////     return null;
         ////     //IBuffer input = CryptographicBuffer.ConvertStringToBinary(str, BinaryStringEncoding.Utf8);
         ////     //IBuffer hashed = hasher.HashData(input);
@@ -62,9 +62,9 @@ namespace Lost
         //// {
         ////     HashAlgorithmProvider hap = HashAlgorithmProvider.OpenAlgorithm(HashAlgorithmNames.Sha256);
         ////     CryptographicHash ch = hap.CreateHash();
-        //// 
-        ////     // read in bytes from file then append with ch.Append(data)           
-        //// 
+        ////
+        ////     // read in bytes from file then append with ch.Append(data)
+        ////
         ////     Windows.Storage.Streams.IBuffer b_hash = ch.GetValueAndReset();       // hash it
         ////     string hash_string = CryptographicBuffer.EncodeToHexString(b_hash);   // encode it to a hex string for easy reading
         //// }

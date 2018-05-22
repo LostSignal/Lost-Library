@@ -31,7 +31,7 @@ namespace Lost
 
             // don't want to use the singleton instance because this method gets called way too often and can corrupt the static variable
             AppSettings appSettings = GetAppSettings();
-            
+
             if (!appSettings)
             {
                 Debug.LogError("Unable to load AppSettings from Resources.");
@@ -43,7 +43,7 @@ namespace Lost
             {
                 EditorSettings.serializationMode = SerializationMode.ForceText;
             }
-            
+
             // testing if we should set the p4ignore variable
             if (appSettings.SourceControl == SourceControlType.Perforce && appSettings.UseP4IgnoreFile && appSettings.SetP4IgnoreVariableAtStartup && appSettings.P4IgnoreFileName != GetCurrentP4IgnoreVariable())
             {
@@ -58,7 +58,7 @@ namespace Lost
             {
                 RemoveWarngingsAsErrorsFile();
             }
-            
+
             if (appSettings.OverrideTemplateCShardFiles)
             {
                 OverrideTemplateCSharpFiles();
@@ -89,7 +89,7 @@ namespace Lost
                 Debug.LogError("Unable to override template files.  Unsupported Editor.");
                 return;
             }
-            
+
             if (Directory.Exists(templateFilesDirectory) == false)
             {
                 Debug.LogError("Unable to override template files, couldn't find unity template directory.");
@@ -124,7 +124,9 @@ namespace Lost
 
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = "robocopy", Verb = "runas", Arguments = string.Format("\"{0}\" \"{1}\" {2}", sourceFolder, destinationFolder, string.Join(" ", fileNames))
+                    FileName = "robocopy",
+                    Verb = "runas",
+                    Arguments = string.Format("\"{0}\" \"{1}\" {2}", sourceFolder, destinationFolder, string.Join(" ", fileNames))
                 });
             }
             else if (Application.platform == RuntimePlatform.OSXEditor)
@@ -137,6 +139,41 @@ namespace Lost
             else
             {
                 Debug.LogError("Unable to override template files, couldn't find unity template directory.");
+            }
+        }
+
+        [MenuItem("Lost/Actions/Convert All C# Files to utf-8-bom, lf, trim_trailing_whitespace, insert_final_newline")]
+        public static void ConvertAllCSharpFiles()
+        {
+            var utf8BomEncoder = new UTF8Encoding(true);
+
+            foreach (string file in Directory.GetFiles(".", "*.cs", SearchOption.AllDirectories))
+            {
+                StringBuilder fileBuilder = new StringBuilder();
+
+                string[] lines = File.ReadAllLines(file);
+                int lastLineIndex = lines.Length - 1;
+
+                // calculating the line of the file that actually has content
+                while (lastLineIndex > 0 && string.IsNullOrEmpty(lines[lastLineIndex].Trim()))
+                {
+                    lastLineIndex--;
+                }
+
+                // converting each line to our project standards
+                for (int i = 0; i <= lastLineIndex; i++)
+                {
+                    string convertedLine = lines[i];
+
+                    convertedLine = convertedLine.TrimEnd();              // trim_trailing_whitespace = true
+                    convertedLine = convertedLine.Replace("\t", "    ");  // indent_style = space, indent_size = 4
+                    convertedLine = convertedLine + '\n';                 // insert_final_newline = true, end_of_line = lf
+
+                    fileBuilder.Append(convertedLine);
+                }
+
+                // charset = utf-8
+                File.WriteAllBytes(file, utf8BomEncoder.GetBytes(fileBuilder.ToString()));
             }
         }
 
@@ -297,7 +334,7 @@ namespace Lost
                 {
                     Provider.Checkout(destinationFile, CheckoutMode.Asset).Wait();
                 }
-                
+
                 // actually writing out the contents
                 File.WriteAllText(destinationFile, fileContents);
             }
@@ -310,7 +347,7 @@ namespace Lost
             {
                 inputText = inputText.Replace("\r\r\n", "\n");
             }
-            
+
             // if it has windows line escaping, then convert everything to Unix
             if (inputText.Contains("\r\n"))
             {
@@ -351,7 +388,7 @@ namespace Lost
 
             return null;
         }
-        
+
         private static List<string> GetAllUnityTemplateFiles()
         {
             List<string> templateFiles = new List<string>();

@@ -32,7 +32,7 @@ namespace Lost
                 Debug.LogError("Trying to ListenRelay on matchInfo that is not using relay.");
                 return;
             }
-            
+
             this.ListenRelay(matchInfo.address, matchInfo.port, matchInfo.networkId, Utility.GetSourceID(), matchInfo.nodeId);
         }
 
@@ -68,7 +68,7 @@ namespace Lost
                 this.OnDisconnectErrorEvent(conn, error);
             }
         }
-        
+
         public override void OnConnected(NetworkConnection conn)
         {
             base.OnConnected(conn);
@@ -78,7 +78,7 @@ namespace Lost
                 this.OnConnectedEvent(conn);
             }
         }
-        
+
         public override void OnDisconnected(NetworkConnection conn)
         {
             base.OnDisconnected(conn);

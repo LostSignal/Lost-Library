@@ -79,23 +79,23 @@ namespace Lost
 
             // starting the process and waiting
             var process = Process.Start(startInfo);
-            
+
             // getting the standard out
             string output = process.StandardOutput.ReadToEnd();
-            
+
             if (string.IsNullOrEmpty(output) == false)
             {
                 UnityEngine.Debug.Log(output);
             }
-            
+
             // getting the standard error
             var error = process.StandardError.ReadToEnd();
-            
+
             if (string.IsNullOrEmpty(error) == false)
             {
                 UnityEngine.Debug.LogError(error);
             }
-            
+
             // waiting for exit
             process.WaitForExit();
         }

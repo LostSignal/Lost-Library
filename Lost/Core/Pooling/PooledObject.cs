@@ -7,7 +7,7 @@
 namespace Lost
 {
     using UnityEngine;
-    
+
     public enum PooledObjectState
     {
         Active,
@@ -24,7 +24,7 @@ namespace Lost
         public PooledObjectState State { get; set; }
 
         private bool isApplicationQuitting = false;
-        
+
         private void Awake()
         {
             this.poolableComponents = this.GetComponents<IPoolable>();
@@ -49,7 +49,7 @@ namespace Lost
 
         public void Recycle()
         {
-            // telling the pool to recycle this object 
+            // telling the pool to recycle this object
             this.Pool.ReturnObjectToPool(this);
 
             if (this.poolableComponents.IsNullOrEmpty() == false)

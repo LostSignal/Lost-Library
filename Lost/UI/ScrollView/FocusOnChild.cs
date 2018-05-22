@@ -8,7 +8,7 @@ namespace Lost
 {
     using UnityEngine;
     using UnityEngine.UI;
-    
+
     [RequireComponent(typeof(ScrollRect))]
     public class FocusOnChild : MonoBehaviour
     {
@@ -104,7 +104,7 @@ namespace Lost
         private void Start()
         {
             this.InitializeDots();
-        }     
+        }
 
         private Vector3 GetDistanceVector(int childIndex)
         {

@@ -21,7 +21,7 @@ namespace Lost
 
             StringBuilder json = new StringBuilder();
             json.Append("[");
-            
+
             for (int i = 0; i < list.Count; i++)
             {
                 json.Append(JsonUtility.ToJson(list[i]));

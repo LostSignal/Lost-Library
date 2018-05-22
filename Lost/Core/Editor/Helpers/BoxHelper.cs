@@ -14,13 +14,13 @@ namespace Lost
     public class BoxHelper : IDisposable
     {
         private static GUIStyle titleGuiStyle = null;
-        
+
         public BoxHelper(float width)
         {
             Rect position = EditorGUILayout.BeginVertical("box", GUILayout.Width(width));
             this.DrawTitle(position, string.Empty);
         }
-        
+
         public BoxHelper(float width, string title)
         {
             Rect position = EditorGUILayout.BeginVertical("box", GUILayout.Width(width));

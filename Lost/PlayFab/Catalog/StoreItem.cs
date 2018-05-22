@@ -28,9 +28,9 @@ namespace Lost
         [SerializeField] private string purchaseDescription;
         [SerializeField] private Sprite purchaseIcon;
         #pragma warning restore 0649
-        
+
         public string StoreId { get; set; }
-        
+
         public CatalogItem CatalogItem { get; set; }
 
         public BundleItem BundleItem { get; set; }
