@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="AppSettings.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
@@ -22,12 +22,6 @@ namespace Lost
         S3,
         PlayFab,
         FTP
-    }
-
-    public enum LineEndings
-    {
-        Windows,
-        Unix
     }
 
     public enum SourceControlType
@@ -72,7 +66,6 @@ namespace Lost
         // project
         [SerializeField] private BuildNumberType buildNumberType;
         [SerializeField] private bool warningsAsErrors = false;
-        [SerializeField] private LineEndings projectLineEndings = LineEndings.Windows;
         [SerializeField] private bool overrideTemplateCShardFiles = false;
 
         // asset bundles
@@ -245,15 +238,6 @@ namespace Lost
 
             #if UNITY_EDITOR
             set { this.warningsAsErrors = value; }
-            #endif
-        }
-
-        public LineEndings ProjectLineEndings
-        {
-            get { return this.projectLineEndings; }
-
-            #if UNITY_EDITOR
-            set { this.projectLineEndings = value; }
             #endif
         }
 

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="AppSettingsHelper.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
@@ -68,8 +68,6 @@ namespace Lost
         [MenuItem("Lost/Actions/Override C# Template Files")]
         public static void OverrideTemplateCSharpFiles()
         {
-            AppSettings appSettings = GetAppSettings();
-
             string unityDirectory = null;
             string templateFilesDirectory = null;
 
@@ -133,7 +131,7 @@ namespace Lost
             {
                 foreach (var templateFile in templateFiles)
                 {
-                    CopyFile(templateFile, Path.Combine(templateFilesDirectory, Path.GetFileName(templateFile)), false, appSettings.ProjectLineEndings);
+                    CopyFile(templateFile, Path.Combine(templateFilesDirectory, Path.GetFileName(templateFile)), false, EditorSettings.lineEndingsForNewScripts);
                 }
             }
             else
@@ -180,22 +178,18 @@ namespace Lost
         [MenuItem("Lost/Actions/Convert all C# files to project line endings")]
         public static void ConvertAllCSharpFileLineEndings()
         {
-            AppSettings appSettings = GetAppSettings();
-
             foreach (string file in Directory.GetFiles(".", "*.cs", SearchOption.AllDirectories))
             {
                 // removing the first 2 characters "./" so it's a relative path from the project folder
                 string fileName = file.Substring(2);
 
-                CopyFile(fileName, fileName, true, appSettings.ProjectLineEndings);
+                CopyFile(fileName, fileName, true, EditorSettings.lineEndingsForNewScripts);
             }
         }
 
         [MenuItem("Lost/Actions/Generate Warnings As Errors File")]
         public static void GenerateWarngingsAsErrorsFile()
         {
-            AppSettings appSettings = GetAppSettings();
-
             string mcsFilePath = "Assets/mcs.rsp";
             string warningsAsErrors = "-warnaserror+";
 
@@ -233,7 +227,7 @@ namespace Lost
             }
             else
             {
-                CreateFile(warningsAsErrors, mcsFilePath, true, appSettings.ProjectLineEndings);
+                CreateFile(warningsAsErrors, mcsFilePath, true, EditorSettings.lineEndingsForNewScripts);
             }
         }
 
@@ -303,7 +297,7 @@ namespace Lost
             RemoveEmptyDirectories("Assets");
         }
 
-        public static void CreateFile(string contents, string destinationFile, bool sourceControlAdd, LineEndings lineEndings)
+        public static void CreateFile(string contents, string destinationFile, bool sourceControlAdd, LineEndingsMode lineEndings)
         {
             string fileContents = ConvertLineEndings(contents, lineEndings);
 
@@ -318,7 +312,7 @@ namespace Lost
             }
         }
 
-        public static void CopyFile(string sourceFile, string destinationFile, bool sourceControlCheckout, LineEndings lineEndings)
+        public static void CopyFile(string sourceFile, string destinationFile, bool sourceControlCheckout, LineEndingsMode lineEndings)
         {
             if (File.Exists(sourceFile) == false)
             {
@@ -340,7 +334,7 @@ namespace Lost
             }
         }
 
-        public static string ConvertLineEndings(string inputText, LineEndings lineEndings)
+        public static string ConvertLineEndings(string inputText, LineEndingsMode lineEndings)
         {
             // checking for a really messed up situation that happens when mixing max/pc sometimes
             if (inputText.Contains("\r\r\n"))
@@ -354,18 +348,23 @@ namespace Lost
                 inputText = inputText.Replace("\r\n", "\n");
             }
 
-            if (lineEndings == LineEndings.Windows)
+            if (lineEndings == LineEndingsMode.Unix)
+            {
+                // do nothing, already in Unix
+            }
+            else if (lineEndings == LineEndingsMode.Windows)
             {
                 // convert all unix to windows
                 inputText = inputText.Replace("\n", "\r\n");
             }
-            else if (lineEndings == LineEndings.Unix)
+            else if (lineEndings == LineEndingsMode.OSNative)
             {
-                // do nothing, already in Unix
+                // convert all os native to windows
+                inputText = inputText.Replace("\n", System.Environment.NewLine);
             }
             else
             {
-                Debug.LogErrorFormat("Unable to convert line endings, unknown line ending type found: {0}", LineEndings.Unix);
+                Debug.LogErrorFormat("Unable to convert line endings, unknown line ending type found: {0}", lineEndings);
             }
 
             return inputText;

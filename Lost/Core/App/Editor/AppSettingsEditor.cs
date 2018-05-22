@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="AppSettingsEditor.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
@@ -168,7 +168,7 @@ namespace Lost
                 using (new BeginHorizontalHelper())
                 {
                     GUILayout.Label("Project Line Endings", GUILayout.Width(labelWidth));
-                    appSettings.ProjectLineEndings = (LineEndings)EditorGUILayout.EnumPopup(appSettings.ProjectLineEndings, GUILayout.Width(150));
+                    EditorSettings.lineEndingsForNewScripts = (LineEndingsMode)EditorGUILayout.EnumPopup(EditorSettings.lineEndingsForNewScripts, GUILayout.Width(150));
                 }
 
                 using (new BeginHorizontalHelper())

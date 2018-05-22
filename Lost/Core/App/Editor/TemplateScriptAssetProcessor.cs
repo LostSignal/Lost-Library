@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ScriptAssetProcessor.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
@@ -18,8 +18,6 @@ namespace Lost
                 return;
             }
 
-            AppSettings appSettings = AppSettingsHelper.GetAppSettings();
-
             // removing the ".meta" extension
             assetPath = assetPath.Substring(0, assetPath.LastIndexOf("."));
 
@@ -37,7 +35,7 @@ namespace Lost
             fileContents = fileContents.Replace("#COMPANY_NAME#", companyName);
             fileContents = fileContents.Replace("#NAMESPACE#", nameSpace);
 
-            File.WriteAllText(assetPath, AppSettingsHelper.ConvertLineEndings(fileContents, appSettings.ProjectLineEndings));
+            File.WriteAllText(assetPath, AppSettingsHelper.ConvertLineEndings(fileContents, EditorSettings.lineEndingsForNewScripts));
             AssetDatabase.Refresh();
         }
     }
