@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------s---
+﻿//--------------------------------------------------------------------s---
 // <copyright file="DebugMenuListener.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>

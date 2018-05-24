@@ -1,4 +1,4 @@
-//// //
+﻿//// //
 //// // Session Tracking?
 //// // Make some stort of storing class (just do a simple file store, but later upgrate to sqlite, or something else)
 //// // Ability to append properites to every event

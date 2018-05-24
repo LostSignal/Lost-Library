@@ -1,4 +1,4 @@
-//// //-----------------------------------------------------------------------
+﻿//// //-----------------------------------------------------------------------
 //// // <copyright file="LocalStore.cs" company="Lost Siganl LLC">
 //// //     Copyright (c) Lost Siganl LLC. All rights reserved.
 //// // </copyright>

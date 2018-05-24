@@ -143,8 +143,6 @@ namespace Lost
         [MenuItem("Lost/Actions/Convert All C# Files to utf-8-bom, lf, trim_trailing_whitespace, insert_final_newline")]
         public static void ConvertAllCSharpFiles()
         {
-            var utf8BomEncoder = new UTF8Encoding(true);
-
             foreach (string file in Directory.GetFiles(".", "*.cs", SearchOption.AllDirectories))
             {
                 StringBuilder fileBuilder = new StringBuilder();
@@ -171,7 +169,16 @@ namespace Lost
                 }
 
                 // charset = utf-8
-                File.WriteAllBytes(file, utf8BomEncoder.GetBytes(fileBuilder.ToString()));
+                var utf8BomEncoder = new UTF8Encoding(true);
+
+                using (var fileStream = new FileStream(file, System.IO.FileMode.Create))
+                {
+                    byte[] preamble = utf8BomEncoder.GetPreamble();
+                    fileStream.Write(preamble, 0, preamble.Length);
+
+                    byte[] contents = utf8BomEncoder.GetBytes(fileBuilder.ToString());
+                    fileStream.Write(contents, 0, contents.Length);
+                }
             }
         }
 
