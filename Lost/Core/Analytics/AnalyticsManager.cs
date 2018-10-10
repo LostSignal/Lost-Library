@@ -10,105 +10,108 @@ namespace Lost
     using System.Collections.Generic;
     using UnityEngine;
 
-    public enum Gender
-    {
-        Male = 0,
-        Female = 1,
-        Unknown = 2
-    }
-
     public class AnalyticsManager : SingletonGameObject<AnalyticsManager>
     {
+        private static readonly string AnonymousIdKey = "AnnonymousId";
         private static readonly float NewSessionWaitTimeInSeconds = 30.0f;
 
-        private List<AnalyticsProvider> analyticsProviders = new List<AnalyticsProvider>();
-        private Dictionary<string, object> constantEventData = new Dictionary<string, object>();
-        private HashSet<int> sentLogs = new HashSet<int>();
-        private Guid session = Guid.NewGuid();
-        private int sessionCount = 1;
-        private float lostFocusTime = -1.0f;
+        List<IAnalyticsProvider> analyticsProviders = new List<IAnalyticsProvider>();
 
-        public Dictionary<string, object> ConstantEventData
+        private float lostFocusTime = -1.0f;
+        private bool pauseFlushing;
+        private string anonymousId;
+
+        public string AnonymousId
         {
             get
             {
-                if (this.constantEventData.Count == 0)
+                if (string.IsNullOrEmpty(this.anonymousId))
                 {
-                    this.constantEventData = new Dictionary<string, object>
+                    string playerPrefsAnonymousId = LostPlayerPrefs.GetString(AnonymousIdKey, null);
+
+                    if (string.IsNullOrEmpty(playerPrefsAnonymousId))
                     {
-                        { "App.Name",  Application.productName },
-                        { "App.Version",  Application.version },
-                        { "App.IsEditor",  Application.isEditor },
-                        { "App.OS",  SystemInfo.operatingSystem },
-                        { "App.ActiveConfig",  AppSettings.ActiveConfig.Name },
-
-                        { "Device.Id",  SystemInfo.deviceUniqueIdentifier },
-                        { "Device.Model",  SystemInfo.deviceModel },
-                        { "Device.Name",  SystemInfo.deviceName },
-                        { "Device.Platform",  Platform.CurrentDevicePlatform.ToString() },
-                        { "Device.RuntimePlatform",  Application.platform.ToString() },
-
-                        { "Screen.Width",  UnityEngine.Screen.width },
-                        { "Screen.Height",  UnityEngine.Screen.height },
-                        { "Screen.DPI",  UnityEngine.Screen.dpi },
-                    };
-
-                    this.WriteSessionData();
+                        this.anonymousId = Guid.NewGuid().ToString();
+                        LostPlayerPrefs.SetString(AnonymousIdKey, this.anonymousId);
+                        LostPlayerPrefs.Save();
+                    }
+                    else
+                    {
+                        this.anonymousId = playerPrefsAnonymousId;
+                    }
                 }
 
-                return this.constantEventData;
+                return this.anonymousId;
             }
         }
 
-        public void Register(AnalyticsProvider provider)
+        public long SessionId
+        {
+            get { return UnityEngine.Analytics.AnalyticsSessionInfo.sessionId; }
+        }
+
+        public void RegisterAnalyticsProvider(IAnalyticsProvider provider)
         {
             this.analyticsProviders.AddIfNotNullAndUnique(provider);
         }
 
-        public void Identify(string userId, Dictionary<string, object> eventData = null, Gender gender = Gender.Unknown, int age = 0)
+        public bool PauseFlushing
         {
-            // TODO [bgish]: Need to set the userId on PerformanceReporting (if they put the API back)
-            Dictionary<string, object> allEventData = this.GetAllEventData(eventData);
-
-            foreach (var provider in this.analyticsProviders)
+            get
             {
-                provider.Identify(userId, allEventData, gender, age);
+                return this.pauseFlushing;
+            }
+
+            set
+            {
+                if (this.pauseFlushing != value)
+                {
+                    this.pauseFlushing = value;
+
+                    if (this.pauseFlushing == false)
+                    {
+                        this.ForceFlush();
+                    }
+                }
             }
         }
 
-        public void Screen(string screenName, Dictionary<string, object> eventData = null)
+        public void Flush()
         {
-            Dictionary<string, object> allEventData = this.GetAllEventData(eventData);
-
-            foreach (var provider in this.analyticsProviders)
+            if (this.pauseFlushing)
             {
-                provider.Screen(screenName, allEventData);
+                return;
             }
+
+            this.ForceFlush();
         }
 
-        public void Transaction(string productId, decimal amount, string currency)
+        public void ResetAnonymousId()
         {
-            foreach (var provider in this.analyticsProviders)
-            {
-                provider.Transaction(productId, amount, currency);
-            }
-        }
-
-        public void TrackPosition(string eventName, Vector3 position)
-        {
-            foreach (var implementor in this.analyticsProviders)
-            {
-                implementor.TrackPosition(eventName, position);
-            }
+            LostPlayerPrefs.DeleteKey(AnonymousIdKey);
+            LostPlayerPrefs.Save();
         }
 
         protected override void Awake()
         {
             base.Awake();
 
-            if (Application.isEditor == false)
+            UnityEngine.Analytics.Analytics.enabled = false;
+            UnityEngine.Analytics.AnalyticsEvent.debugMode = Application.isEditor;
+
+            if (UnityEngine.Analytics.AnalyticsSessionInfo.userId != AnonymousId)
             {
-                Application.logMessageReceived += Application_logMessageReceived;
+                UnityEngine.Analytics.Analytics.SetUserId(AnonymousId);
+            }
+
+            Analytics.Analytics.CustomEventFired += this.EventFired;
+        }
+
+        private void EventFired(string eventName, IDictionary<string, object> eventData)
+        {
+            for (int i = 0; i < this.analyticsProviders.Count; i++)
+            {
+                this.analyticsProviders[i].CustomEvent(this.SessionId, eventName, eventData);
             }
         }
 
@@ -120,87 +123,58 @@ namespace Lost
 
                 if (this.lostFocusTime > 0 && delta > NewSessionWaitTimeInSeconds)
                 {
-                    this.session = Guid.NewGuid();
-                    this.sessionCount++;
-                    this.WriteSessionData();
+                    // this.session = Guid.NewGuid();
+                    // this.sessionCount++;
+                    // this.SendNewSessionEvent();
                 }
             }
             else
             {
                 this.lostFocusTime = Time.realtimeSinceStartup;
+                this.ForceFlush();
             }
         }
 
-        private void Track(string eventName, Dictionary<string, object> eventData)
+        private void SendNewSessionEvent()
         {
-            Dictionary<string, object> allEventData = this.GetAllEventData(eventData);
-
-            foreach (var provider in this.analyticsProviders)
+            Analytics.AnalyticsEvent.Custom("new_session", new Dictionary<string, object>
             {
-                provider.Track(eventName, allEventData);
-            }
+                { "active_config", AppSettings.ActiveConfig != null ? AppSettings.ActiveConfig.Name : string.Empty },
+                { "app_name",  Application.productName },
+                { "app_version",  Application.version },
+                { "app_is_editor",  Application.isEditor },
+                { "app_runtime_platform",  Application.platform.ToString() },
+                { "app_language",  Application.systemLanguage.ToString() },
+            });
         }
 
-        private Dictionary<string, object> GetAllEventData(Dictionary<string, object> eventData)
+        private void SendCloudBuildEvent()
         {
-            var contantDataCopy = this.CopyDictionary(this.ConstantEventData);
+            var manifest = CloudBuildManifest.Find();
 
-            // appending all the event data
-            if (eventData != null)
+            if (manifest == null)
             {
-                foreach (var keyValuePair in eventData)
-                {
-                    this.AddIfDoesntExist(contantDataCopy, keyValuePair.Key, keyValuePair.Value);
-                }
+                return;
             }
 
-            return contantDataCopy;
-        }
-
-        private void AddIfDoesntExist(Dictionary<string, object> eventData, string key, object value)
-        {
-            if (eventData.ContainsKey(key) == false)
+            Analytics.AnalyticsEvent.Custom("unity_cloud_build", new Dictionary<string, object>
             {
-                eventData.Add(key, value);
-            }
-            else
+                { "branch",  manifest.ScmBranch },
+                { "commit_id",  manifest.ScmCommitId },
+                { "build_number",  manifest.BuildNumber },
+                { "target_name",  manifest.CloudBuildTargetName },
+                { "unity_version",  manifest.UnityVersion },
+                { "bundle_id",  manifest.BundleId },
+                { "project_id",  manifest.ProjectId },
+            });
+        }
+        
+        private void ForceFlush()
+        {
+            for (int i = 0; i < this.analyticsProviders.Count; i++)
             {
-                Debug.LogErrorFormat(this, "Tried adding already existing Key \"{0}\" -> Value \"{1}\" to analytics eventData.", key, value);
+                this.analyticsProviders[i].FlushRequested();
             }
-        }
-
-        private Dictionary<string, object> CopyDictionary(Dictionary<string, object> eventData)
-        {
-            return eventData == null ? new Dictionary<string, object>() : new Dictionary<string, object>(eventData);
-        }
-
-        private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
-        {
-            int hashCode = stackTrace.GetHashCode();
-
-            if (this.sentLogs.Contains(hashCode) == false)
-            {
-                this.sentLogs.Add(hashCode);
-
-                // making sure we don't go over our 1k body limit size in playfab
-                if (stackTrace.Length > 450)
-                {
-                    stackTrace = stackTrace.Substring(0, 450);
-                }
-
-                this.Track("LogEvent", new Dictionary<string, object>
-                {
-                    { "Condition", condition },
-                    { "StackTrace", stackTrace },
-                    { "LogType", type.ToString() },
-                });
-            }
-        }
-
-        private void WriteSessionData()
-        {
-            this.ConstantEventData.AddOrOverwrite("App.SessionGuid", session.ToString());
-            this.ConstantEventData.AddOrOverwrite("App.SessionCount", sessionCount.ToString());
         }
     }
 }

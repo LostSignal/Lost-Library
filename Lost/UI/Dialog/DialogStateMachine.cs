@@ -25,6 +25,11 @@ namespace Lost
             get { return this.state == State.Hidden; }
         }
 
+        public bool IsUnknown
+        {
+            get { return this.state == State.Unknown; }
+        }
+
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             base.OnStateUpdate(animator, stateInfo, layerIndex);

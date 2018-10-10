@@ -16,6 +16,13 @@ namespace Lost
 
         private void Update()
         {
+            // Make sure not to run this when actually plaing the game (even if it's just in the editor)
+            if (Application.isPlaying)
+            {
+                this.enabled = false;
+                return;
+            }
+
             Dialog dialog = this.GetComponent<Dialog>();
 
             if (dialog == null)

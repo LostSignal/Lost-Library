@@ -24,6 +24,11 @@ namespace Lost
             SpinnerBox.Instance.UpdateBodyText("Connecting To Store...");
         }
 
+        public static UnityTask<StringInputResult> ShowChangeDisplayNameInputBox(string currentDisplayName)
+        {
+            return StringInputBox.Instance.Show("Change Display Name", "Enter in your new display name.", currentDisplayName);
+        }
+
         public static UnityTask<OkResult> HandleError(System.Exception exception)
         {
             UnityTask<OkResult> result = null;
@@ -46,6 +51,15 @@ namespace Lost
 
             switch (playfabException.Error.Error)
             {
+                // Display Name Changing Errors
+                case PlayFabErrorCode.NameNotAvailable:
+                    MessageBox.Instance.ShowOk("Rename Failed", "That name is currently not available.");
+                    break;
+
+                case PlayFabErrorCode.ProfaneDisplayName:
+                    MessageBox.Instance.ShowOk("Rename Failed", "That name contains profanity.");
+                    break;
+
                 // android receipt errors
                 case PlayFabErrorCode.ReceiptCancelled:
 

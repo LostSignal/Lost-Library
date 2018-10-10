@@ -70,15 +70,16 @@ namespace Lost
         {
             string unityDirectory = null;
             string templateFilesDirectory = null;
-
+            string applicationPath = EditorApplication.applicationPath;
+            
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
-                unityDirectory = Path.GetDirectoryName(System.Environment.CommandLine);
+                unityDirectory = Path.GetDirectoryName(applicationPath);
                 templateFilesDirectory = Path.Combine(unityDirectory, "Data\\Resources\\ScriptTemplates");
             }
             else if (Application.platform == RuntimePlatform.OSXEditor)
             {
-                unityDirectory = Path.GetDirectoryName(System.Environment.CommandLine);
+                unityDirectory = Path.GetDirectoryName(applicationPath);
                 unityDirectory = Path.GetDirectoryName(unityDirectory);  // going back one more directory
                 templateFilesDirectory = Path.Combine(unityDirectory, "Resources/ScriptTemplates");
             }
@@ -90,7 +91,7 @@ namespace Lost
 
             if (Directory.Exists(templateFilesDirectory) == false)
             {
-                Debug.LogError("Unable to override template files, couldn't find unity template directory.");
+                Debug.LogErrorFormat("Unable to override template files, couldn't find unity template directory {0}.", templateFilesDirectory);
                 return;
             }
 
@@ -399,13 +400,14 @@ namespace Lost
         {
             List<string> templateFiles = new List<string>();
 
-            foreach (var templateFile in Directory.GetFiles(".", "*.txt", SearchOption.AllDirectories))
+            foreach (var templateFile in Directory.GetFiles(".", "*.cs.txt", SearchOption.AllDirectories))
             {
-                var sanitizedTemplateFile = templateFile.Replace("\\", "/");
+                var fullTemplateFilePath = templateFile.Replace("\\", "/");
+                var templateFileDirectory = Path.GetDirectoryName(fullTemplateFilePath).Replace("\\", "/");
 
-                if (sanitizedTemplateFile.Contains("/Lost/") && Path.GetDirectoryName(sanitizedTemplateFile).EndsWith("/TemplateFiles"))
+                if (fullTemplateFilePath.Contains("/Lost/") && templateFileDirectory.EndsWith("/TemplateFiles"))
                 {
-                    templateFiles.Add(sanitizedTemplateFile);
+                    templateFiles.Add(fullTemplateFilePath);
                 }
             }
 

@@ -42,25 +42,7 @@ namespace Lost
         #pragma warning restore 0649
 
         private PurchaseResult result;
-
-        public void SetupDefault()
-        {
-            // creating objects
-            var content = this.transform.Find("Content").gameObject;
-            content.GetOrAddComponent<Image>();
-            content.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0.5f);
-            content.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0.5f);
-            content.GetComponent<RectTransform>().sizeDelta = new Vector2(800, 800);
-            content.GetComponent<RectTransform>().localPosition = new Vector3(0, 0, 0);
-
-            this.cancelButton = this.DebugCreateButton(content, "CancelButton", "CancelButtonText", "Cancel", new Vector3(300, 300));
-            this.buyButton = this.DebugCreateButton(content, "BuyButton", "BuyButtonText", "Buy", new Vector3(0, -300));
-            this.buyButtonText = this.buyButton.GetComponentInChildren<Text>();
-            this.buyButtonIcon = this.DebugCreateImage(this.buyButton.gameObject, "Icon", Color.red, new Vector3(75, 0));
-            this.storeItemIcon = this.DebugCreateImage(content, "StoreItemIcon", Color.blue, new Vector3(0, 400));
-            this.storeItemDescription = this.DebugCreateText(content, "ItemDescription", "Description", Vector3.zero);
-        }
-
+        
         public override void OnBackButtonPressed()
         {
             base.OnBackButtonPressed();

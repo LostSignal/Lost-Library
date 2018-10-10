@@ -101,14 +101,9 @@ namespace Lost
             get { return this.isShowing && this.dialogStateMachine.IsDoneShowing; }
         }
 
-        public bool IsHidding
-        {
-            get { return this.isShowing == false; }
-        }
-
         public bool IsHidden
         {
-            get { return this.isShowing == false && this.dialogStateMachine.IsDoneHiding; }
+            get { return this.isShowing == false && (this.dialogStateMachine.IsDoneHiding || this.dialogStateMachine.IsUnknown); }
         }
 
         public bool IsTransitioning
@@ -177,6 +172,10 @@ namespace Lost
                 this.OnHide();
 
                 DialogManager.Instance.RemoveDialog(this);
+            }
+            else if (dialog != null)
+            {
+                dialog.Show();
             }
         }
 
@@ -280,52 +279,7 @@ namespace Lost
         protected virtual void OnHide()
         {
         }
-
-        protected Image DebugCreateImage(GameObject parent, string objectName, Color color, Vector3 localPosition)
-        {
-            var itemDescriptionText = new GameObject(objectName, typeof(Image));
-            itemDescriptionText.transform.SetParent(parent.transform);
-            itemDescriptionText.transform.Reset();
-            itemDescriptionText.transform.localPosition = localPosition;
-
-            var imageComponent = itemDescriptionText.GetComponent<Image>();
-            imageComponent.color = color;
-
-            return imageComponent;
-        }
-
-        protected Text DebugCreateText(GameObject parent, string objectName, string text, Vector3 localPosition)
-        {
-            var itemDescriptionText = new GameObject(objectName, typeof(RectTransform), typeof(Text));
-            itemDescriptionText.transform.SetParent(parent.transform);
-            itemDescriptionText.transform.Reset();
-            itemDescriptionText.transform.localPosition = localPosition;
-
-            var textComponent = itemDescriptionText.GetComponent<Text>();
-            textComponent.text = text;
-            textComponent.color = Color.black;
-
-            return textComponent;
-        }
-
-        protected Button DebugCreateButton(GameObject parent, string objectName, string textObjectName, string text, Vector3 localPosition)
-        {
-            var button = new GameObject(objectName, typeof(RectTransform), typeof(Image), typeof(Button));
-            button.transform.SetParent(parent.transform);
-            button.transform.Reset();
-            button.transform.localPosition = localPosition;
-            button.GetComponent<Image>().color = Color.grey;
-            button.GetComponent<RectTransform>().sizeDelta = new Vector2(150, 50);
-
-            var cancelButtonText = new GameObject(textObjectName, typeof(RectTransform), typeof(Text));
-            cancelButtonText.transform.SetParent(button.transform);
-            cancelButtonText.transform.Reset();
-            cancelButtonText.GetComponent<Text>().text = text;
-            cancelButtonText.GetComponent<Text>().color = Color.black;
-
-            return button.GetComponent<Button>();
-        }
-
+        
         private void Start()
         {
             // this needs to happen after all Awakes are called

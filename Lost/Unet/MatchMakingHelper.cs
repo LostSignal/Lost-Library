@@ -446,6 +446,8 @@ namespace Lost
                 matchMaker = networkMatchObject.AddComponent<NetworkMatch>();
             }
 
+            #if !UNITY_WEBGL
+
             // finding closest match making host
             if (closestMatchHostIndex == -1)
             {
@@ -466,10 +468,17 @@ namespace Lost
                         minMatchHostIndex = i;
                         minPing = ping.time;
                     }
+
                 }
 
                 closestMatchHostIndex = minMatchHostIndex;
             }
+
+            #else
+
+            currentMatchHostIndex = 0;
+
+            #endif
 
             if (currentMatchHostIndex == -1)
             {

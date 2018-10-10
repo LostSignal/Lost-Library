@@ -23,6 +23,8 @@ namespace Lost
         static PF()
         {
             PlayfabEvents = PlayFabEvents.Init();
+            PlayfabEvents.OnLoginResultEvent += LoginResultEvent;
+
             PlayFabSettings.TitleId = AppSettings.ActiveConfig.PlayfabTitleId;
             CatalogVersion = AppSettings.ActiveConfig.CatalogVersion;
             CloudScriptRevision = AppSettings.ActiveConfig.CloudScriptRevision;
@@ -31,6 +33,12 @@ namespace Lost
         public static PlayFabEvents PlayfabEvents { get; private set; }
         public static string CatalogVersion { get; private set; }
         public static int CloudScriptRevision { get; private set; }
+        public static string PlayFabId { get; private set; }
+
+        public static long ConvertPlayFabIdToLong(string playfabId)
+        {
+            return System.Convert.ToInt64(playfabId, 16);
+        }
 
         #region Login and linking with device id
 
@@ -156,7 +164,8 @@ namespace Lost
 
         public static T GetCloudScrtipResult<T>(UnityTask<ExecuteCloudScriptResult> result)
         {
-            return PlayFab.Json.JsonWrapper.DeserializeObject<T>(result.Value.FunctionResult.ToString());
+            string functionResult = result.Value.FunctionResult != null ? result.Value.FunctionResult.ToString() : null;
+            return PlayFab.Json.JsonWrapper.DeserializeObject<T>(functionResult);
         }
 
         #endregion
@@ -337,6 +346,25 @@ namespace Lost
 
         #endregion
 
+        #region Matchmaking Related Functions
+
+        public static UnityTask<CurrentGamesResult> Do(CurrentGamesRequest request)
+        {
+            return Do<CurrentGamesRequest, CurrentGamesResult>(request, PlayFabClientAPI.GetCurrentGames);
+        }
+
+        public static UnityTask<MatchmakeResult> Do(MatchmakeRequest request)
+        {
+            return Do<MatchmakeRequest, MatchmakeResult>(request, PlayFabClientAPI.Matchmake);
+        }
+
+        public static UnityTask<StartGameResult> Do(StartGameRequest request)
+        {
+            return Do<StartGameRequest, StartGameResult>(request, PlayFabClientAPI.StartGame);
+        }
+
+        #endregion
+
         private static UnityTask<Result> Do<Request, Result>(Request request, Action<Request, Action<Result>, Action<PlayFabError>, object, Dictionary<string, string>> playfabFunction)
             where Request : class
             where Result : class
@@ -361,6 +389,20 @@ namespace Lost
             if (error != null)
             {
                 throw new PlayFabException(error);
+            }
+
+            // Checking cloud script logging for errors
+            var executeCloudScriptResult = result as ExecuteCloudScriptResult;
+
+            if (executeCloudScriptResult != null)
+            {
+                for (int i = 0; i < executeCloudScriptResult.Logs.Count; i++)
+                {
+                    if (executeCloudScriptResult.Logs[i].Level == "Error")
+                    {
+                        throw new PlayFabCloudScriptException(executeCloudScriptResult.Logs[i].Message);
+                    }
+                }
             }
 
             yield return result;
@@ -501,6 +543,11 @@ namespace Lost
             {
                 throw new NotImplementedException();
             }
+        }
+
+        private static void LoginResultEvent(LoginResult loginResult)
+        {
+            PlayFabId = loginResult?.InfoResultPayload?.AccountInfo?.PlayFabId;
         }
     }
 }

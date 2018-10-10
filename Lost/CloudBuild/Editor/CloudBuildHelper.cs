@@ -175,6 +175,7 @@ namespace Lost
         }
 
         // http://answers.unity3d.com/questions/1225564/enable-unity-uses-remote-notifications.html
+        // https://answers.unity.com/questions/1224123/enable-push-notification-in-xcode-project-by-defau.html
         // https://forum.unity3d.com/threads/how-to-put-ios-entitlements-file-in-a-unity-project.442277/
         [PostProcessBuild]
         private static void EnableIOSPushNotifications(BuildTarget buildTarget, string buildPath)
@@ -191,6 +192,17 @@ namespace Lost
             string text = File.ReadAllText(preprocessorPath);
             text = text.Replace("UNITY_USES_REMOTE_NOTIFICATIONS 0", "UNITY_USES_REMOTE_NOTIFICATIONS 1");
             File.WriteAllText(preprocessorPath, text);
+
+            // var capManager = new UnityEditor.iOS.Xcode.ProjectCapabilityManager(buildPath, "com.example");
+            // 
+            // if (AppSettings.ActiveConfig.IOSPushNotificationType == IOSPushNotificationType.Development)
+            // {
+            //     capManager.AddPushNotifications(true);
+            // }
+            // else if (AppSettings.ActiveConfig.IOSPushNotificationType == IOSPushNotificationType.Production)
+            // {
+            //     capManager.AddPushNotifications(false);
+            // }
 
             // // creating the entitlements file
             var entitlements = new System.Text.StringBuilder();
@@ -212,6 +224,8 @@ namespace Lost
             string targetName = UnityEditor.iOS.Xcode.PBXProject.GetUnityTargetName();
             string targetGuid = pbxProject.TargetGuidByName(targetName);
 
+            // pbxProject.AddCapability(targetGuid, UnityEditor.iOS.Xcode.PBXCapabilityType.PushNotifications);
+
             // writing out the entitlements file to disk
             string destinationFilePath = string.Format("{0}/{1}/{2}", buildPath, targetName, fileName);
             Debug.Log("Adding Entitlements " + destinationFilePath);
@@ -225,6 +239,8 @@ namespace Lost
             pbxProject.AddFile(relativeFilePath, fileName);
             pbxProject.AddBuildProperty(targetGuid, "CODE_SIGN_ENTITLEMENTS", relativeFilePath);
 
+            pbxProject.GetBuildPropertyForConfig(targetGuid, "CODE_SIGN_ENTITLEMENTS");
+
             // saving the pbx project back to disk
             pbxProject.WriteToFile(pbxProjectPath);
 
@@ -232,3 +248,21 @@ namespace Lost
         }
     }
 }
+
+
+//   /BUILD_PATH/lost-signal-llc.tienlen.tienlen-ios-dev/TienLen_Unity/temp.XXXXXX20180823-5755-1c1vdfv/Unity-iPhone/Push.entitlements
+
+//   /BUILD_PATH/lost-signal-llc.tienlen.tienlen-ios-dev/TienLen_Unity/temp.XXXXXX20180823-5755-1c1vdfv/TienLen.entitlements Unity-iPhone/Push.entitlements
+
+
+// private static void OneSignalPostBuild(BuildTarget target, string buildPath)
+// {
+//     var capManager = new ProjectCapabilityManager(buildPath, "com.example");
+//     capManager.AddPushNotifications(Debug.isDebugBuild);
+// 
+//     var project = capManager.PBXProject;
+//     var targetGuid = project.TargetGuidByName(PBXProject.GetUnityTargetName());
+//     project.AddFrameworkToProject(targetGuid, "UserNotifications.framework", false);
+// 
+//     capManager.Close();
+// }

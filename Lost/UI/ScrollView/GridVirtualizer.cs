@@ -11,15 +11,15 @@ namespace Lost
     using UnityEngine;
     using UnityEngine.UI;
 
-    public enum GrowType
-    {
-        Vertically,
-        Horizontally,
-    }
-
     [Serializable]
     public abstract class GridVirtualizer<T> where T : MonoBehaviour
     {
+        public enum GrowType
+        {
+            Vertically,
+            Horizontally,
+        }
+
         public delegate void OnShowItemDelegate(T monoBehaviour, int index);
         public event OnShowItemDelegate OnShowItem;
 

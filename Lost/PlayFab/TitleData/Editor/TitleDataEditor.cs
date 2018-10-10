@@ -66,12 +66,23 @@ namespace Lost
         #if ENABLE_PLAYFABADMIN_API
         protected abstract void UploadTitleData(string key, string version, T data);
 
-        protected void SetTitleData(string titleDataKey, string json)
+        protected void SetTitleData(string titleDataKey, string json, System.Action onComplete = null)
         {
             this.SetTitleData(
                 new SetTitleDataRequest { Key = titleDataKey, Value = json },
-                (result) => Debug.LogFormat("Successfully uploaded Title Data Key {0}", titleDataKey),
-                (error) => Debug.LogErrorFormat("Unable to upload Title Data Key {0}: {1}", titleDataKey, error));
+                (result) =>
+                {
+                    Debug.LogFormat("Successfully uploaded Title Data Key {0}", titleDataKey);
+
+                    if (onComplete != null)
+                    {
+                        onComplete();
+                    }
+                },
+                (error) =>
+                {
+                    Debug.LogErrorFormat("Unable to upload Title Data Key {0}: {1}", titleDataKey, error);
+                });
         }
 
         private void SetTitleData(SetTitleDataRequest req, Action<SetTitleDataResult> resultCb, Action<PlayFab.PfEditor.EditorModels.PlayFabError> errorCb)

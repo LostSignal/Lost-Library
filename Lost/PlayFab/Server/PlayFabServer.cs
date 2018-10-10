@@ -17,6 +17,7 @@ namespace Lost
     using PlayFab.SharedModels;
     using UnityEngine;
     using UnityEngine.Purchasing;
+    using UnityEngine.SceneManagement;
 
     public delegate void OnVirtualCurrencyChangedDelegate();
     public delegate void OnUserInventoryChagnedDelegate();
@@ -88,7 +89,6 @@ namespace Lost
         private float serverRealtimeSinceStartup = 0.0f;
 
         // device id
-        private const string DeviceIdKey = "DeviceId";
         private static string deviceId;
 
         // tracking time outs
@@ -152,6 +152,11 @@ namespace Lost
             get { return this.userAccountInfo != null ? this.userAccountInfo.PlayFabId : null; }
         }
 
+        public string DisplayName
+        {
+            get { return this.userAccountInfo != null && this.userAccountInfo.TitleInfo != null ? this.userAccountInfo.TitleInfo.DisplayName : null; }
+        }
+
         public string FacebookId
         {
             get { return this.userAccountInfo != null && this.userAccountInfo.FacebookInfo != null ? this.userAccountInfo.FacebookInfo.FacebookId : null; }
@@ -192,26 +197,7 @@ namespace Lost
 
         public string DeviceId
         {
-            get
-            {
-                if (string.IsNullOrEmpty(deviceId))
-                {
-                    string playerPrefsDeviceId = LostPlayerPrefs.GetString(DeviceIdKey, null);
-
-                    if (string.IsNullOrEmpty(playerPrefsDeviceId))
-                    {
-                        deviceId = Guid.NewGuid().ToString();
-                        LostPlayerPrefs.SetString(DeviceIdKey, deviceId);
-                        LostPlayerPrefs.Save();
-                    }
-                    else
-                    {
-                        deviceId = playerPrefsDeviceId;
-                    }
-                }
-
-                return deviceId;
-            }
+            get { return AnalyticsManager.Instance.AnonymousId; }
         }
 
         public IEnumerable<IInventoryItem> UserInventory
@@ -223,12 +209,6 @@ namespace Lost
                     yield return this.userInventory[i];
                 }
             }
-        }
-
-        public void ResetDeviceId()
-        {
-            LostPlayerPrefs.DeleteKey(DeviceIdKey);
-            LostPlayerPrefs.Save();
         }
 
         public bool HasInventoryItem(string itemId)
@@ -251,6 +231,11 @@ namespace Lost
             }
 
             return -1;
+        }
+
+        public UnityTask<bool> ChangeDisplayName()
+        {
+            return UnityTask<bool>.Run(this.ChangeDisplayNameCoroutine());
         }
 
         public UnityTask<GetUserInventoryResult> RefreshVirtualCurrency()
@@ -592,6 +577,48 @@ namespace Lost
             }
         }
 
+        private IEnumerator<bool> ChangeDisplayNameCoroutine()
+        {
+            var stringInputBox = PlayFabMessages.ShowChangeDisplayNameInputBox(this.DisplayName);
+
+            while (stringInputBox.IsDone == false)
+            {
+                yield return default(bool);
+            }
+
+            if (stringInputBox.Value == StringInputResult.Cancel)
+            {
+                yield return false;
+                yield break;
+            }
+
+            var updateDisplayName = PF.Do(new UpdateUserTitleDisplayNameRequest
+            {
+                DisplayName = StringInputBox.Instance.Text,
+            });
+
+            while (updateDisplayName.IsDone == false)
+            {
+                yield return default(bool);
+            }
+
+            // Early out if we got an error
+            if (updateDisplayName.HasError)
+            {
+                PlayFabMessages.HandleError(updateDisplayName.Exception);
+                yield return false;
+                yield break;
+            }
+
+            // Updating the display name
+            if (this.userAccountInfo != null && this.userAccountInfo.TitleInfo != null)
+            {
+                this.userAccountInfo.TitleInfo.DisplayName = StringInputBox.Instance.Text;
+            }
+
+            yield return true;
+        }
+
         private IEnumerator<List<StoreItem>> GetStoreItemsInternal(string storeId)
         {
             var getStore = PF.Do(new GetStoreItemsRequest() { StoreId = storeId });
@@ -694,8 +721,14 @@ namespace Lost
 
         private void UpdateVirtualCurrencies(Dictionary<string, int> virtualCurrencies, Dictionary<string, VirtualCurrencyRechargeTime> rechargeTimes)
         {
-            this.virtualCurrencies = virtualCurrencies;
-            this.virtualCurrencyRechargeTimes = new Dictionary<string, int>();
+            this.virtualCurrencies.Clear();
+            
+            foreach (var currencyId in virtualCurrencies.Keys)
+            {
+                this.virtualCurrencies.Add(currencyId, virtualCurrencies[currencyId]);
+            }
+
+            this.virtualCurrencyRechargeTimes.Clear();
 
             foreach (var vc in rechargeTimes.Keys)
             {
@@ -747,11 +780,11 @@ namespace Lost
             Debug.AssertFormat(receipt != null, "Unable to parse receipt {0}", e.purchasedProduct.receipt);
 
             var store = (string)receipt["Store"];
-            var transactionID = (string)receipt["TransactionID"];
+            var transactionId = (string)receipt["TransactionID"];
             var payload = (string)receipt["Payload"];
 
             Debug.AssertFormat(string.IsNullOrEmpty(store) == false, "Unable to parse store from {0}", e.purchasedProduct.receipt);
-            Debug.AssertFormat(string.IsNullOrEmpty(transactionID) == false, "Unable to parse transactionID from {0}", e.purchasedProduct.receipt);
+            Debug.AssertFormat(string.IsNullOrEmpty(transactionId) == false, "Unable to parse transactionID from {0}", e.purchasedProduct.receipt);
             Debug.AssertFormat(string.IsNullOrEmpty(payload) == false, "Unable to parse payload from {0}", e.purchasedProduct.receipt);
 
             bool wasSuccessfull = false;
@@ -818,7 +851,22 @@ namespace Lost
                 yield break;
             }
 
-            AnalyticsManager.Instance.Transaction(e.purchasedProduct.definition.id, e.purchasedProduct.metadata.localizedPrice, e.purchasedProduct.metadata.isoCurrencyCode);
+            float price = catalogItem.RealMoneyCost / 100.0f;
+            string itemId = e.purchasedProduct.definition.id;
+            string itemType = catalogItem.ItemClass;
+            string level = SceneManager.GetActiveScene().name;
+            string transactionContext = this.FindCatalogStore(itemId);
+
+            // Original Unity Event
+            Analytics.Analytics.Transaction(e.purchasedProduct.definition.id, e.purchasedProduct.metadata.localizedPrice, e.purchasedProduct.metadata.isoCurrencyCode);
+
+            // Standard Unity Event
+            Analytics.AnalyticsEvent.IAPTransaction(transactionContext, price, itemId, itemType, level, transactionId, new Dictionary<string, object>
+            {
+                { "localized_price", e.purchasedProduct.metadata.localizedPrice },
+                { "iso_currency_code", e.purchasedProduct.metadata.isoCurrencyCode },
+                { "store", store },
+            });
 
             if (bundleItem != null)
             {
@@ -828,6 +876,22 @@ namespace Lost
             {
                 this.InternalAddCatalogItemToInventory(catalogItem.Id, 1);
             }
+        }
+
+        private string FindCatalogStore(string itemId)
+        {
+            for (int i = 0; i < this.ActiveCatalog.Stores.Count; i++)
+            {
+                for (int j = 0; j < this.ActiveCatalog.Stores[i].StoreItems.Count; j++)
+                {
+                    if (itemId == this.ActiveCatalog.Stores[i].StoreItems[j].ItemId)
+                    {
+                        return this.ActiveCatalog.Stores[i].Id;
+                    }
+                }
+            }
+
+            return "Unknown";
         }
 
         private IEnumerator DebugPurchaseStoreItem(PurchaseEventArgs e)

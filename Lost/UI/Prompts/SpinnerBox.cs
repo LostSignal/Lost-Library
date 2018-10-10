@@ -27,20 +27,6 @@ namespace Lost
 
         private Action cancelButtonAction;
 
-        public void SetupDefault()
-        {
-            var content = this.transform.Find("Content").gameObject;
-            content.GetOrAddComponent<Image>();
-            content.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0.5f);
-            content.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0.5f);
-            content.GetComponent<RectTransform>().sizeDelta = new Vector2(800, 800);
-            content.GetComponent<RectTransform>().localPosition = new Vector3(0, 0, 0);
-
-            this.title = this.DebugCreateText(content, "TitleText", "Title", new Vector3(0, 300));
-            this.body = this.DebugCreateText(content, "TitleBody", "Body", Vector3.zero);
-            this.cancelButton = this.DebugCreateButton(content, "CanelButton", "Text", "Cancel", new Vector3(0, -300));
-        }
-
         public void Show(string title, string body)
         {
             this.PrivateShow(title, body, false, null);

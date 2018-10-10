@@ -7,6 +7,13 @@
 namespace Lost
 {
     using TMPro;
+    using UnityEngine;
+
+    public enum IntFormat
+    {
+        Plain,
+        ThousandsSeperated,
+    }
 
     public struct BetterStringBuilder
     {
@@ -22,16 +29,47 @@ namespace Lost
 
         public BetterStringBuilder Append(string value)
         {
-            for (int i = 0; i < value.Length; i++)
+            if (string.IsNullOrEmpty(value) == false)
             {
-                charBuffer[currentLength++] = value[i];
+                for (int i = 0; i < value.Length; i++)
+                {
+                    charBuffer[currentLength++] = value[i];
+                }
             }
 
             return this;
         }
 
-        public BetterStringBuilder Append(int value)
+        public BetterStringBuilder Append(int value, IntFormat format = IntFormat.Plain)
         {
+            switch (format)
+            {
+                case IntFormat.Plain:
+                    return this.AppendInt(value, false);
+
+                case IntFormat.ThousandsSeperated:
+                    return this.AppendInt(value, true);
+
+                default:
+                    Debug.LogErrorFormat("Found Unknown IntFormat {0}", format);
+                    return this.AppendInt(value, false);
+            }
+        }
+
+        public void Set(TMP_Text text)
+        {
+            text.SetCharArray(charBuffer, 0, currentLength);
+        }
+
+        public override string ToString()
+        {
+            return new string(charBuffer, 0, currentLength);
+        }
+
+        private BetterStringBuilder AppendInt(int value, bool showThousandsSeperator)
+        {
+            string thousandsSeperator = showThousandsSeperator ? Localization.GetThousandsSeperator() : string.Empty;
+
             if (value < 0)
             {
                 charBuffer[currentLength++] = '-';
@@ -51,14 +89,14 @@ namespace Lost
             {
                 divisor /= 10;
                 charBuffer[currentLength++] = digits[(value / divisor) % 10];
+
+                if (divisor == 1000 || divisor == 1000000 || divisor == 1000000000)
+                {
+                    this.Append(thousandsSeperator);
+                }
             }
 
             return this;
-        }
-
-        public void Set(TMP_Text text)
-        {
-            text.SetCharArray(charBuffer, 0, currentLength);
         }
     }
 }

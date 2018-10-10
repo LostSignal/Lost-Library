@@ -13,6 +13,11 @@ namespace Lost
     {
         private LinkedList<Dialog> dialogs = new LinkedList<Dialog>();
 
+        public bool IsTopMostDialog(Dialog dialog)
+        {
+            return this.dialogs.Last != null && this.dialogs.Last.Value == dialog;
+        }
+
         public void AddDialog(Dialog dialog)
         {
             if (dialog != null && dialog.RegisterForBackButton && this.dialogs.Contains(dialog) == false)
@@ -37,7 +42,7 @@ namespace Lost
             }
         }
 
-        #if UNITY_ANDROID || UNITY_EDITOR
+        #if UNITY_ANDROID || UNITY_EDITOR || UNITY_STANDALONE
         private void Update()
         {
             // NOTE [bgish]: this catches the Android Back Button

@@ -32,6 +32,7 @@ namespace Lost
         [SerializeField] private UnityEvent onStartAnimation;
         [SerializeField] private UnityEvent onEndAnimation;
         [SerializeField] private AnimationCurve animationCurve = new AnimationCurve(new Keyframe { time = 0, value = 0 }, new Keyframe { time = 1, value = 1 });
+        [SerializeField] private IntFormat format;
         #pragma warning restore 0649
 
         private Text text;
@@ -148,7 +149,7 @@ namespace Lost
                 }
                 else
                 {
-                    this.text.text = this.intValue.ToString();
+                    BetterStringBuilder.New().Append(this.intValue, this.format).Set(this.text);
                 }
             }
         }

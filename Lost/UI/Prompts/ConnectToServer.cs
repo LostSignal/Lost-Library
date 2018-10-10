@@ -22,15 +22,7 @@ namespace Lost
         #pragma warning restore 0649
 
         private Camera cameraCache;
-
-        public void SetupDefault()
-        {
-            var content = this.transform.Find("Content").gameObject;
-            content.GetComponent<RectTransform>().FitToParent();
-
-            this.body = this.DebugCreateText(content, "BodyText", "Body", Vector3.zero);
-        }
-
+        
         public void Show(string bodyText)
         {
             Debug.Assert(string.IsNullOrEmpty(bodyText) == false, "ConnectToServer.Show was given invalid text", this);

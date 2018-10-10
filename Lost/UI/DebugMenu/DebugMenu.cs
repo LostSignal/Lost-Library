@@ -31,19 +31,17 @@ namespace Lost
         [SerializeField] private RectTransform debugMenuItemsHolder;
 
         [Header("Text Overlay")]
-        [SerializeField] private TextMeshProUGUI upperLeftText;
-        [SerializeField] private TextMeshProUGUI upperRightText;
-        [SerializeField] private TextMeshProUGUI lowerLeftText;
-        [SerializeField] private TextMeshProUGUI lowerRightText;
+        [SerializeField] private TMP_Text upperLeftText;
+        [SerializeField] private TMP_Text upperRightText;
+        [SerializeField] private TMP_Text lowerLeftText;
+        [SerializeField] private TMP_Text lowerRightText;
         #pragma warning restore 0649
 
         // fps related variables
-        private StringBuilder fpsBuilder = new StringBuilder();
         private readonly int fpsUpdateTicks = 10;
         private int fpsCurrentTickCount = 0;
         private float fpsDeltaTime = 0.0f;
         private Corner fpsCorner = Corner.UpperLeft;
-        private Color fpsColor = Color.red;
         private bool showFps = false;
 
         private Camera cameraCache = null;
@@ -115,7 +113,7 @@ namespace Lost
         public void SetFpsCornerAndColor(Corner fpsCorner, Color fpsColor)
         {
             this.fpsCorner = fpsCorner;
-            this.fpsColor = fpsColor;
+            this.SetCornerColor(fpsCorner, fpsColor);
         }
 
         #endregion
@@ -151,7 +149,11 @@ namespace Lost
         public void SetText(Corner corner, string text, Color color)
         {
             this.SetText(corner, text);
+            this.SetCornerColor(corner, color);
+        }
 
+        public void SetCornerColor(Corner corner, Color color)
+        {
             switch (corner)
             {
                 case Corner.UpperLeft:
@@ -222,24 +224,38 @@ namespace Lost
             {
                 float msec = (this.fpsDeltaTime / (float)this.fpsUpdateTicks) * 1000.0f;
                 float fps = 1.0f / (this.fpsDeltaTime / (float)this.fpsUpdateTicks);
-
-                // clearing the current string
-                fpsBuilder.Remove(0, fpsBuilder.Length);
-
+                
                 // building the new string
-                fpsBuilder.Append((int)msec);
-                fpsBuilder.Append(".");
-                fpsBuilder.Append(this.GetDecimalPoint(msec));
-                fpsBuilder.Append(" ms (");
-                fpsBuilder.Append((int)fps);
-                fpsBuilder.Append(".");
-                fpsBuilder.Append(this.GetDecimalPoint(fps));
-                fpsBuilder.Append(" fps)");
-
-                this.SetText(this.fpsCorner, fpsBuilder.ToString(), this.fpsColor);
-
+                BetterStringBuilder.New()
+                    .Append((int)msec)
+                    .Append(".")
+                    .Append(this.GetDecimalPoint(msec))
+                    .Append(" ms (")
+                    .Append((int)fps)
+                    .Append(".")
+                    .Append(this.GetDecimalPoint(fps))
+                    .Append(" fps)")
+                    .Set(this.GetCornerText(this.fpsCorner));
+                
                 this.fpsCurrentTickCount = 0;
                 this.fpsDeltaTime = 0.0f;
+            }
+        }
+
+        private TMP_Text GetCornerText(Corner corner)
+        {
+            switch (corner)
+            {
+                case Corner.LowerLeft:
+                    return this.lowerLeftText;
+                case Corner.LowerRight:
+                    return this.lowerRightText;
+                case Corner.UpperLeft:
+                    return this.upperLeftText;
+                case Corner.UpperRight:
+                    return this.upperRightText;
+                default:
+                    return null;
             }
         }
 

@@ -13,7 +13,7 @@ namespace Lost
     {
         public static void SafeSetActive(this GameObject gameObject, bool active)
         {
-            if (gameObject.activeSelf != active)
+            if (gameObject && gameObject.activeSelf != active)
             {
                 gameObject.SetActive(active);
             }
@@ -110,6 +110,14 @@ namespace Lost
         public static void SetLayerRecursively(this GameObject gameObject, int layer)
         {
             PrivateSetLayerRecursively(gameObject, layer);
+        }
+        
+        public static void DestroyAllChildrenRecursively(this GameObject gameObject)
+        {
+            for (int i = gameObject.transform.childCount - 1; i >= 0; i--)
+            {
+                PrivateDestroyAllRecursively(gameObject.transform.GetChild(i).gameObject);
+            }
         }
 
         public static void DestroyAllRecursively(this GameObject gameObject)
