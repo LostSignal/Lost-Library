@@ -1,0 +1,185 @@
+﻿//-----------------------------------------------------------------------
+// <copyright file="IntText.cs" company="Lost Signal LLC">
+//     Copyright (c) Lost Signal LLC. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
+
+namespace Lost
+{
+    using System.Collections;
+    using System.Linq;
+    using UnityEngine;
+    using UnityEngine.Events;
+    using Text = TMPro.TMP_Text;
+
+    public enum TextUpdateType
+    {
+        Instant,
+        Animate,
+        None,
+    }
+
+    [RequireComponent(typeof(Text))]
+    public class IntText : MonoBehaviour
+    {
+        #pragma warning disable 0649
+        [SerializeField] private string unsetText = "?";
+        [SerializeField] private string prefixValue = "";
+        [SerializeField] private string postfixValue = "";
+        [SerializeField] private UnityEvent onStartAnimation;
+        [SerializeField] private UnityEvent onEndAnimation;
+        [SerializeField] private AnimationCurve animationCurve = new AnimationCurve(new Keyframe { time = 0, value = 0 }, new Keyframe { time = 1, value = 1 });
+        [SerializeField] private IntFormat format;
+        #pragma warning restore 0649
+
+        private Coroutine animateToGoalCoroutine;
+        private int intValue = int.MinValue;
+        private int goalValue = int.MinValue;
+        private Text text;
+
+        public Text Text
+        {
+            get
+            {
+                this.UpdateTextField();
+                return this.text;
+            }
+        }
+
+        public bool HasValueBeenSet
+        {
+            get { return this.intValue != int.MinValue; }
+        }
+
+        public int CurrentValue
+        {
+            get { return this.intValue; }
+        }
+
+        public int GoalValue
+        {
+            get { return this.goalValue; }
+        }
+
+        public void UpdateValue(int newValue, TextUpdateType updateType)
+        {
+            if (this.goalValue == newValue)
+            {
+                return;
+            }
+
+            this.goalValue = newValue;
+
+            if (updateType == TextUpdateType.Instant)
+            {
+                if (this.intValue != newValue)
+                {
+                    this.intValue = newValue;
+                    this.goalValue = newValue;
+
+                    this.UpdateText();
+                }
+            }
+            else if (updateType == TextUpdateType.Animate)
+            {
+                this.AnimateToGoal();
+            }
+            else if (updateType == TextUpdateType.None)
+            {
+                // do nothing
+            }
+            else
+            {
+                Debug.LogErrorFormat("IntText.UpdateValue found unknown TextUpdateType {0}", updateType.ToString());
+            }
+        }
+
+        public void AnimateToGoal()
+        {
+            if (this.intValue != this.goalValue)
+            {
+                if (this.animateToGoalCoroutine != null)
+                {
+                    CoroutineRunner.Instance.StopCoroutine(this.animateToGoalCoroutine);
+                    this.animateToGoalCoroutine = null;
+                }
+
+                this.animateToGoalCoroutine = CoroutineRunner.Instance.StartCoroutine(this.AnimateToGoalCoroutine());
+            }
+        }
+
+        // NOTE [bgish]: has zero references bcause AnimateToGoal refers to this function by string name
+        private IEnumerator AnimateToGoalCoroutine()
+        {
+            if (this.HasValueBeenSet == false)
+            {
+                this.intValue = 0;
+                this.text.text = "0";
+            }
+
+            this.onStartAnimation.InvokeIfNotNull();
+
+            float startValue = this.intValue;
+            float endValue = this.goalValue;
+            float difference = endValue - startValue;
+            float animationTime = this.animationCurve.keys.Last().time;
+            float currentTime = 0;
+
+            while (currentTime < animationTime)
+            {
+                float newValue = startValue + (difference * this.animationCurve.Evaluate(currentTime));
+
+                this.intValue = (int)newValue;
+                this.UpdateText();
+
+                yield return null;
+
+                currentTime += Time.deltaTime;
+            }
+
+            this.intValue = this.goalValue;
+            this.UpdateText();
+
+            this.onEndAnimation.InvokeIfNotNull();
+        }
+
+        private void OnEnable()
+        {
+            this.UpdateText();
+        }
+
+        private void UpdateTextField()
+        {
+            if (this.text == null)
+            {
+                this.text = this.GetComponent<Text>();
+
+                if (this.text == null)
+                {
+                    Debug.LogWarning("IntText does not have a valid Text object to work with.", this);
+                }
+            }
+        }
+
+        private void UpdateText()
+        {
+            this.UpdateTextField();
+
+            if (this.text != null)
+            {
+                if (this.intValue == int.MinValue)
+                {
+                    this.text.text = this.unsetText;
+                }
+                else
+                {
+                    BetterStringBuilder.New()
+                        .Append(this.prefixValue)
+                        .Append(this.intValue, this.format)
+                        .Append(this.postfixValue)
+                        .Set(this.text);
+                }
+            }
+        }
+    }
+}

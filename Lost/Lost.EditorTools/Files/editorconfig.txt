@@ -1,0 +1,9 @@
+root = true
+
+[*.{cs,meta,csproj,sln}]
+indent_style = space             # roslyn
+indent_size = 4                  # roslyn
+insert_final_newline = true      # roslyn
+charset = utf-8-bom              # roslyn
+end_of_line = lf                 # lf (\n), cr (\r), crlf (\r\n)
+trim_trailing_whitespace = true

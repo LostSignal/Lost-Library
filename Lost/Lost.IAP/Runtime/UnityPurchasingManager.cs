@@ -1,0 +1,169 @@
+﻿//-----------------------------------------------------------------------
+// <copyright file="UnityPurchasingManager.cs" company="Lost Signal LLC">
+//     Copyright (c) Lost Signal LLC. All rights reserved.
+// </copyright>
+//-----------------------------------------------------------------------
+
+#if USING_UNITY_PURCHASING
+
+namespace Lost.IAP
+{
+    using System.Collections.Generic;
+    using UnityEngine;
+    using UnityEngine.Purchasing;
+
+    public class UnityPurchasingManager : SingletonGameObject<UnityPurchasingManager>, IStoreListener
+    {
+        private enum InitializationState
+        {
+            Initializing,
+            InitializeFailed,
+            InitializedSucceeded,
+        }
+
+        private enum PurchasingState
+        {
+            PurchasingWaiting,
+            Purchasing,
+            PurchasingFailed,
+            PurchasingSucceeded,
+        }
+
+        // initialization
+        private IStoreController controller;
+        private ConfigurationBuilder builder;
+        private InitializationState initializationState;
+        private InitializationFailureReason initializationFailureReason;
+
+        // purchasing
+        private PurchasingState purchasingState;
+        private PurchaseFailureReason purchaseFailureReason;
+        private PurchaseEventArgs purchaseEventArgs;
+
+        public bool IsIAPInitialized
+        {
+            get { return initializationState == InitializationState.InitializedSucceeded; }
+        }
+
+        public UnityTask<bool> InitializeUnityPurchasing(System.Action<ConfigurationBuilder> configurationBuilder)
+        {
+            return UnityTask<bool>.Run(this.InitializeUnityPurchasingCoroutine(configurationBuilder));
+        }
+
+        public UnityTask<PurchaseEventArgs> PurchaseProduct(string itemId)
+        {
+            return UnityTask<PurchaseEventArgs>.Run(this.PurchaseProductCoroutine(itemId));
+        }
+
+        private ConfigurationBuilder GetConfigurationBuilder(System.Action<ConfigurationBuilder> configurationBuilder)
+        {
+            if (this.builder == null)
+            {
+                var module = StandardPurchasingModule.Instance();
+
+                if (Debug.isDebugBuild || Application.isEditor)
+                {
+                    module.useFakeStoreUIMode = FakeStoreUIMode.StandardUser;
+                }
+
+                this.builder = ConfigurationBuilder.Instance(module);
+
+                configurationBuilder?.Invoke(this.builder);
+            }
+
+            return this.builder;
+        }
+
+        private IEnumerator<bool> InitializeUnityPurchasingCoroutine(System.Action<ConfigurationBuilder> configurationBuilder)
+        {
+            if (this.initializationState == InitializationState.InitializedSucceeded)
+            {
+                yield return true;
+                yield break;
+            }
+
+            float startTime = Time.realtimeSinceStartup;
+            this.initializationState = InitializationState.Initializing;
+            UnityPurchasing.Initialize(this, this.GetConfigurationBuilder(configurationBuilder));
+
+            while (this.initializationState == InitializationState.Initializing)
+            {
+                yield return default(bool);
+
+                if (Time.realtimeSinceStartup - startTime > 5.0f)
+                {
+                    throw new PurchasingInitializationTimeOutException();
+                }
+            }
+
+            if (this.initializationState == InitializationState.InitializedSucceeded)
+            {
+                yield return true;
+            }
+            else
+            {
+                throw new PurchasingInitializationException(initializationFailureReason);
+            }
+        }
+
+        void IStoreListener.OnInitialized(IStoreController controller, IExtensionProvider extensions)
+        {
+            this.initializationState = InitializationState.InitializedSucceeded;
+            this.controller = controller;
+        }
+
+        void IStoreListener.OnInitializeFailed(InitializationFailureReason error)
+        {
+            this.initializationState = InitializationState.InitializeFailed;
+            this.initializationFailureReason = error;
+        }
+
+        private IEnumerator<PurchaseEventArgs> PurchaseProductCoroutine(string itemId)
+        {
+            if (this.purchasingState != PurchasingState.PurchasingWaiting)
+            {
+                throw new PurchasingException(PurchaseFailureReason.ExistingPurchasePending);
+            }
+
+            this.purchasingState = PurchasingState.Purchasing;
+            this.purchaseFailureReason = PurchaseFailureReason.Unknown;
+            this.purchaseEventArgs = null;
+
+            this.controller.InitiatePurchase(itemId);
+
+            while (this.purchasingState == PurchasingState.Purchasing)
+            {
+                yield return default(PurchaseEventArgs);
+            }
+
+            bool wasSuccessful = this.purchasingState == PurchasingState.PurchasingSucceeded;
+
+            this.purchasingState = PurchasingState.PurchasingWaiting;
+
+            if (wasSuccessful)
+            {
+                yield return this.purchaseEventArgs;
+            }
+            else
+            {
+                throw new PurchasingException(this.purchaseFailureReason);
+            }
+        }
+
+        PurchaseProcessingResult IStoreListener.ProcessPurchase(PurchaseEventArgs e)
+        {
+            this.purchasingState = PurchasingState.PurchasingSucceeded;
+            this.purchaseEventArgs = e;
+
+            return PurchaseProcessingResult.Complete;
+        }
+
+        void IStoreListener.OnPurchaseFailed(Product i, PurchaseFailureReason p)
+        {
+            this.purchasingState = PurchasingState.PurchasingFailed;
+            this.purchaseFailureReason = p;
+        }
+    }
+}
+
+#endif
