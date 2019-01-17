@@ -1,9 +1,23 @@
-# Lost
-A helpful Unity framework that ranges from Singletons, Input Abstraction, Unity Cloud build helpers, Smart Coroutines, App Initialization and more.
+# Lost Library
 
-# Dependencies
-* PlayFab Unity SDK (https://api.playfab.com/sdks/unity)
-* Text Mesh Pro (https://www.assetstore.unity3d.com/en/#!/content/17662)
+A helpful Unity framework that ranges from Singletons, Input Abstraction, Unity Cloud Build helpers, Smart Coroutines, App Initialization and more.  This code base is used in every one of Lost Signals Applications/Games.  It's been an ever evolving project over the last 5+ years.  We're always trying to make it better and easier to use.  We also feel that lots of people can really benifit from our work so we're releasing it to the public under the MIT License. 
+
+# Donate
+
+If you like using the Lost Library and you'd like to say thanks, then feel free to donate so we can spend more time making the Lost Library even better.
+
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+<input type="hidden" name="cmd" value="_s-xclick" />
+<input type="hidden" name="hosted_button_id" value="V3GJRJMZ8LBRA" />
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+</form>
+
+
+# Bug Fixes / Feature Requests / Project Integrations
+
+If you would like our help fixing bugs, implementing new features, or integrating the Lost Library into your project, then you should contact us at contracting@lostsignalgames.com.
+
 
 # License
 
