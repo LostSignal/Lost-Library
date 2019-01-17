@@ -6,13 +6,14 @@ A helpful Unity framework that ranges from Singletons, Input Abstraction, Unity 
 
 If you like using the Lost Library and you'd like to say thanks, then feel free to donate so we can spend more time making the Lost Library even better.
 
+{::nomarkdown}
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
 <input type="hidden" name="cmd" value="_s-xclick" />
 <input type="hidden" name="hosted_button_id" value="V3GJRJMZ8LBRA" />
 <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
 <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" />
 </form>
-
+{:/}
 
 # Bug Fixes / Feature Requests / Project Integrations
 
