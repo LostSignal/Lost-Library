@@ -38,6 +38,13 @@ namespace Lost
             get { return forceRelogin == false && PlayFabClientAPI.IsClientLoggedIn(); }
         }
 
+        public void Logout()
+        {
+            this.userAccountInfo = null;
+            this.forceRelogin = true;
+            this.SessionTicket = null;
+        }
+
         public bool IsDeviceLinked
         {
             get
@@ -136,7 +143,7 @@ namespace Lost
         {
             return UnityTask<LinkFacebookAccountResult>.Run(this.LinkFacebookCoroutine());
         }
-        
+
         public UnityTask<UnlinkFacebookAccountResult> UnlinkFacebook()
         {
             return PF.Do<UnlinkFacebookAccountRequest, UnlinkFacebookAccountResult>(new UnlinkFacebookAccountRequest(), PlayFabClientAPI.UnlinkFacebookAccount);
@@ -154,7 +161,7 @@ namespace Lost
             #if !USING_FACEBOOK_SDK
             throw new FacebookException("USING_FACEBOOK_SDK is not defined!  Check your AppSettings.");
             #else
-            
+
             if (Facebook.Unity.FB.IsInitialized == false)
             {
                 bool initializationFinished = false;
@@ -175,7 +182,7 @@ namespace Lost
             {
                 this.FacebookLoginResult = null;
 
-                Facebook.Unity.FB.LogInWithReadPermissions(new[] { "public_profile", "email", "user_friends" }, (loginResult) => { this.FacebookLoginResult = loginResult; });
+                Facebook.Unity.FB.LogInWithReadPermissions(new[] { "public_profile", "email" }, (loginResult) => { this.FacebookLoginResult = loginResult; });
 
                 // waiting for FB login to complete
                 while (this.FacebookLoginResult == null)
@@ -197,7 +204,7 @@ namespace Lost
                     throw new FacebookException("TokenString is Null! or Empty!");
                 }
             }
-            
+
             yield return Facebook.Unity.AccessToken.CurrentAccessToken.TokenString;
             #endif
         }

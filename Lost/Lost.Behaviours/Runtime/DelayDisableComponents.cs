@@ -16,14 +16,27 @@ namespace Lost
         [SerializeField] private MonoBehaviour[] components;
         #pragma warning restore 0649
 
-        private void Start()
+        private void OnEnable()
         {
             if (components == null || components.Length == 0)
             {
                 return;
             }
 
-            CoroutineRunner.Instance.StartCoroutine(this.DisableCoroutine());
+            bool needsToRun = false;
+
+            if (this.components.IsNullOrEmpty() == false)
+            {
+                for (int i = 0; i < this.components.Length; i++)
+                {
+                    needsToRun |= this.components[i].enabled;
+                }
+            }
+
+            if (needsToRun)
+            {
+                CoroutineRunner.Instance.StartCoroutine(this.DisableCoroutine());
+            }
         }
 
         private IEnumerator DisableCoroutine()

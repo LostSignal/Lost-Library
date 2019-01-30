@@ -1,0 +1,65 @@
+
+* Make sure every project uses the AppConfig system.
+  * Example:  Lost.Logging should have a LostLoggingAppConfig that (if enabled) will turn on the "USING_LOST_LOGGING" define
+  * Also, should have an option for Initializing at startup
+    * This would mean that all AppConfigs should also have a RuntimeInitializeOnLoad virtual method as well
+
+* Rename AR to XR
+  * Move Interactables to that folder?
+
+Experimental
+Networking
+UI
+
+
+Behaviours
+
+-----
+
+
+Base of everything: Lost.AppConfig
+
+General Lost Namespace (Lost.Core)
+  Extensions
+  Utilites
+  Singleton
+  Utilities
+  
+  Storage?
+  Pooling?
+  EditorTools?
+
+
+
+Not Sure If These Should Be In Their Own Package
+-------------------------------------------------
+* Core
+* EditorTools
+* Experimental
+* Extensions
+* Localization
+* Pooling
+* Singleton
+* Storage
+* Utilities
+
+Should Be Their Own Package
+----------------------------
+* Addressables
+* Ads
+* Analytics
+* AppConfig  -  Should we break this out into two?  AppConfig and EditorGUI
+* Behaviours
+* Collections
+* Dictionary
+* Events
+* IAP
+* Input
+* InteractablePlants
+* Logging
+* Networking
+* PlayFab
+* Spline
+* UI
+* UnityTask
+* XR

@@ -6,31 +6,50 @@
 
 namespace Lost
 {
-    using System.Collections.Generic;
-    using System.Linq;
+    using System;
     using UnityEngine;
 
-    [CreateAssetMenu]
-    public abstract class TitleData<T> : ScriptableObject where T : IVersion, new()
+    [Serializable]
+    public class TitleData<T> : ScriptableObject where T : new()
     {
-        #pragma warning disable 0649
-        [SerializeField] private string key;
-        [SerializeField] private List<T> data = new List<T> { new T() };
-        #pragma warning restore 0649
+        #if UNITY_EDITOR
+        [SerializeField] private T data = new T();
+        #endif
 
-        public string Key
-        {
-            get { return this.key; }
-        }
+        [SerializeField] private string titleDataKeyName = "";
+        [SerializeField] private bool serializeWithUnity = true;
+        [SerializeField] private bool compressData = false;
 
-        public List<T> Data
+        #if UNITY_EDITOR
+        public T Data
         {
             get { return this.data; }
         }
+        #endif
 
-        public T GetDataVersion(string version)
+        public string TitleDataKeyName
         {
-            return this.data.FirstOrDefault(x => x.Version == version);
+            get { return this.titleDataKeyName; }
+            set { this.titleDataKeyName = value; }
+        }
+
+        public bool SerializeWithUnity
+        {
+            get { return this.serializeWithUnity; }
+            set { this.serializeWithUnity = value; }
+        }
+
+        public bool CompressData
+        {
+            get { return this.compressData; }
+            set { this.compressData = value; }
+        }
+
+        public Lost.UnityTask<T> Load()
+        {
+            // Take key name and the verison and load from title data using PF class
+            // If it's compressed, then decompress it
+            return null;
         }
     }
 }

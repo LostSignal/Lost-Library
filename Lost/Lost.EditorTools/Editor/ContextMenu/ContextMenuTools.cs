@@ -57,5 +57,45 @@ namespace Lost
                 }
             }
         }
+
+        [MenuItem("Assets/Lost/Get LoC")]
+        public static void LinesOfCode()
+        {
+            if (Selection.activeObject == null)
+            {
+                UnityEngine.Debug.LogError("You must select a directory for this option to work.");
+                return;
+            }
+
+            string rootDirectoryAssetPath = AssetDatabase.GetAssetPath(Selection.activeObject.GetInstanceID());
+
+            if (Directory.Exists(rootDirectoryAssetPath) == false)
+            {
+                UnityEngine.Debug.LogError("You must select a directory for this option to work.");
+                return;
+            }
+
+            int linesOfCodeCount = 0;
+            int fileCount = 0;
+
+            foreach (var file in Directory.GetFiles(rootDirectoryAssetPath, "*.cs", SearchOption.AllDirectories))
+            {
+                fileCount++;
+
+                foreach (var line in File.ReadAllLines(file))
+                {
+                    string trimmedLine = line.Trim();
+                    if (string.IsNullOrWhiteSpace(trimmedLine) || trimmedLine == "{" || trimmedLine == "}" || trimmedLine.StartsWith("//"))
+                    {
+                        continue;
+                    }
+
+                    linesOfCodeCount++;
+                }
+            }
+
+            UnityEngine.Debug.Log("C# File Count: " + fileCount);
+            UnityEngine.Debug.Log("Line Count: " + linesOfCodeCount);
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace Lost
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Lost.AppConfig;
+    using Lost.EditorGrid;
     using UnityEditor;
     using UnityEngine;
     using UnityEngine.UI;
@@ -113,7 +113,7 @@ namespace Lost
         private void DrawAnimator(Dialog dialog)
         {
             bool isVisible;
-            using (new FoldoutHelper(793215825, "Animator", out isVisible, false))
+            using (new FoldoutScope(793215825, "Animator", out isVisible, false))
             {
                 if (isVisible == false)
                 {
@@ -132,7 +132,7 @@ namespace Lost
         private void DrawCanvas(Dialog dialog)
         {
             bool isVisible;
-            using (new FoldoutHelper(793215826, "Canvas", out isVisible, false))
+            using (new FoldoutScope(793215826, "Canvas", out isVisible, false))
             {
                 if (isVisible == false)
                 {
@@ -183,7 +183,7 @@ namespace Lost
 
             // Events
             bool areEventsVisible;
-            using (new FoldoutHelper(793215810, "Dialog Events", out areEventsVisible, false))
+            using (new FoldoutScope(793215810, "Dialog Events", out areEventsVisible, false))
             {
                 if (areEventsVisible)
                 {
@@ -195,7 +195,7 @@ namespace Lost
 
             // Properties
             bool dialogPropertiesVisible;
-            using (new FoldoutHelper(793215711, "Dialog Properties", out dialogPropertiesVisible, false))
+            using (new FoldoutScope(793215711, "Dialog Properties", out dialogPropertiesVisible, false))
             {
                 if (dialogPropertiesVisible)
                 {

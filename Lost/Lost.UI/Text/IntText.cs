@@ -111,6 +111,8 @@ namespace Lost
         // NOTE [bgish]: has zero references bcause AnimateToGoal refers to this function by string name
         private IEnumerator AnimateToGoalCoroutine()
         {
+            this.UpdateTextField();
+
             if (this.HasValueBeenSet == false)
             {
                 this.intValue = 0;
@@ -143,9 +145,19 @@ namespace Lost
             this.onEndAnimation.InvokeIfNotNull();
         }
 
+        private void Awake()
+        {
+            Localization.Localization.LanguagedChanged += this.UpdateText;
+        }
+
         private void OnEnable()
         {
             this.UpdateText();
+        }
+
+        private void OnDestroy()
+        {
+            Localization.Localization.LanguagedChanged -= this.UpdateText;
         }
 
         private void UpdateTextField()

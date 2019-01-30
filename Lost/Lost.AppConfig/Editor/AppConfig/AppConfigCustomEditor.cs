@@ -9,6 +9,7 @@ namespace Lost.AppConfig
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Lost.EditorGrid;
     using UnityEditor;
     using UnityEngine;
 
@@ -42,7 +43,7 @@ namespace Lost.AppConfig
             var appConfig = this.target as AppConfig;
 
             bool appConfigPropertiesVisible = false;
-            using (new FoldoutHelper(5545418, "App Config Properties", out appConfigPropertiesVisible))
+            using (new FoldoutScope(5545418, "App Config Properties", out appConfigPropertiesVisible))
             {
                 if (appConfigPropertiesVisible)
                 {
@@ -54,7 +55,7 @@ namespace Lost.AppConfig
             }
 
             bool appConfigSettingsVisible = false;
-            using (new FoldoutHelper(5545416, "App Config Settings", out appConfigSettingsVisible))
+            using (new FoldoutScope(5545416, "App Config Settings", out appConfigSettingsVisible))
             {
                 if (appConfigSettingsVisible)
                 {
@@ -106,7 +107,7 @@ namespace Lost.AppConfig
 
             for (int i = 0; i < settingsToAdd.Count; i += 2)
             {
-                using (new BeginHorizontalHelper())
+                using (new EditorGUILayout.HorizontalScope())
                 {
                     for (int j = 0; j < 2; j++)
                     {
@@ -147,18 +148,18 @@ namespace Lost.AppConfig
             definesGridDefinition[0].Width = (int)(width - 90.0f);
 
             bool definesVisible = false;
-            using (new FoldoutHelper(564185451, "Defines", out definesVisible, true))
+            using (new FoldoutScope(564185451, "Defines", out definesVisible, true))
             {
                 if (definesVisible == false)
                 {
                     return;
                 }
 
-                using (new BeginGridHelper(definesGrid))
+                using (new BeginGridScope(definesGrid))
                 {
                     for (int i = 0; i < appConfig.Defines.Count; i++)
                     {
-                        using (new BeginGridRowHelper(definesGrid))
+                        using (new BeginGridRowScope(definesGrid))
                         {
                             appConfig.Defines[i] = definesGrid.DrawString(appConfig.Defines[i]);
                         }
@@ -180,20 +181,22 @@ namespace Lost.AppConfig
 
             float currentViewWidth = EditorGUIUtility.currentViewWidth - 20;
             bool foldoutVisible = true;
-            Rect boxRect;
+            Rect boxRect = new Rect();
 
             var verticleHelper = settings.IsInline ?
-                (IDisposable)new BeginVerticalHelper(out boxRect, "box") :
-                (IDisposable)new FoldoutHelper(settings.DisplayName.GetHashCode(), settings.DisplayName, out foldoutVisible, out boxRect, false);
+                (IDisposable)new EditorGUILayout.HorizontalScope("box") :
+                (IDisposable)new FoldoutScope(settings.DisplayName.GetHashCode(), settings.DisplayName, out foldoutVisible, out boxRect, false);
 
             using (verticleHelper)
             {
+                float y = settings.IsInline ? (verticleHelper as EditorGUILayout.HorizontalScope).rect.y : boxRect.y;
+
                 // Drawing the button
                 float buttonSize = 14;
-                float rightPadding = 2;
+                float rightPadding = 7;
                 float topPadding = 1;
 
-                Rect buttonRect = new Rect(new Vector2(currentViewWidth - rightPadding, boxRect.y + topPadding), new Vector2(buttonSize, buttonSize));
+                Rect buttonRect = new Rect(new Vector2(currentViewWidth - rightPadding, y + topPadding), new Vector2(buttonSize, buttonSize));
 
                 if (isInherited)
                 {
@@ -226,9 +229,9 @@ namespace Lost.AppConfig
                 }
 
                 // Iterating and displaying all properties
-                using (new BeginDisabledGroupHelper(isInherited))
+                using (new EditorGUI.DisabledGroupScope(isInherited))
                 {
-                    float width = currentViewWidth - (settings.IsInline ? 24 : 6);
+                    float width = currentViewWidth - (settings.IsInline ? 34 : 15);
                     settings.DrawSettings(settings, width);
                 }
             }

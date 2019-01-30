@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Lost
+namespace Lost.Localization
 {
     using System.Collections.Generic;
     using UnityEditor;

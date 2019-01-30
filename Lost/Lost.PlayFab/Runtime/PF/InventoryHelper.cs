@@ -13,7 +13,8 @@ namespace Lost
 
     public class InventoryHelper
     {
-        private List<ItemInstance> usersInventory = new List<ItemInstance>();
+        private List<ItemInstance> usersInventory = null;
+        private bool getInventoryCoroutineRunning;
 
         public InventoryHelper()
         {
@@ -22,24 +23,72 @@ namespace Lost
             PF.PlayfabEvents.OnGetPlayerCombinedInfoResultEvent += PlayfabEvents_OnGetPlayerCombinedInfoResultEvent;
         }
 
-        public int GetInventoryCount(string itemId)
+        public void InvalidateUserInventory()
         {
-            int count = 0;
+            this.usersInventory = null;
+        }
 
-            for (int i = 0; i < this.usersInventory.Count; i++)
+        public UnityTask<List<ItemInstance>> GetInventoryItems()
+        {
+            return UnityTask<List<ItemInstance>>.Run(GetInventoryItemsCoroutine());
+
+            IEnumerator <List<ItemInstance>> GetInventoryItemsCoroutine()
             {
-                if (this.usersInventory[i].ItemId == itemId)
+                // If it's already running, then wait for it to finish
+                while (this.getInventoryCoroutineRunning)
                 {
-                    int? remainingUses = this.usersInventory[i].RemainingUses;
+                    yield return default(List<ItemInstance>);
+                }
 
-                    if (remainingUses.HasValue)
+                this.getInventoryCoroutineRunning = true;
+
+                if (this.usersInventory == null)
+                {
+                    var playfabGetInventory = PF.Do(new GetUserInventoryRequest());
+
+                    while (playfabGetInventory.IsDone == false)
                     {
-                        count += remainingUses.Value;
+                        yield return default(List<ItemInstance>);
                     }
                 }
-            }
 
-            return count;
+                this.getInventoryCoroutineRunning = false;
+
+                yield return this.usersInventory;
+            }
+        }
+
+        public UnityTask<int> GetInventoryCount(string itemId)
+        {
+            return UnityTask<int>.Run(GetInventoryCountCoroutine());
+
+            IEnumerator<int> GetInventoryCountCoroutine()
+            {
+                var inventory = this.GetInventoryItems();
+
+                while (inventory.IsDone == false)
+                {
+                    yield return default(int);
+                }
+
+                List<ItemInstance> items = inventory.Value;
+                int count = 0;
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (items[i].ItemId == itemId)
+                    {
+                        int? remainingUses = items[i].RemainingUses;
+
+                        if (remainingUses.HasValue)
+                        {
+                            count += remainingUses.Value;
+                        }
+                    }
+                }
+
+                yield return count;
+            }
         }
 
         public void InternalAddCatalogItemToInventory(CatalogItem catalogItem)
@@ -67,7 +116,14 @@ namespace Lost
 
         private void UpdateInventory(List<ItemInstance> inventory)
         {
-            this.usersInventory.Clear();
+            if (this.usersInventory == null)
+            {
+                this.usersInventory = new List<ItemInstance>();
+            }
+            else
+            {
+                this.usersInventory.Clear();
+            }
 
             if (inventory.IsNullOrEmpty() == false)
             {

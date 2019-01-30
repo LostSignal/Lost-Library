@@ -12,16 +12,16 @@ namespace Lost
     {
         public UnityAdsProvider(string appleAppStoreId, string googlePlayId)
         {
-            #if UNITY_ADS && UNITY_IPHONE
+            #if UNITY_IOS
 
-            if (string.IsNullOrWhiteSpace(appleAppStoreId) == false)
+            if (string.IsNullOrWhiteSpace(appleAppStoreId) == false && UnityEngine.Advertisements.Advertisement.isInitialized == false)
             {
                 UnityEngine.Advertisements.Advertisement.Initialize(appleAppStoreId);
             }
-            
-            #elif UNITY_ADS && UNITY_ANDROID
-            
-            if (string.IsNullOrWhiteSpace(googlePlayId) == false)
+
+            #elif UNITY_ANDROID
+
+            if (string.IsNullOrWhiteSpace(googlePlayId) == false && UnityEngine.Advertisements.Advertisement.isInitialized == false)
             {
                 UnityEngine.Advertisements.Advertisement.Initialize(googlePlayId);
             }
@@ -34,7 +34,7 @@ namespace Lost
             get { return "UnityAds"; }
         }
 
-        #if UNITY_ADS
+        #if UNITY_IOS || UNITY_ANDROID
 
         bool IAdProvider.AreAdsSupported
         {

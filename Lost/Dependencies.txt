@@ -1,0 +1,19 @@
+
+Lost.AppConfig --> Lost.EditorTools
+               \->  Lost.Core ---> Lost.Ads
+                               \-> Lost.EditorTools
+							   \-> Lost.Experimental
+                               \-> Lost.Extras 
+							   \-> Lost.IAP
+							   \-> Lost.Localization -> Lost.UI
+							   \-> Lost.Logging
+												   
+
+Lost.Networking (nothing?)
+Lost.AR         (nothing?)
+
+
+Lost.Networking    \
+Lost.UI             > Lost.PlayFab
+Lost.IAP           /
+Lost.Localization /

@@ -8,7 +8,7 @@ namespace Lost
 {
     using System;
     using System.Linq;
-    using Lost.AppConfig;
+    using Lost.EditorGrid;
     using UnityEditor;
     using UnityEditor.SceneManagement;
     using UnityEngine;
@@ -16,7 +16,7 @@ namespace Lost
     public class UIActionsEditor : MonoBehaviour
     {
         private static EditorGridDefinition gridDefinition;
-        private static AppConfig.EditorGrid grid;
+        private static EditorGrid.EditorGrid grid;
 
         // state information
         private static int stateIndex = 0;
@@ -43,13 +43,13 @@ namespace Lost
 
             GUILayout.Label(string.Empty);
 
-            using (new BeginHorizontalHelper())
+            using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.Label("State", GUILayout.Width(90));
                 stateIndex = EditorGUILayout.Popup(stateIndex, stateNames, GUILayout.Width(150));
             }
 
-            using (new BeginHorizontalHelper())
+            using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.Label("UI Action", GUILayout.Width(90));
                 uiActionIndex = EditorGUILayout.Popup(uiActionIndex, uiActionNames, GUILayout.Width(150));
@@ -61,7 +61,7 @@ namespace Lost
                 return;
             }
 
-            using (new BeginHorizontalHelper())
+            using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("Add", GUILayout.Width(245), GUILayout.Height(14)))
                 {
@@ -83,7 +83,7 @@ namespace Lost
 
             bool orderChanged = false;
 
-            using (new BeginGridHelper(grid))
+            using (new BeginGridScope(grid))
             {
                 for (int i = 0; i < uiActionComponents.Count; i++)
                 {
@@ -98,7 +98,7 @@ namespace Lost
                         uiAction.Order = i;
                     }
 
-                    using (new BeginGridRowHelper(grid))
+                    using (new BeginGridRowScope(grid))
                     {
                         grid.DrawLabel(uiAction.State.ToString());
 
@@ -156,11 +156,11 @@ namespace Lost
                 gridDefinition.AddColumn("Value", 175);
                 gridDefinition.RowButtons = GridButton.All;
 
-                grid = new EditorGrid(gridDefinition);
+                grid = new EditorGrid.EditorGrid(gridDefinition);
             }
 
             stateNames = Enum.GetNames(typeof(UIActionState));
-            uiActionTypes = TypeUtil.GetAllTypesOf<UIAction>().ToArray();
+            uiActionTypes = AppConfig.TypeUtil.GetAllTypesOf<UIAction>().ToArray();
             uiActionNames = uiActionTypes.Select(x => x.Name).ToArray();
         }
     }

@@ -79,7 +79,7 @@ namespace Lost
 
         private BetterStringBuilder AppendLong(long value, bool showThousandsSeperator)
         {
-            string thousandsSeperator = showThousandsSeperator ? Localization.GetThousandsSeperator() : string.Empty;
+            string thousandsSeperator = showThousandsSeperator ? Localization.Localization.GetThousandsSeperator() : string.Empty;
 
             if (value < 0)
             {

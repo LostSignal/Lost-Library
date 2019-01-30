@@ -9,6 +9,7 @@ namespace Lost
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Lost.EditorGrid;
     using Lost.AppConfig;
     using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace Lost
     [AppConfigSettingsOrder(500)]
     public class LostDefineSettings : AppConfigSettings
     {
-        private static AppConfig.EditorGrid definesGrid;
+        private static EditorGrid.EditorGrid definesGrid;
         private static EditorGridDefinition definesGridDefinition;
 
         #pragma warning disable 0649
@@ -35,11 +36,11 @@ namespace Lost
             // Adjusting the first columns width to fit the total size of the space
             definesGridDefinition[0].Width = (int)(width - definesGridDefinition[1].Width);
 
-            using (new BeginGridHelper(definesGrid))
+            using (new BeginGridScope(definesGrid))
             {
                 foreach (var define in lostDefineSettings.defines)
                 {
-                    using (new BeginGridRowHelper(definesGrid))
+                    using (new BeginGridRowScope(definesGrid))
                     {
                         definesGrid.DrawLabel(define.Name);
                         define.IsEnabled = definesGrid.DrawBool(define.IsEnabled);
@@ -80,7 +81,7 @@ namespace Lost
                 definesGridDefinition.RowButtons = GridButton.None;
                 definesGridDefinition.DrawHeader = false;
 
-                definesGrid = new EditorGrid(definesGridDefinition);
+                definesGrid = new EditorGrid.EditorGrid(definesGridDefinition);
             }
 
             this.ConfigureLostDefines();
@@ -91,7 +92,7 @@ namespace Lost
             this.AddLostDefine(new Define("UNITY", true));
             this.AddLostDefine(new Define("USING_PLAYFAB_SDK", false));
             this.AddLostDefine(new Define("USING_FACEBOOK_SDK", false));
-            this.AddLostDefine(new Define("USING_PLAYFAB_ANDROID_SDK", false));
+            this.AddLostDefine(new Define("USING_ANDROID_FIREBASE_MESSAGING", false));
             this.AddLostDefine(new Define("USING_UNITY_ADS", false));
             this.AddLostDefine(new Define("USING_UNITY_ANALYTICS", false));
             this.AddLostDefine(new Define("USING_UNITY_PURCHASING", false));

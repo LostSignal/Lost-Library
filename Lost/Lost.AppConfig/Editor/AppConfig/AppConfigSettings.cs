@@ -57,7 +57,7 @@ namespace Lost.AppConfig
                     continue;
                 }
 
-                using (new BeginHorizontalHelper())
+                using (new EditorGUILayout.HorizontalScope())
                 {
                     EditorGUILayout.PropertyField(serializedObject.FindProperty(prop.name), true, GUILayout.Width(width));
                 }

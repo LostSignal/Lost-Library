@@ -98,7 +98,7 @@ namespace Lost
             {
                 bool isTouchScreenVisible = false;
 
-#if UNITY_ANDROID || UNITY_IPHONE || UNITY_WSA || UNITY_WSA_10_0
+#if UNITY_ANDROID || UNITY_IOS || UNITY_WSA || UNITY_WSA_10_0
                 isTouchScreenVisible = TouchScreenKeyboard.visible;
 #endif
 

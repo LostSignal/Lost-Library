@@ -40,7 +40,7 @@ namespace Lost
                 #endif
 
                 // mobile
-                #if UNITY_IPHONE
+                #if UNITY_IPHONE || UNITY_IOS
                 return DevicePlatform.iOS;
                 #elif UNITY_ANDROID
                 return DevicePlatform.Android;

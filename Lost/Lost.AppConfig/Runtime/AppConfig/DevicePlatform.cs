@@ -10,7 +10,7 @@ namespace Lost.AppConfig
     public enum DevicePlatform
     {
         Nothing           = 0,
-        iOS               = 1 << 0,  // UNITY_IPHONE
+        iOS               = 1 << 0,  // UNITY_IOS / UNITY_IPHONE (Depricated)
         Android           = 1 << 1,  // UNITY_ANDROID
         Windows           = 1 << 2,  // UNITY_STANDALONE_WIN
         Mac               = 1 << 3,  // UNITY_STANDALONE_OSX

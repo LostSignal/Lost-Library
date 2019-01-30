@@ -38,7 +38,7 @@ namespace Lost
                 this.scenes[key] = this.DrawCheckbox(key, this.scenes[key]);
             }
 
-            using (new BeginHorizontalHelper())
+            using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("Build Lighting"))
                 {
@@ -47,7 +47,7 @@ namespace Lost
                 }
             }
 
-            using (new BeginHorizontalHelper())
+            using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("Refresh Scene List"))
                 {
@@ -71,7 +71,7 @@ namespace Lost
 
         private bool DrawCheckbox(string label, bool value)
         {
-            using (new BeginHorizontalHelper())
+            using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField(string.Empty, GUILayout.Width(10));
                 bool newValue = EditorGUILayout.Toggle(value, GUILayout.Width(20));

@@ -24,9 +24,11 @@ namespace Lost
             SpinnerBox.Instance.UpdateBodyText("Connecting To Store...");
         }
 
-        public static UnityTask<StringInputResult> ShowChangeDisplayNameInputBox(string currentDisplayName)
+        public static UnityTask<StringInputResult> ShowChangeDisplayNameInputBox(string currentDisplayName, string customTitle = null, string customBody = null)
         {
-            return StringInputBox.Instance.Show("Change Display Name", "Enter in your new display name.", currentDisplayName);
+            return (customTitle != null && customBody != null)
+                ? StringInputBox.Instance.Show(customTitle, customBody, currentDisplayName)
+                : StringInputBox.Instance.Show("Change Display Name", "Enter in your new display name.", currentDisplayName);
         }
 
         public static UnityTask<OkResult> HandleError(System.Exception exception)

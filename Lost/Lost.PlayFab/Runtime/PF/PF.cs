@@ -29,6 +29,7 @@ namespace Lost
 
         public static PlayFabEvents PlayfabEvents { get; private set; }
 
+        public static PushNotificationsHelper PushNotifications { get; private set; }
         public static CloudScriptHelper CloudScript { get; private set; }
         public static PurchasingHelper Purchasing { get; private set; }
         public static InventoryHelper Inventory { get; private set; }
@@ -70,6 +71,7 @@ namespace Lost
             PlayfabEvents.OnGlobalErrorEvent += PlayfabEvents_OnGlobalErrorEvent;
 
             // Creating all the helpers
+            PushNotifications = new PushNotificationsHelper();
             CloudScript = new CloudScriptHelper();
             Purchasing = new PurchasingHelper();
             Inventory = new InventoryHelper();
