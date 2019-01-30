@@ -14,7 +14,6 @@ namespace Lost.Addressables
     using UnityEngine;
     using UnityEditor;
     using UnityEditor.Build.Reporting;
-    using UnityEditor.AddressableAssets;
 
     ////
     //// TODO [bgish]: Since all AssetBundles have their Hash appended to the name, before uploading any files to Azure, we
@@ -58,14 +57,18 @@ namespace Lost.Addressables
 
         public override void OnUnityCloudBuildInitiated(AppConfig appConfig)
         {
+            #if USING_UNITY_ADDRESSABLES
             // Making sure the addressables are built
-            AddressableAssetSettings.BuildPlayerContent();
+            UnityEditor.AddressableAssets.AddressableAssetSettings.BuildPlayerContent();
+            #endif
         }
 
         public override void OnUserBuildInitiated(AppConfig appConfig)
         {
+            #if USING_UNITY_ADDRESSABLES
             // Making sure the addressables are built
-            AddressableAssetSettings.BuildPlayerContent();
+            UnityEditor.AddressableAssets.AddressableAssetSettings.BuildPlayerContent();
+            #endif
         }
 
         public override void OnPostprocessBuild(AppConfig appConfig, BuildReport buildReport)
@@ -181,7 +184,8 @@ namespace Lost.Addressables
 
         private bool IsBeingUsedByAddressableSystem()
         {
-            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+            #if USING_UNITY_ADDRESSABLES
+            UnityEditor.AddressableAssets.AddressableAssetSettings settings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
             string buildPath = this.GetType().FullName + "." + nameof(BuildPath);
 
             if (settings == null)
@@ -191,7 +195,7 @@ namespace Lost.Addressables
 
             foreach (var group in settings.groups.Where(x => x.entries.IsNullOrEmpty() == false))
             {
-                foreach (var schema in group.Schemas.OfType<BundledAssetGroupSchema>())
+                foreach (var schema in group.Schemas.OfType<UnityEditor.AddressableAssets.BundledAssetGroupSchema>())
                 {
                     if (schema?.BuildPath?.GetValue(settings) == buildPath)
                     {
@@ -199,6 +203,7 @@ namespace Lost.Addressables
                     }
                 }
             }
+            #endif
 
             return false;
         }

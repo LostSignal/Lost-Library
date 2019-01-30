@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if USING_UNITY_ADDRESSABLES
+
 namespace Lost
 {
     using System;
@@ -51,3 +53,5 @@ namespace Lost
         }
     }
 }
+
+#endif

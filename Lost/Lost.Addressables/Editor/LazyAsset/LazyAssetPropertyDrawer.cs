@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if USING_UNITY_ADDRESSABLES
+
 namespace Lost
 {
     using System.Collections.Generic;
@@ -57,3 +59,5 @@ namespace Lost
         }
     }
 }
+
+#endif

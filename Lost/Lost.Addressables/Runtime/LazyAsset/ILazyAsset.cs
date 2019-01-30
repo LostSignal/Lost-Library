@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if USING_UNITY_ADDRESSABLES
+
 namespace Lost
 {
     using System.Collections;
@@ -17,3 +19,5 @@ namespace Lost
         IEnumerator Load();
     }
 }
+
+#endif

@@ -53,7 +53,11 @@ namespace Lost.Localization
 
         public static string GetTranslation(string localizationKey)
         {
+            #if USING_I2_LOCALIZATION
             return I2.Loc.LocalizationManager.GetTranslation(localizationKey);
+            #else
+            return null;
+            #endif
         }
 
         public static string GetThousandsSeperator()
@@ -119,7 +123,9 @@ namespace Lost.Localization
         // TODO [bgish]: When Lost Localization is far enough along, remove this
         private static void UpdateI2Localization()
         {
+#if USING_I2_LOCALIZATION
             I2.Loc.LocalizationManager.CurrentLanguage = Localization.CurrentLanguage.IsoLanguageName;
+#endif
         }
     }
 }

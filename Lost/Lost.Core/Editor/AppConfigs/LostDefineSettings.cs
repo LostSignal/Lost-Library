@@ -89,23 +89,70 @@ namespace Lost
 
         private void ConfigureLostDefines()
         {
-            this.AddLostDefine(new Define("UNITY", true));
-            this.AddLostDefine(new Define("USING_PLAYFAB_SDK", false));
-            this.AddLostDefine(new Define("USING_FACEBOOK_SDK", false));
-            this.AddLostDefine(new Define("USING_ANDROID_FIREBASE_MESSAGING", false));
-            this.AddLostDefine(new Define("USING_UNITY_ADS", false));
-            this.AddLostDefine(new Define("USING_UNITY_ANALYTICS", false));
-            this.AddLostDefine(new Define("USING_UNITY_PURCHASING", false));
-            this.AddLostDefine(new Define("USING_UNITY_ADDRESSABLES", false));
-            this.AddLostDefine(new Define("USING_UNITY_AR_FOUNDATION", false));
+            List<Define> validDefines = new List<Define>
+            {
+                new Define("UNITY", true),
+
+                // Unity Packages Defines
+                new Define("USING_UNITY_ADS", false),
+                new Define("USING_UNITY_ANALYTICS", false),
+                new Define("USING_UNITY_PURCHASING", false),
+                new Define("USING_UNITY_ADDRESSABLES", false),
+                new Define("USING_UNITY_AR_FOUNDATION", false),
+
+                // Thrid Party Packages Defines
+                new Define("USING_PLAYFAB_SDK", false),
+                new Define("USING_FACEBOOK_SDK", false),
+                new Define("USING_ANDROID_FIREBASE_MESSAGING", false),
+                new Define("USING_I2_LOCALIZATION", false),
+            };
+
+            // Adding all valid defines to our list of defines (if they don't already exist)
+            HashSet<string> validDefineNames = new HashSet<string>();
+
+            bool definesAdded = false;
+
+            foreach (var define in validDefines)
+            {
+                validDefineNames.Add(define.Name);
+                definesAdded |= this.AddLostDefine(define);
+            }
+
+            // If any defines were added, then sort them by name
+            if (definesAdded)
+            {
+                this.defines = this.defines.OrderBy(x => x.Name).ToList();
+            }
+
+            // Determining if there are any old defines in our defines list that should be removed
+            HashSet<string> invalidDefineNames = new HashSet<string>();
+
+            foreach (var define in this.defines)
+            {
+                if (validDefineNames.Contains(define.Name) == false)
+                {
+                    invalidDefineNames.Add(define.Name);
+                }
+            }
+
+            // Removing invalid defines from project settings and our defines list
+            if (invalidDefineNames.Count > 0)
+            {
+                definesAdded = true;
+                this.defines = this.defines.Where(x => invalidDefineNames.Contains(x.Name) == false).OrderBy(x => x.Name).ToList();
+                EditorAppConfigDefinesHelper.UpdateProjectDefines(new HashSet<string>(), invalidDefineNames);
+            }
         }
 
-        private void AddLostDefine(Define define)
+        private bool AddLostDefine(Define define)
         {
             if (this.defines.FirstOrDefault(x => x.Name == define.Name) == null)
             {
                 this.defines.Add(define);
+                return true;
             }
+
+            return false;
         }
 
         [Serializable]

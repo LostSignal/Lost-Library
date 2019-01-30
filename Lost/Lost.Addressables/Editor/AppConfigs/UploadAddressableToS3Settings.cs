@@ -12,7 +12,6 @@ namespace Lost.Addressables
     using Lost.AppConfig;
     using UnityEngine;
     using UnityEditor;
-    using UnityEditor.AddressableAssets;
     using UnityEditor.Build.Reporting;
 
     [AppConfigSettingsOrder(90)]
@@ -88,7 +87,8 @@ namespace Lost.Addressables
 
         private bool IsBeingUsedByAddressableSystem()
         {
-            AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
+            #if USING_UNITY_ADDRESSABLES
+            UnityEditor.AddressableAssets.AddressableAssetSettings settings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
             string buildPath = this.GetType().FullName + "." + nameof(BuildPath);
 
             if (settings == null)
@@ -98,7 +98,7 @@ namespace Lost.Addressables
 
             foreach (var group in settings.groups.Where(x => x.entries.IsNullOrEmpty() == false))
             {
-                foreach (var schema in group.Schemas.OfType<BundledAssetGroupSchema>())
+                foreach (var schema in group.Schemas.OfType<UnityEditor.AddressableAssets.BundledAssetGroupSchema>())
                 {
                     if (schema?.BuildPath?.GetValue(settings) == buildPath)
                     {
@@ -106,6 +106,7 @@ namespace Lost.Addressables
                     }
                 }
             }
+            #endif
 
             return false;
         }
