@@ -11,7 +11,7 @@ namespace Lost
     [RequireComponent(typeof(Animator))]
     public class AnimatorHelper : MonoBehaviour
     {
-        private Animator animator;
+        [SerializeField, HideInInspector] private Animator animator;
 
         public void SetBoolTrue(string paramName)
         {
@@ -33,9 +33,14 @@ namespace Lost
             this.ExecuteDelayed(seconds, () => this.animator.enabled = false);
         }
 
+        private void OnValidate()
+        {
+            this.AssertGetComponent<Animator>(ref this.animator);
+        }
+
         private void Awake()
         {
-            this.animator = this.GetComponent<Animator>();
+            this.OnValidate();
         }
     }
 }

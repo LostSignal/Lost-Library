@@ -8,8 +8,9 @@ namespace Lost.AppConfig
 {
     using UnityEditor.Build;
     using UnityEditor.Build.Reporting;
+    using UnityEngine.SceneManagement;
 
-    public class EditorAppConfigBuildHelper : IPreprocessBuildWithReport, IPostprocessBuildWithReport
+    public class EditorAppConfigBuildHelper : IPreprocessBuildWithReport, IPostprocessBuildWithReport, IProcessSceneWithReport
     {
         int IOrderedCallback.callbackOrder => 1000;
 
@@ -30,6 +31,16 @@ namespace Lost.AppConfig
             foreach (var settings in EditorAppConfig.GetActiveConfigSettings())
             {
                 settings.OnPreproccessBuild(activeConfig, report);
+            }
+        }
+
+        void IProcessSceneWithReport.OnProcessScene(Scene scene, BuildReport report)
+        {
+            var activeConfig = EditorAppConfig.ActiveAppConfig;
+
+            foreach (var settings in EditorAppConfig.GetActiveConfigSettings())
+            {
+                settings.OnProcessScene(activeConfig, scene, report);
             }
         }
     }

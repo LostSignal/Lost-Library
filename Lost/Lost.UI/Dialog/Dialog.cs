@@ -132,7 +132,7 @@ namespace Lost
 
         public bool IsHidden
         {
-            get { return this.isShowing == false && (this.dialogStateMachine.IsDoneHiding || this.dialogStateMachine.IsUnknown); }
+            get { return this.isShowing == false && (this.dialogStateMachine.IsDoneHiding || this.dialogStateMachine.IsInitialized); }
         }
 
         public bool IsTransitioning

@@ -25,9 +25,9 @@ namespace Lost
             get { return this.state == State.Hidden; }
         }
 
-        public bool IsUnknown
+        public bool IsInitialized
         {
-            get { return this.state == State.Unknown; }
+            get { return this.state == State.Initialized; }
         }
 
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -42,15 +42,11 @@ namespace Lost
             {
                 this.state = State.Hidden;
             }
-            else
-            {
-                this.state = State.Unknown;
-            }
         }
 
         private enum State
         {
-            Unknown,
+            Initialized,
             Hidden,
             Shown,
         }

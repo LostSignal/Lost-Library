@@ -16,13 +16,20 @@ namespace Lost
         #pragma warning disable 0649
         [SerializeField] private UnityEvent onToggleOn;
         [SerializeField] private UnityEvent onToggleOff;
+
+        // Hidden Serialized Fields
+        [SerializeField, HideInInspector] private Toggle toggle;
         #pragma warning restore 0649
 
-        private Toggle toggle;
+        private void OnValidate()
+        {
+            this.AssertGetComponent<Toggle>(ref this.toggle);
+        }
 
         private void Awake()
         {
-            this.toggle = this.GetComponent<Toggle>();
+            this.OnValidate();
+
             this.toggle.onValueChanged.AddListener(this.ToggleChanged);
             this.ToggleChanged(this.toggle.isOn);
         }

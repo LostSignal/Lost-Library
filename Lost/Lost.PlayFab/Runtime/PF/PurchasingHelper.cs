@@ -60,15 +60,23 @@ namespace Lost
 
             #if USING_UNITY_PURCHASING
             // initializing purchasing, but no need to wait on it
-            if (getCatalog.HasError == false && Lost.IAP.UnityPurchasingManager.Instance.IsIAPInitialized == false)
+            if (getCatalog.HasError == false && IAP.UnityPurchasingManager.Instance.IsIAPInitialized == false)
             {
-                var initializeUnityIap = Lost.IAP.UnityPurchasingManager.Instance.InitializeUnityPurchasing((builder) =>
+                var initializeUnityIap = IAP.UnityPurchasingManager.Instance.InitializeUnityPurchasing((builder, module) =>
                 {
                     foreach (var catalogItem in getCatalog.Value)
                     {
                         if (catalogItem.GetVirtualCurrenyPrice("RM") > 0)
                         {
-                            builder.AddProduct(catalogItem.ItemId, this.GetProductType(catalogItem));
+                            string itemId = catalogItem.ItemId;
+
+                            // GooglePlay store does not allow uppercase at all
+                            if (module.appStore == AppStore.GooglePlay)
+                            {
+                                itemId = itemId.ToLower();
+                            }
+
+                            builder.AddProduct(itemId, this.GetProductType(catalogItem));
                         }
                     }
                 });

@@ -45,9 +45,41 @@ namespace Lost.IAP
             get { return initializationState == InitializationState.InitializedSucceeded; }
         }
 
-        public UnityTask<bool> InitializeUnityPurchasing(System.Action<ConfigurationBuilder> configurationBuilder)
+        public UnityTask<bool> InitializeUnityPurchasing(System.Action<ConfigurationBuilder, StandardPurchasingModule> configurationBuilder)
         {
-            return UnityTask<bool>.Run(this.InitializeUnityPurchasingCoroutine(configurationBuilder));
+            return UnityTask<bool>.Run(InitializeUnityPurchasingCoroutine());
+
+            IEnumerator<bool> InitializeUnityPurchasingCoroutine()
+            {
+                if (this.initializationState == InitializationState.InitializedSucceeded)
+                {
+                    yield return true;
+                    yield break;
+                }
+
+                float startTime = Time.realtimeSinceStartup;
+                this.initializationState = InitializationState.Initializing;
+                UnityPurchasing.Initialize(this, this.GetConfigurationBuilder(configurationBuilder));
+
+                while (this.initializationState == InitializationState.Initializing)
+                {
+                    yield return default(bool);
+
+                    if (Time.realtimeSinceStartup - startTime > 5.0f)
+                    {
+                        throw new PurchasingInitializationTimeOutException();
+                    }
+                }
+
+                if (this.initializationState == InitializationState.InitializedSucceeded)
+                {
+                    yield return true;
+                }
+                else
+                {
+                    throw new PurchasingInitializationException(initializationFailureReason);
+                }
+            }
         }
 
         public UnityTask<PurchaseEventArgs> PurchaseProduct(string itemId)
@@ -55,7 +87,7 @@ namespace Lost.IAP
             return UnityTask<PurchaseEventArgs>.Run(this.PurchaseProductCoroutine(itemId));
         }
 
-        private ConfigurationBuilder GetConfigurationBuilder(System.Action<ConfigurationBuilder> configurationBuilder)
+        private ConfigurationBuilder GetConfigurationBuilder(System.Action<ConfigurationBuilder, StandardPurchasingModule> configurationBuilder)
         {
             if (this.builder == null)
             {
@@ -68,42 +100,10 @@ namespace Lost.IAP
 
                 this.builder = ConfigurationBuilder.Instance(module);
 
-                configurationBuilder?.Invoke(this.builder);
+                configurationBuilder?.Invoke(this.builder, module);
             }
 
             return this.builder;
-        }
-
-        private IEnumerator<bool> InitializeUnityPurchasingCoroutine(System.Action<ConfigurationBuilder> configurationBuilder)
-        {
-            if (this.initializationState == InitializationState.InitializedSucceeded)
-            {
-                yield return true;
-                yield break;
-            }
-
-            float startTime = Time.realtimeSinceStartup;
-            this.initializationState = InitializationState.Initializing;
-            UnityPurchasing.Initialize(this, this.GetConfigurationBuilder(configurationBuilder));
-
-            while (this.initializationState == InitializationState.Initializing)
-            {
-                yield return default(bool);
-
-                if (Time.realtimeSinceStartup - startTime > 5.0f)
-                {
-                    throw new PurchasingInitializationTimeOutException();
-                }
-            }
-
-            if (this.initializationState == InitializationState.InitializedSucceeded)
-            {
-                yield return true;
-            }
-            else
-            {
-                throw new PurchasingInitializationException(initializationFailureReason);
-            }
         }
 
         void IStoreListener.OnInitialized(IStoreController controller, IExtensionProvider extensions)

@@ -298,6 +298,8 @@ namespace Lost.AppConfig
                 return;
             }
 
+            EditorApplication.playModeStateChanged += PlayModeStateChanged;
+
             // Recording defines before we possibly alter them
             List<string> definesBefore = new List<string>();
             BuildTargetGroupUtil.GetValid().ForEach(x => definesBefore.Add(PlayerSettings.GetScriptingDefineSymbolsForGroup(x)));
@@ -338,6 +340,30 @@ namespace Lost.AppConfig
             WriteRuntimeConfigFile();
 
             // TODO [bgish]: Write out the MenuItems class? (force recompile if new)
+        }
+
+        private static void PlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (EditorApplication.isPlaying == false && EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                WriteRuntimeConfigFile();
+
+                var activeConfig = EditorAppConfig.ActiveAppConfig;
+
+                foreach (var settings in EditorAppConfig.GetActiveConfigSettings())
+                {
+                    settings.OnEnteringPlayMode(activeConfig);
+                }
+            }
+            else if (state == PlayModeStateChange.ExitingPlayMode)
+            {
+                var activeConfig = EditorAppConfig.ActiveAppConfig;
+
+                foreach (var settings in EditorAppConfig.GetActiveConfigSettings())
+                {
+                    settings.OnExitingPlayMode(activeConfig);
+                }
+            }
         }
     }
 }

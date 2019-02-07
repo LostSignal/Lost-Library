@@ -19,12 +19,13 @@ namespace Lost.Localization
 
         private void OnValidate()
         {
-            this.Initialize();
+            this.AssertGetComponent<Toggle>(ref this.toggle);
         }
 
         private void Awake()
         {
-            this.Initialize();
+            this.OnValidate();
+
             this.toggle.onValueChanged.AddListener(this.ValueChanged);
         }
 
@@ -42,14 +43,6 @@ namespace Lost.Localization
                 }
 
                 Debug.LogErrorFormat(this, "ChangeLanguage.ChangeLanguageTo couldn't find supported language {0}!", this.isoLanguageName);
-            }
-        }
-
-        private void Initialize()
-        {
-            if (this.toggle == null)
-            {
-                this.toggle = this.GetComponent<Toggle>();
             }
         }
     }

@@ -10,6 +10,7 @@ namespace Lost.AppConfig
     using UnityEditor;
     using UnityEditor.Build.Reporting;
     using UnityEngine;
+    using UnityEngine.SceneManagement;
 
     public abstract class AppConfigSettings : ScriptableObject
     {
@@ -28,6 +29,10 @@ namespace Lost.AppConfig
         {
         }
 
+        public virtual void OnProcessScene(AppConfig appConfig, Scene scene, BuildReport report)
+        {
+        }
+
         public virtual void InitializeOnLoad(AppConfig appConfig)
         {
         }
@@ -37,6 +42,14 @@ namespace Lost.AppConfig
         }
 
         public virtual void OnUnityCloudBuildInitiated(AppConfig appConfig)
+        {
+        }
+
+        public virtual void OnEnteringPlayMode(AppConfig appConfig)
+        {
+        }
+
+        public virtual void OnExitingPlayMode(AppConfig appConfig)
         {
         }
 

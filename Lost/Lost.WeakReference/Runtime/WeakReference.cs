@@ -1,10 +1,8 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="LazyAsset.cs" company="Lost Signal LLC">
+// <copyright file="WeakReference.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
-
-#if !UNITY || USING_UNITY_ADDRESSABLES
 
 namespace Lost
 {
@@ -12,26 +10,17 @@ namespace Lost
     using UnityEngine;
 
     [Serializable]
-    public class LazyAsset
+    public class WeakReference
     {
         #pragma warning disable 0649
-        [SerializeField] private string assetGuid;
+        [SerializeField] private string guid;
         #pragma warning restore 0649
 
-        public string AssetGuid
-        {
-            get { return this.assetGuid; }
-
-            #if UNITY_EDITOR
-            set { this.assetGuid = value; }
-            #endif
-        }
+        public string Guid => this.guid;
 
         public virtual System.Type Type
         {
-            get { return null; }
+            get { return typeof(GameObject); }
         }
     }
 }
-
-#endif

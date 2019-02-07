@@ -11,15 +11,23 @@ namespace Lost
     [RequireComponent(typeof(DebugMenu))]
     public class DebugMenuListener : MonoBehaviour
     {
+        #pragma warning disable 0649
+        [SerializeField, HideInInspector] private DebugMenu debugMenu;
+        #pragma warning restore 0649
+
         private const float HoldTime = 2.0f;
 
-        private DebugMenu debugMenu;
         private float threeFingerHoldTime = 0.0f;
         private float spaceHoldTime = 0.0f;
 
+        private void OnValidate()
+        {
+            this.AssertGetComponent<DebugMenu>(ref this.debugMenu);
+        }
+
         private void Awake()
         {
-            this.debugMenu = this.GetComponent<DebugMenu>();
+            this.OnValidate();
         }
 
         private void Update()

@@ -4,19 +4,15 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if USING_UNITY_ADDRESSABLES
+#if !UNITY || USING_UNITY_ADDRESSABLES
 
 namespace Lost
 {
-    using System.Collections;
-
     public interface ILazyAsset
     {
         string AssetGuid { get; }
 
         bool IsLoaded { get; }
-
-        IEnumerator Load();
     }
 }
 

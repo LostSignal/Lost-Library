@@ -59,7 +59,7 @@ namespace Lost.Addressables
         {
             #if USING_UNITY_ADDRESSABLES
             // Making sure the addressables are built
-            UnityEditor.AddressableAssets.AddressableAssetSettings.BuildPlayerContent();
+            UnityEditor.AddressableAssets.Settings.AddressableAssetSettings.BuildPlayerContent();
             #endif
         }
 
@@ -67,7 +67,7 @@ namespace Lost.Addressables
         {
             #if USING_UNITY_ADDRESSABLES
             // Making sure the addressables are built
-            UnityEditor.AddressableAssets.AddressableAssetSettings.BuildPlayerContent();
+            UnityEditor.AddressableAssets.Settings.AddressableAssetSettings.BuildPlayerContent();
             #endif
         }
 
@@ -185,7 +185,7 @@ namespace Lost.Addressables
         private bool IsBeingUsedByAddressableSystem()
         {
             #if USING_UNITY_ADDRESSABLES
-            UnityEditor.AddressableAssets.AddressableAssetSettings settings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
+            UnityEditor.AddressableAssets.Settings.AddressableAssetSettings settings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
             string buildPath = this.GetType().FullName + "." + nameof(BuildPath);
 
             if (settings == null)
@@ -195,7 +195,7 @@ namespace Lost.Addressables
 
             foreach (var group in settings.groups.Where(x => x.entries.IsNullOrEmpty() == false))
             {
-                foreach (var schema in group.Schemas.OfType<UnityEditor.AddressableAssets.BundledAssetGroupSchema>())
+                foreach (var schema in group.Schemas.OfType<UnityEditor.AddressableAssets.Settings.GroupSchemas.BundledAssetGroupSchema>())
                 {
                     if (schema?.BuildPath?.GetValue(settings) == buildPath)
                     {

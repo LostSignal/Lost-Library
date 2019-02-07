@@ -15,14 +15,21 @@ namespace Lost
         [SerializeField] private float degreesPerSecond = 180;
         [SerializeField] private bool shouldSnapDegrees = true;
         [SerializeField] private float snapDegrees = 45;
+
+        // Hidden Serialized Fields
+        [SerializeField, HideInInspector] private RectTransform rectTransform;
         #pragma warning restore 0649
 
-        private RectTransform rectTransform;
         private float currentDegrees;
+
+        private void OnValidate()
+        {
+            this.AssertGetComponent<RectTransform>(ref this.rectTransform);
+        }
 
         private void Awake()
         {
-            this.rectTransform = this.GetComponent<RectTransform>();
+            this.OnValidate();
         }
 
         private void Update()

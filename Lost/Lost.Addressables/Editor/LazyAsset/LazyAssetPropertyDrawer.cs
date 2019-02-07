@@ -8,13 +8,17 @@
 
 namespace Lost
 {
+    using System;
     using System.Collections.Generic;
+    using Lost.AppConfig;
     using UnityEditor;
     using UnityEngine;
 
-    public class LazyAssetPropertyDrawer<T> : PropertyDrawer where T : UnityEngine.Object
+    [CustomPropertyDrawer(typeof(LazyAsset), true)]
+    public class LazyAssetPropertyDrawer : PropertyDrawer
     {
-        private static readonly Dictionary<string, T> objectCache = new Dictionary<string, T>();
+        private static readonly Dictionary<string, UnityEngine.Object> objectCache = new Dictionary<string, UnityEngine.Object>();
+        private static readonly Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -24,34 +28,47 @@ namespace Lost
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             SerializedProperty assetGuid = property.FindPropertyRelative("assetGuid");
+            Type type = this.GetType(property);
 
             var currentValue = this.GetAsset(assetGuid.stringValue);
-            var newValue = EditorGUI.ObjectField(position, label, currentValue, typeof(T), false);
+
+            var newValue = EditorGUI.ObjectField(position, label, currentValue, type, false);
 
             if (currentValue != newValue)
             {
                 assetGuid.stringValue = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(newValue));
-
-                SerializedProperty assetPath = property.FindPropertyRelative("assetPath");
-                assetPath.stringValue = AssetDatabase.GUIDToAssetPath(assetGuid.stringValue);
-
-                SerializedProperty assetAssetBundleName = property.FindPropertyRelative("assetBundleName");
-                assetAssetBundleName.stringValue = LazyAsset<Object>.FindAssetBundleName(assetPath.stringValue);
             }
         }
 
-        private T GetAsset(string guid)
+        private Type GetType(SerializedProperty property)
+        {
+            Type type;
+
+            if (typeCache.TryGetValue(property.type, out type) == false)
+            {
+                Type propertyType = TypeUtil.GetTypeByName<LazyAsset>(property.type);
+                object propertyObject = Activator.CreateInstance(propertyType);
+                LazyAsset lazyAsset = propertyObject as LazyAsset;
+
+                type = lazyAsset.Type;
+                typeCache.Add(property.type, type);
+            }
+
+            return type;
+        }
+
+        private UnityEngine.Object GetAsset(string guid)
         {
             if (string.IsNullOrEmpty(guid))
             {
                 return null;
             }
 
-            T obj;
+            UnityEngine.Object obj;
             if (objectCache.TryGetValue(guid, out obj) == false)
             {
                 var assetPath = AssetDatabase.GUIDToAssetPath(guid);
-                obj = AssetDatabase.LoadAssetAtPath(assetPath, typeof(T)) as T;
+                obj = AssetDatabase.LoadAssetAtPath(assetPath, typeof(UnityEngine.Object));
                 objectCache.Add(guid, obj);
             }
 

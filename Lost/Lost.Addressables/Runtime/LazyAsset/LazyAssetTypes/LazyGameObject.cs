@@ -1,10 +1,10 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="LazySprite.cs" company="Lost Signal LLC">
+// <copyright file="LazyGameObject.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if USING_UNITY_ADDRESSABLES
+#if !UNITY || USING_UNITY_ADDRESSABLES
 
 namespace Lost
 {
@@ -12,7 +12,11 @@ namespace Lost
     using UnityEngine;
 
     [Serializable]
-    public class LazySprite : LazyAsset<Sprite>
+    #if UNITY
+    public class LazyGameObject : LazyAsset<GameObject>
+    #else
+    public class LazyGameObject : LazyAsset<object>
+    #endif
     {
     }
 }

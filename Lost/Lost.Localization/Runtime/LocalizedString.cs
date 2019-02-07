@@ -10,7 +10,7 @@ namespace Lost
     using UnityEngine;
 
     [Serializable]
-    public class LocalizedString
+    public class LocalizedString : IValidate
     {
         #pragma warning disable 0649
         [SerializeField] private string localizedStringId;
@@ -26,6 +26,12 @@ namespace Lost
         {
             // TODO [bgish]: Actually query localizatin system to get this info
             get { return this.Id; } // throw new NotImplementedException(); }
+        }
+
+        void IValidate.Validate()
+        {
+            // TODO [bgish]: Actually verify that localizedStringId is not null and exists in a localization table
+            throw new NotImplementedException();
         }
     }
 }

@@ -24,9 +24,10 @@ namespace Lost
         [SerializeField] private float maxScale = 1.8f;
         [SerializeField] private float minScale = 1.0f;
         [SerializeField] private float dotScaleSpeed = 3.0f;
-        #pragma warning restore 0649
 
-        private ScrollRect scrollRect;
+        // Hidden Serialized Fields
+        [SerializeField, HideInInspector] private ScrollRect scrollRect;
+        #pragma warning restore 0649
 
         private GameObject closestChild;
 
@@ -96,9 +97,14 @@ namespace Lost
             }
         }
 
+        private void OnValidate()
+        {
+            this.AssertGetComponent<ScrollRect>(ref this.scrollRect);
+        }
+
         private void Awake()
         {
-            this.scrollRect = this.GetComponent<ScrollRect>();
+            this.OnValidate();
         }
 
         private void Start()

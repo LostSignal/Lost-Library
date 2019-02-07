@@ -20,9 +20,11 @@ namespace Lost
     {
         #pragma warning disable 0649
         [SerializeField] private TimespanTextFormat format;
+
+        // Hidden Serialized Fields
+        [SerializeField, HideInInspector] private Text text;
         #pragma warning restore 0649
 
-        private Text text;
         private int seconds;
 
         public int Seconds
@@ -47,9 +49,14 @@ namespace Lost
             }
         }
 
+        private void OnValidate()
+        {
+            this.AssertGetComponent<Text>(ref this.text);
+        }
+
         private void Awake()
         {
-            this.text = this.GetComponent<Text>();
+            this.OnValidate();
         }
 
         private void OnEnable()

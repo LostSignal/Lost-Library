@@ -19,10 +19,15 @@ namespace Lost
         private const float RetryWaitTime = 1.0f;
         private const int RetryCountMax = 10;
 
+        #pragma warning disable
         public event OnReceivePushNotificationDelegate OnReceivePushNotification;
+        #pragma warning restore
 
         private Queue<PushNotification> pushNotifications = new Queue<PushNotification>();
+
+        #if (UNITY_ANDROID && USING_ANDROID_FIREBASE_MESSAGING) || UNITY_IOS
         private string deviceToken = null;
+        #endif
 
         public bool HasPushNotifications
         {

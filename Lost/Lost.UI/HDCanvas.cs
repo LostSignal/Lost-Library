@@ -14,8 +14,8 @@ namespace Lost
     [RequireComponent(typeof(CanvasScaler))]
     public class HDCanvas : MonoBehaviour
     {
-        private CanvasScaler canvasScaler;
-        private Canvas canvas;
+        [SerializeField, HideInInspector] private CanvasScaler canvasScaler;
+        [SerializeField, HideInInspector] private Canvas canvas;
 
         public new bool enabled
         {
@@ -48,17 +48,15 @@ namespace Lost
             this.Setup();
         }
 
+        private void OnValidate()
+        {
+            this.CacheComponents();
+        }
+
         private void CacheComponents()
         {
-            if (this.canvas == null)
-            {
-                this.canvas = this.GetComponent<Canvas>();
-            }
-
-            if (this.canvasScaler == null)
-            {
-                this.canvasScaler = this.GetComponent<CanvasScaler>();
-            }
+            this.AssertGetComponent<Canvas>(ref this.canvas);
+            this.AssertGetComponent<CanvasScaler>(ref this.canvasScaler);
         }
 
         private void Setup()

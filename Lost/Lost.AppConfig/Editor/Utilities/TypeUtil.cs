@@ -50,5 +50,18 @@ namespace Lost.AppConfig
                 yield return t;
             }
         }
+
+        public static Type GetTypeByName<T>(string typeName)
+        {
+            foreach (Type t in TypeUtil.GetAllTypesOf<LazyAsset>())
+            {
+                if (t.Name == typeName)
+                {
+                    return t;
+                }
+            }
+
+            return null;
+        }
     }
 }

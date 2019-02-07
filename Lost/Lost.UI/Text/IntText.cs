@@ -30,12 +30,14 @@ namespace Lost
         [SerializeField] private UnityEvent onEndAnimation;
         [SerializeField] private AnimationCurve animationCurve = new AnimationCurve(new Keyframe { time = 0, value = 0 }, new Keyframe { time = 1, value = 1 });
         [SerializeField] private IntFormat format;
+
+        // Hidden Serialized Fields
+        [SerializeField, HideInInspector] private Text text;
         #pragma warning restore 0649
 
         private Coroutine animateToGoalCoroutine;
         private int intValue = int.MinValue;
         private int goalValue = int.MinValue;
-        private Text text;
 
         public Text Text
         {
@@ -145,6 +147,11 @@ namespace Lost
             this.onEndAnimation.InvokeIfNotNull();
         }
 
+        private void OnValidate()
+        {
+            this.UpdateTextField();
+        }
+
         private void Awake()
         {
             Localization.Localization.LanguagedChanged += this.UpdateText;
@@ -162,15 +169,7 @@ namespace Lost
 
         private void UpdateTextField()
         {
-            if (this.text == null)
-            {
-                this.text = this.GetComponent<Text>();
-
-                if (this.text == null)
-                {
-                    Debug.LogWarning("IntText does not have a valid Text object to work with.", this);
-                }
-            }
+            this.AssertGetComponent<Text>(ref this.text);
         }
 
         private void UpdateText()

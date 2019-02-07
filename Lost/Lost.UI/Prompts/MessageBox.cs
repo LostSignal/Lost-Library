@@ -111,8 +111,8 @@ namespace Lost
         private IEnumerator<YesNoResult> ShowYesNoInternal(string title, string body)
         {
             // TODO [bgish]: If "in use", then wait till it becomes available
-
-            this.SetLeftRightText(title, body, "No", "Yes");
+            var localizeStrings = BigBlindInteractive.TienLen.MessageBoxLocalization.Instance.confirm;
+            this.SetLeftRightText(title, body, localizeStrings.No, localizeStrings.Yes);
             this.Dialog.Show();
 
             // waiting for it to start showing

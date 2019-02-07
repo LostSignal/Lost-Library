@@ -51,13 +51,19 @@ namespace Lost
             this.Setup();
         }
 
+        private void OnValidate()
+        {
+            this.Setup();
+        }
+
         private void Setup()
         {
+            this.AssertGetComponentInParent<GraphicRaycaster>(ref this.graphicRaycaster);
+            this.AssertGetComponent<CanvasRenderer>(ref this.canvasRenderer);
+            this.AssertGetComponent<RectTransform>(ref this.rectTransform);
+            this.AssertGetComponent<Image>(ref this.image);
+
             // making sure all our components exist
-            this.graphicRaycaster = this.graphicRaycaster == null ? this.GetComponentInParent<GraphicRaycaster>() : this.graphicRaycaster;
-            this.canvasRenderer = this.canvasRenderer == null ? this.GetComponent<CanvasRenderer>() : this.canvasRenderer;
-            this.rectTransform = this.rectTransform == null ? this.GetComponent<RectTransform>() : this.rectTransform;
-            this.image = this.image == null ? this.GetComponent<Image>() : this.image;
             this.onClick = this.onClick == null ? new UnityEvent() : this.onClick;
 
             // seting up initial values

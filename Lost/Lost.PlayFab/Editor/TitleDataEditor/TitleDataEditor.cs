@@ -49,61 +49,62 @@ namespace Lost
                 return;
             }
 
-            EditorGUI.BeginChangeCheck();
-
-            using (new GUILayout.HorizontalScope("box", GUILayout.ExpandWidth(true)))
+            using (var changeCheck = new EditorGUI.ChangeCheckScope())
             {
-                // TitleDataKeyName
-                GUILayout.Label("TitleData Key", GUILayout.Width(80));
-                this.titleDataObject.TitleDataKeyName = GUILayout.TextField(this.titleDataObject.TitleDataKeyName, GUILayout.Width(200));
-                GUILayout.Space(10);
-
-                // SerializeWithUnity
-                this.titleDataObject.SerializeWithUnity = GUILayout.Toggle(this.titleDataObject.SerializeWithUnity, "Serialize With Unity", GUILayout.Width(140));
-
-                // CompressData
-                this.titleDataObject.CompressData = GUILayout.Toggle(this.titleDataObject.CompressData, "Compress Data", GUILayout.Width(150));
-
-                GUILayout.FlexibleSpace();
-
-                // Upload Button
-                if (GUILayout.Button("Upload", GUILayout.Width(100)))
+                using (new GUILayout.HorizontalScope("box", GUILayout.ExpandWidth(true)))
                 {
-                    string json = string.Empty;
+                    // TitleDataKeyName
+                    GUILayout.Label("TitleData Key", GUILayout.Width(80));
+                    this.titleDataObject.TitleDataKeyName = GUILayout.TextField(this.titleDataObject.TitleDataKeyName, GUILayout.Width(200));
+                    GUILayout.Space(10);
 
-                    if (this.titleDataObject.SerializeWithUnity)
-                    {
-                        json = JsonUtility.ToJson(this.titleDataObject.Data);
-                    }
-                    else
-                    {
-                        json = PF.SerializerPlugin.SerializeObject(this.titleDataObject.Data);
-                    }
+                    // SerializeWithUnity
+                    this.titleDataObject.SerializeWithUnity = GUILayout.Toggle(this.titleDataObject.SerializeWithUnity, "Serialize With Unity", GUILayout.Width(140));
 
-                    if (this.titleDataObject.CompressData)
-                    {
-                        json = LZString.CompressToBase64(json);
-                    }
+                    // CompressData
+                    this.titleDataObject.CompressData = GUILayout.Toggle(this.titleDataObject.CompressData, "Compress Data", GUILayout.Width(150));
 
-                    PlayFabEditorAdmin.SetTitleDataAndPrintErrorOrSuccess(this.titleDataObject.TitleDataKeyName, json);
+                    GUILayout.FlexibleSpace();
+
+                    // Upload Button
+                    if (GUILayout.Button("Upload", GUILayout.Width(100)))
+                    {
+                        string json = string.Empty;
+
+                        if (this.titleDataObject.SerializeWithUnity)
+                        {
+                            json = JsonUtility.ToJson(this.titleDataObject.Data);
+                        }
+                        else
+                        {
+                            json = PF.SerializerPlugin.SerializeObject(this.titleDataObject.Data);
+                        }
+
+                        if (this.titleDataObject.CompressData)
+                        {
+                            json = LZString.CompressToBase64(json);
+                        }
+
+                        PlayFabEditorAdmin.SetTitleDataAndPrintErrorOrSuccess(this.titleDataObject.TitleDataKeyName, json);
+                    }
                 }
-            }
 
-            using (var horizontalScope = new GUILayout.HorizontalScope("box", GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)))
-            {
-                using (var scrollViewScope = new EditorGUILayout.ScrollViewScope(scrollBarPosition))
+                using (var horizontalScope = new GUILayout.HorizontalScope("box", GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)))
                 {
-                    scrollBarPosition = scrollViewScope.scrollPosition;
+                    using (var scrollViewScope = new EditorGUILayout.ScrollViewScope(scrollBarPosition))
+                    {
+                        scrollBarPosition = scrollViewScope.scrollPosition;
 
-                    this.DrawData(this.titleDataObject.Data, this.serializedObject, this.serializedProperty);
+                        this.DrawData(this.titleDataObject.Data, this.serializedObject, this.serializedProperty);
+                    }
                 }
-            }
 
-            // Making sure we mark the data dirty if it changed
-            if (GUI.changed)
-            {
-                EditorUtility.SetDirty(this.serializedObject.targetObject);
-                this.serializedObject.ApplyModifiedProperties();
+                // Making sure we mark the data dirty if it changed
+                if (changeCheck.changed)
+                {
+                    EditorUtility.SetDirty(this.serializedObject.targetObject);
+                    this.serializedObject.ApplyModifiedProperties();
+                }
             }
         }
 

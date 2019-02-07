@@ -38,11 +38,9 @@ namespace Lost
             return UnityTask<bool>.Run(this.ChangeDisplayNameCoroutine(newDisplayName));
         }
 
-        public UnityTask<bool> ChangeDisplayNameWithPopup(string customTitle = null, string customBody = null)
+        public UnityTask<bool> ChangeDisplayNameWithPopup()
         {
-            return (customTitle != null && customBody != null)
-                ? UnityTask<bool>.Run(this.ChangeDisplayNameWithPopupCoroutine(customTitle, customBody))
-                : UnityTask<bool>.Run(this.ChangeDisplayNameWithPopupCoroutine());
+            return UnityTask<bool>.Run(this.ChangeDisplayNameWithPopupCoroutine());
         }
 
         private IEnumerator<bool> ChangeDisplayNameCoroutine(string newDisplayName)
@@ -72,12 +70,9 @@ namespace Lost
             yield return true;
         }
 
-        private IEnumerator<bool> ChangeDisplayNameWithPopupCoroutine(string customTitle = null, string customBody = null)
+        private IEnumerator<bool> ChangeDisplayNameWithPopupCoroutine()
         {
-            // customTitle and body are currently used for localization
-            var stringInputBox = (customTitle != null && customBody != null)
-                ? PlayFabMessages.ShowChangeDisplayNameInputBox(PF.User.DisplayName, customTitle, customBody)
-                : PlayFabMessages.ShowChangeDisplayNameInputBox(PF.User.DisplayName);
+            var stringInputBox = PlayFabMessages.ShowChangeDisplayNameInputBox(PF.User.DisplayName);
 
             while (stringInputBox.IsDone == false)
             {

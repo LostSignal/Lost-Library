@@ -17,31 +17,28 @@ namespace Lost
 
         private void OnValidate()
         {
-            this.GenerateGuid(false);
         }
 
         private void Awake()
         {
             #if UNITY_EDITOR
-            while (GuidManager.Instance.DoesGuidExist(this))
+            if (this.guid == null)
             {
-                this.GenerateGuid(true);
+                this.guid = System.Guid.NewGuid().ToString();
             }
             #endif
 
-            GuidManager.Instance.RegisterGuid(this);
+            if (Application.isPlaying)
+            {
+                GuidManager.Instance.RegisterGuid(this);
+            }
         }
 
         private void OnDestroy()
         {
-            GuidManager.Instance.UnregisterGuid(this);
-        }
-
-        private void GenerateGuid(bool forceRegenerateGuid)
-        {
-            if (this.guid == null || forceRegenerateGuid)
+            if (Application.isPlaying)
             {
-                this.guid = System.Guid.NewGuid().ToString();
+                GuidManager.Instance.UnregisterGuid(this);
             }
         }
     }

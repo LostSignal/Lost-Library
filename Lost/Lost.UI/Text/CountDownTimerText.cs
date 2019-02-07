@@ -15,10 +15,12 @@ namespace Lost
     {
         #pragma warning disable 0649
         [SerializeField] private string finishedText;
+
+        // Hidden Serialized Fields
+        [SerializeField, HideInInspector] private Text text;
         #pragma warning restore 0649
 
         private DateTime target;
-        private Text text;
         private float timer;
 
         public DateTime Target
@@ -35,9 +37,14 @@ namespace Lost
             }
         }
 
+        private void OnValidate()
+        {
+            this.AssertGetComponent<Text>(ref this.text);
+        }
+
         private void Awake()
         {
-            this.text = this.GetComponent<Text>();
+            this.OnValidate();
         }
 
         private void OnEnable()
