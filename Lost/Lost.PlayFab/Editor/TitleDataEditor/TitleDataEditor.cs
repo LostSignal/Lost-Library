@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if USING_PLAYFAB
+#if USING_PLAYFAB_SDK
 
 namespace Lost
 {
