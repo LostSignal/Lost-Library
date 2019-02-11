@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if USING_PLAYFAB_SDK
+
 namespace Lost
 {
     using System;
@@ -61,3 +63,5 @@ namespace Lost
         }
     }
 }
+
+#endif

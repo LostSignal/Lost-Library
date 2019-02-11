@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if USING_PLAYFAB_SDK
+
 namespace Lost
 {
     using System.Collections.Generic;
@@ -181,3 +183,5 @@ namespace Lost
         protected abstract void DrawData(BaseType item, SerializedObject serializedObject, SerializedProperty serializedProperty);
     }
 }
+
+#endif

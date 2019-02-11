@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if USING_PLAYFAB
+
 namespace Lost
 {
     using UnityEditor;
@@ -111,3 +113,5 @@ namespace Lost
         protected abstract void DrawData(BaseType item, SerializedObject serializedObject, SerializedProperty serializedProperty);
     }
 }
+
+#endif

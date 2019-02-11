@@ -15,8 +15,8 @@ namespace Lost.Localization
         private static ReadOnlyCollection<Language> languages;
         private static ReadOnlyCollection<string> languageNames;
 
-        public static readonly Language English = new Language("English", "English", "en", SystemLanguage.English, ",", ".");
-        public static readonly Language Vietnamese = new Language("Vietnamese", "Tiếng Việt", "vi", SystemLanguage.Vietnamese, ".", ",");
+        public static readonly Language English = new Language("English", "English", "en", SystemLanguage.English, ",", ".", "Yes", "No");
+        public static readonly Language Vietnamese = new Language("Vietnamese", "Tiếng Việt", "vi", SystemLanguage.Vietnamese, ".", ",", "Có", "Không");
 
         public static ReadOnlyCollection<Language> AllLanguages
         {

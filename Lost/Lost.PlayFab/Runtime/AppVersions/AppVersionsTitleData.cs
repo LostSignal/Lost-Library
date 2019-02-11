@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if USING_PLAYFAB_SDK
+
 namespace Lost
 {
     [UnityEngine.CreateAssetMenu(menuName = "TitleData/AppVersions")]
@@ -11,3 +13,5 @@ namespace Lost
     {
     }
 }
+
+#endif

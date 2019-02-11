@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if USING_PLAYFAB_SDK
+
 namespace Lost
 {
     using PlayFab;
@@ -70,3 +72,5 @@ namespace Lost
         }
     }
 }
+
+#endif

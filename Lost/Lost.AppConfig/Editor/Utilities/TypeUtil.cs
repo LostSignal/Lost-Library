@@ -51,9 +51,9 @@ namespace Lost.AppConfig
             }
         }
 
-        public static Type GetTypeByName<T>(string typeName)
+        public static Type GetTypeByName<BaseType>(string typeName)
         {
-            foreach (Type t in TypeUtil.GetAllTypesOf<LazyAsset>())
+            foreach (Type t in TypeUtil.GetAllTypesOf<BaseType>())
             {
                 if (t.Name == typeName)
                 {
