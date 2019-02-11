@@ -53,16 +53,19 @@ namespace Lost
             get { return this.isCenteredAroundPlayer; }
             set { this.isCenteredAroundPlayer = value; }
         }
+
         public bool IsFriendLeaderboard
         {
             get { return this.isFriendLeaderboard; }
             set { this.isFriendLeaderboard = value; }
         }
+
         public bool IncludeFacebookFriends
         {
             get { return this.includeFacebookFriends; }
             set { this.includeFacebookFriends = value; }
         }
+
         public bool IncludeSteamFriends
         {
             get { return this.includeSteamFriends; }
@@ -233,6 +236,18 @@ namespace Lost
                     this.AppendLeaderboardResults(leaderboard, leaderboard.HasError == false ? leaderboard.Value.Leaderboard : null);
                 }
             }
+
+            // Testing is we should put the current player in the center of the leaderboard
+            if (startPosition.HasValue == false && this.isCenteredAroundPlayer)
+            {
+                for (int i = 0; i < this.entries.Count; i++)
+                {
+                    if (this.entries[i].PlayFabId == PF.User.PlayFabId)
+                    {
+                        this.CenterOnIndex(i);
+                    }
+                }
+            }
         }
 
         private IEnumerator AddToTopCoroutine()
@@ -249,15 +264,13 @@ namespace Lost
             {
                 PlayerLeaderboardEntry firstEntry = this.entries[0];
 
-                // If we're already at the top of the list, we can't get more
-                if (firstEntry.Position == 0)
+                // Making sure we're not already at the top
+                if (firstEntry.Position != 0)
                 {
-                    yield break;
+                    int position = Mathf.Max(firstEntry.Position - this.maxResultsCount - 1, 0);
+
+                    yield return this.RefreshLeaderboardCoroutine(position);
                 }
-
-                int position = Mathf.Max(firstEntry.Position - this.maxResultsCount - 1, 0);
-
-                yield return this.RefreshLeaderboardCoroutine(position);
             }
 
             this.coroutineRunning = false;

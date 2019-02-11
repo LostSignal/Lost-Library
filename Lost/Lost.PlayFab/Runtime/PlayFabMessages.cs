@@ -32,7 +32,8 @@ namespace Lost
             var localizeStrings = BigBlindInteractive.TienLen.MessageBoxLocalization.Instance.changeName;
             var title = localizeStrings.Title;
             var body = localizeStrings.Body;
-            return StringInputBox.Instance.Show(title, body, currentDisplayName);
+
+            return StringInputBox.Instance.Show(title, body, currentDisplayName, 15);
         }
 
         public static UnityTask<OkResult> HandleError(System.Exception exception)
@@ -62,33 +63,44 @@ namespace Lost
             {
                 // Display Name Changing Errors
                 case PlayFabErrorCode.NameNotAvailable:
-                    MessageBox.Instance.ShowOk(changeNameStrings.RenameFailedTitle, changeNameStrings.RenameFailed_NotAvaialbe);
-                    break;
+                    {
+                        MessageBox.Instance.ShowOk(changeNameStrings.RenameFailedTitle, changeNameStrings.RenameFailed_NotAvaialbe);
+                        break;
+                    }
 
                 case PlayFabErrorCode.ProfaneDisplayName:
-                    MessageBox.Instance.ShowOk(changeNameStrings.RenameFailedTitle, changeNameStrings.RenameFailed_ProfaneDisplayName);
-                    break;
+                    {
+                        MessageBox.Instance.ShowOk(changeNameStrings.RenameFailedTitle, changeNameStrings.RenameFailed_ProfaneDisplayName);
+                        break;
+                    }
 
-                // android receipt errors
+                // common receipt errors between iOS/Android
                 case PlayFabErrorCode.ReceiptCancelled:
+                case PlayFabErrorCode.InvalidBundleID:
+                case PlayFabErrorCode.InvalidReceipt:
+                case PlayFabErrorCode.NoMatchingCatalogItemForReceipt:
+                case PlayFabErrorCode.ReceiptAlreadyUsed:
+                case PlayFabErrorCode.SubscriptionAlreadyTaken:
+                case PlayFabErrorCode.InvalidProductForSubscription:
 
                 // ios receipt errors
-                case PlayFabErrorCode.ReceiptDoesNotContainInAppItems:
-                case PlayFabErrorCode.ReceiptContainsMultipleInAppItems:
-                case PlayFabErrorCode.InvalidBundleID:
-                case PlayFabErrorCode.InvalidVirtualCurrency:
                 case PlayFabErrorCode.DownstreamServiceUnavailable:
                 case PlayFabErrorCode.InvalidCurrencyCode:
+                case PlayFabErrorCode.InvalidEnvironmentForReceipt:
+                case PlayFabErrorCode.InvalidVirtualCurrency:
+                case PlayFabErrorCode.ReceiptContainsMultipleInAppItems:
+                case PlayFabErrorCode.ReceiptDoesNotContainInAppItems:
 
-                // common recipt errors between iOS/Android
-                case PlayFabErrorCode.InvalidReceipt:
-                case PlayFabErrorCode.ReceiptAlreadyUsed:
-                case PlayFabErrorCode.NoMatchingCatalogItemForReceipt:
-                    Debug.LogErrorFormat("Hit Error {0} while validating receipt", playfabException.Error.Error);
-                    MessageBox.Instance.ShowOk(purchaseFailedStrings.Title, purchaseFailedStrings.UnableToValidateReceipt);
-                    break;
+                // android receipt errors
+                case PlayFabErrorCode.MissingTitleGoogleProperties:
+                case PlayFabErrorCode.NoRealMoneyPriceForCatalogItem:
+                    {
+                        Debug.LogErrorFormat("Hit Error {0} while validating receipt", playfabException.Error.Error);
+                        MessageBox.Instance.ShowOk(purchaseFailedStrings.Title, purchaseFailedStrings.UnableToValidateReceipt);
+                        break;
+                    }
 
-                // TODO [bgish] - handle way more...
+                    // TODO [bgish] - handle way more...
             }
 
             return null;

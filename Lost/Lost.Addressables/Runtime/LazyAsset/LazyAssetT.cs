@@ -18,8 +18,13 @@ namespace Lost
     [Serializable]
     public class LazyAsset<T> : LazyAsset, ILazyAsset, IValidate where T : UnityEngine.Object
     {
-        [NonSerialized] private T loadedAsset;
-        [NonSerialized] private bool isLoaded;
+        // TODO [bgish]: Once addressables are working, make asset NonSerialized and load it from addressables
+
+        #pragma warning disable 0649
+        [SerializeField] private T asset;
+        #pragma warning restore 0649
+
+        [NonSerialized] private bool isLoaded = true;
 
         public override Type Type
         {
@@ -35,7 +40,7 @@ namespace Lost
                     Debug.LogWarningFormat("Tried accessing asset {0} before loading it.", this.AssetGuid);
                 }
 
-                return this.loadedAsset;
+                return this.asset;
             }
         }
 
@@ -55,7 +60,7 @@ namespace Lost
 
             loadOp.Completed += op =>
             {
-                this.loadedAsset = op.Result;
+                this.asset = op.Result;
                 this.isLoaded = true;
             };
 
@@ -70,8 +75,8 @@ namespace Lost
                 return;
             }
 
-            Addressables.ReleaseAsset(this.loadedAsset);
-            this.loadedAsset = null;
+            Addressables.ReleaseAsset(this.asset);
+            this.asset = null;
             this.isLoaded = false;
         }
 

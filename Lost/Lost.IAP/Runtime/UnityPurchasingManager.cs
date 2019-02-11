@@ -45,7 +45,25 @@ namespace Lost.IAP
             get { return initializationState == InitializationState.InitializedSucceeded; }
         }
 
-        public UnityTask<bool> InitializeUnityPurchasing(System.Action<ConfigurationBuilder, StandardPurchasingModule> configurationBuilder)
+        public string GetLocalizedPrice(string itemId)
+        {
+            if (this.controller == null)
+            {
+                Debug.LogError("Tried to get Localized Price of {0} before inittializing UnityIAP!");
+                return null;
+            }
+
+            Product product = this.controller.products.WithID(itemId);
+
+            if (product != null)
+            {
+                return product.metadata.localizedPriceString;
+            }
+
+            return null;
+        }
+
+        public UnityTask<bool> InitializeUnityPurchasing(System.Action<AppStore, ConfigurationBuilder> configurationBuilder)
         {
             return UnityTask<bool>.Run(InitializeUnityPurchasingCoroutine());
 
@@ -87,7 +105,7 @@ namespace Lost.IAP
             return UnityTask<PurchaseEventArgs>.Run(this.PurchaseProductCoroutine(itemId));
         }
 
-        private ConfigurationBuilder GetConfigurationBuilder(System.Action<ConfigurationBuilder, StandardPurchasingModule> configurationBuilder)
+        private ConfigurationBuilder GetConfigurationBuilder(System.Action<AppStore, ConfigurationBuilder> configurationBuilder)
         {
             if (this.builder == null)
             {
@@ -100,7 +118,7 @@ namespace Lost.IAP
 
                 this.builder = ConfigurationBuilder.Instance(module);
 
-                configurationBuilder?.Invoke(this.builder, module);
+                configurationBuilder?.Invoke(module.appStore, this.builder);
             }
 
             return this.builder;

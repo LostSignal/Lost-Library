@@ -40,6 +40,11 @@ namespace Lost
             return this;
         }
 
+        public BetterStringBuilder AppendLine()
+        {
+            return this.Append("\n");
+        }
+
         public BetterStringBuilder Append(char value)
         {
             charBuffer[currentLength++] = value;

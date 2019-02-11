@@ -103,6 +103,35 @@ namespace Lost
             this.ReplaceAllVisibleTiles();
         }
 
+        public void CenterOnIndex(int index)
+        {
+            if (this.count == 0)
+            {
+                return;
+            }
+
+            if (this.growType == GrowType.Vertically)
+            {
+                float rowY = this.GetRowY(index);
+                float desiredY = (this.lowerLeftBounds.y - this.upperRightBounds.y) / 2.0f;
+
+                this.scrollRect.content.localPosition = this.scrollRect.content.localPosition.AddToY(desiredY - rowY + (this.cellSize.y / 2.0f));
+                this.scrollRect.verticalNormalizedPosition = Mathf.Clamp01(this.scrollRect.verticalNormalizedPosition);
+            }
+            else if (this.growType == GrowType.Horizontally)
+            {
+                float columnX = this.GetColumnX(index);
+                float desiredX = (this.lowerLeftBounds.x - this.upperRightBounds.x) / 2.0f;
+
+                this.scrollRect.content.localPosition = this.scrollRect.content.localPosition.AddToX(desiredX - columnX + (this.cellSize.x / 2.0f));
+                this.scrollRect.horizontalNormalizedPosition = Mathf.Clamp01(this.scrollRect.horizontalNormalizedPosition);
+            }
+            else
+            {
+                Debug.LogErrorFormat("VirtualizedScrollRect.CenterOnIndex incountered an unknown GrowType {0}", this.growType);
+            }
+        }
+
         /// <summary>
         /// If the Grow Type is vertical, then a negative itemCount will shift contents up, and positive will shift items down.
         /// If the Grow type is horizontal, then a negative itemCount will shift contents right, and positive will shift items left.

@@ -6,6 +6,7 @@
 
 namespace Lost
 {
+    using System;
     using System.Collections.Generic;
     using UnityEngine;
 
@@ -57,31 +58,45 @@ namespace Lost
 
         private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
         {
-            int stackTraceHashCode = stackTrace.GetHashCode();
-
-            // Forward all Logging as an Analytic Event (if we haven't seen it before this session)
-            if (this.ForwardLoggingAsAnalyticEvents && this.sentLogs.Contains(stackTraceHashCode) == false)
+            try
             {
-                // Making sure we don't send regular logs up if that flag is set
-                if (this.DontForwardInfoLevelLogging == false || type != LogType.Log)
+                int stackTraceHashCode = stackTrace.GetHashCode();
+
+                // Forward all Logging as an Analytic Event (if we haven't seen it before this session)
+                if (this.ForwardLoggingAsAnalyticEvents && this.sentLogs.Contains(stackTraceHashCode) == false)
                 {
-                    this.sentLogs.Add(stackTraceHashCode);
+                    // Making sure we don't send regular logs up if that flag is set
+                    if (this.DontForwardInfoLevelLogging == false || type != LogType.Log)
+                    {
+                        this.sentLogs.Add(stackTraceHashCode);
 
-                    this.eventArgsCache[logTypeName] = this.logTypeCache[type];
-                    this.eventArgsCache[conditionName] = condition;
-                    this.eventArgsCache[hashCodeName] = stackTraceHashCode;
+                        this.eventArgsCache[logTypeName] = this.logTypeCache[type];
+                        this.eventArgsCache[conditionName] = condition;
+                        this.eventArgsCache[hashCodeName] = stackTraceHashCode;
 
-                    // NOTE [bgish]: Currently can't do this, because it puts us over event size limits
-                    this.eventArgsCache[callstackName] = string.Empty; // stackTrace
+                        // NOTE [bgish]: Currently can't do this, because it puts us over event size limits
+                        this.eventArgsCache[callstackName] = string.Empty; // stackTrace
 
-                    Lost.Analytics.AnalyticsEvent.Custom(logEventName, this.eventArgsCache);
+                        Lost.Analytics.AnalyticsEvent.Custom(logEventName, this.eventArgsCache);
+                    }
+                }
+
+                // Sending the log to all the providers
+                for (int i = 0; i < this.loggingProviders.Count; i++)
+                {
+                    try
+                    {
+                        this.loggingProviders[i].Log(condition, stackTrace, type);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogException(ex);
+                    }
                 }
             }
-
-            // Sending the log to all the providers
-            for (int i = 0; i < this.loggingProviders.Count; i++)
+            catch (Exception ex)
             {
-                this.loggingProviders[i].Log(condition, stackTrace, type);
+                Debug.LogException(ex);
             }
         }
     }

@@ -28,6 +28,10 @@ namespace Lost
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             SerializedProperty assetGuid = property.FindPropertyRelative("assetGuid");
+
+            // TODO [bgish]: Remove this line when addressables are working and we no longer need the hard reference
+            SerializedProperty asset = property.FindPropertyRelative("asset");
+
             Type type = this.GetType(property);
 
             var currentValue = this.GetAsset(assetGuid.stringValue);
@@ -37,6 +41,9 @@ namespace Lost
             if (currentValue != newValue)
             {
                 assetGuid.stringValue = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(newValue));
+
+                // TODO [bgish]: Remove this line when addressables are working and we no longer need the hard reference
+                asset.objectReferenceValue = newValue;
             }
         }
 

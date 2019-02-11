@@ -10,6 +10,8 @@ namespace Lost
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
     using Lost.AppConfig;
     using PlayFab;
     using PlayFab.ClientModels;
@@ -62,21 +64,13 @@ namespace Lost
             // initializing purchasing, but no need to wait on it
             if (getCatalog.HasError == false && IAP.UnityPurchasingManager.Instance.IsIAPInitialized == false)
             {
-                var initializeUnityIap = IAP.UnityPurchasingManager.Instance.InitializeUnityPurchasing((builder, module) =>
+                var initializeUnityIap = IAP.UnityPurchasingManager.Instance.InitializeUnityPurchasing((store, builder) =>
                 {
                     foreach (var catalogItem in getCatalog.Value)
                     {
                         if (catalogItem.GetVirtualCurrenyPrice("RM") > 0)
                         {
-                            string itemId = catalogItem.ItemId;
-
-                            // GooglePlay store does not allow uppercase at all
-                            if (module.appStore == AppStore.GooglePlay)
-                            {
-                                itemId = itemId.ToLower();
-                            }
-
-                            builder.AddProduct(itemId, this.GetProductType(catalogItem));
+                            builder.AddProduct(catalogItem.ItemId, this.GetProductType(catalogItem));
                         }
                     }
                 });
@@ -267,6 +261,55 @@ namespace Lost
             }
         }
 
+        private int GetPurchasePrice(PurchaseEventArgs e)
+        {
+            int fractionalUnit;
+
+            switch (e.purchasedProduct.metadata.isoCurrencyCode)
+            {
+                // https://en.wikipedia.org/wiki/List_of_circulating_currencies
+                // 
+                // case "BHD": // Bahrain
+                // case "IQD": // Iraq   
+                // case "KWD": // Kuwait 
+                // case "LYD": // Libya  
+                // case "OMR": // Oman   
+                // case "TND": // Tunisia
+                //     {
+                //         fractionalUnit = 1000;
+                //         break;
+                //     }
+                // 
+                // case "MGA": // Madagascar
+                // case "MRU": // Mauritania, Sahrawi Republic (Mauritanian ouguiya)
+                //     {
+                //         fractionalUnit = 5;
+                //         break;
+                //     }
+                // 
+                // case "VUV": // Vanuatu   
+                //     {
+                //         fractionalUnit = 1;
+                //         break;
+                //     }
+                // 
+                // NOTE [bgish]: May need this for IAP to work in Vietname
+                // case "VND": // Vietname
+                //     {
+                //         fractionalUnit = 10;
+                //         break;
+                //     }
+
+                default:
+                    {
+                        fractionalUnit = 100;
+                        break;
+                    }
+            }
+
+            return (int)(e.purchasedProduct.metadata.localizedPrice * fractionalUnit);
+        }
+
         private IEnumerator<bool> ProcessPurchaseCoroutine(PurchaseEventArgs e, string storeId)
         {
             var catalogItem = PF.Catalog.GetCatalogItem(e.purchasedProduct.definition.id);
@@ -284,14 +327,16 @@ namespace Lost
             Debug.AssertFormat(string.IsNullOrEmpty(transactionId) == false, "Unable to parse transactionID from {0}", e.purchasedProduct.receipt);
             Debug.AssertFormat(string.IsNullOrEmpty(payload) == false, "Unable to parse payload from {0}", e.purchasedProduct.receipt);
 
+            var currencyCode = e.purchasedProduct.metadata.isoCurrencyCode;
+            var purchasePrice = this.GetPurchasePrice(e);
             bool wasSuccessfull = false;
 
             if (Platform.CurrentDevicePlatform == DevicePlatform.iOS)
             {
                 var validate = PF.Do(new ValidateIOSReceiptRequest()
                 {
-                    CurrencyCode = e.purchasedProduct.metadata.isoCurrencyCode,
-                    PurchasePrice = (int)(e.purchasedProduct.metadata.localizedPrice * 100),
+                    CurrencyCode = currencyCode,
+                    PurchasePrice = purchasePrice,
                     ReceiptData = payload,
                 });
 
@@ -303,6 +348,9 @@ namespace Lost
                 if (validate.HasError)
                 {
                     Debug.LogErrorFormat("Unable to validate iOS IAP Purchase: {0}", validate?.Exception?.ToString());
+                    this.LogErrorReceiptFailedInfo(catalogItem, e);
+                    Debug.LogErrorFormat("ReceiptData = " + payload);
+
                     PlayFabMessages.HandleError(validate.Exception);
                 }
                 else
@@ -323,8 +371,8 @@ namespace Lost
 
                 var validate = PF.Do(new ValidateGooglePlayPurchaseRequest()
                 {
-                    CurrencyCode = e.purchasedProduct.metadata.isoCurrencyCode,
-                    PurchasePrice = (uint)(e.purchasedProduct.metadata.localizedPrice * 100),
+                    CurrencyCode = currencyCode,
+                    PurchasePrice = (uint)purchasePrice,
                     ReceiptJson = receiptJson,
                     Signature = signature,
                 });
@@ -337,6 +385,10 @@ namespace Lost
                 if (validate.HasError)
                 {
                     Debug.LogErrorFormat("Unable to validate Google Play IAP Purchase: {0}", validate?.Exception?.ToString());
+                    this.LogErrorReceiptFailedInfo(catalogItem, e);
+                    Debug.LogErrorFormat("Receipt Json = " + receiptJson);
+                    Debug.LogErrorFormat("Signature = " + signature);
+
                     PlayFabMessages.HandleError(validate.Exception);
                 }
                 else
@@ -369,6 +421,27 @@ namespace Lost
             PF.Inventory.InternalAddCatalogItemToInventory(catalogItem);
 
             yield return true;
+        }
+
+        private void LogErrorReceiptFailedInfo(CatalogItem catalogItem, PurchaseEventArgs e)
+        {
+            StringBuilder itemDataBuilder = new StringBuilder();
+            itemDataBuilder.Append("Item Id = ");
+            itemDataBuilder.Append(catalogItem?.ItemId);
+            itemDataBuilder.AppendLine();
+            itemDataBuilder.Append("Item RM = ");
+            itemDataBuilder.Append(catalogItem?.GetVirtualCurrenyPrice("RM"));
+            itemDataBuilder.AppendLine();
+            itemDataBuilder.Append("Currency Code = ");
+            itemDataBuilder.Append(e.purchasedProduct.metadata.isoCurrencyCode);
+            itemDataBuilder.AppendLine();
+            itemDataBuilder.Append("Localized Price = ");
+            itemDataBuilder.Append(e.purchasedProduct.metadata.localizedPrice);
+            itemDataBuilder.AppendLine();
+            itemDataBuilder.Append("Purchase Price = ");
+            itemDataBuilder.Append(this.GetPurchasePrice(e));
+
+            Debug.LogError(itemDataBuilder.ToString());
         }
 
         private IEnumerator<bool> DebugPurchaseStoreItem(PurchaseEventArgs e)

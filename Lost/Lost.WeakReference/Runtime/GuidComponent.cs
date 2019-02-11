@@ -11,7 +11,9 @@ namespace Lost
     [ExecuteInEditMode]
     public class GuidComponent : MonoBehaviour
     {
+        #pragma warning disable 0649
         [ReadOnly, SerializeField] private string guid;
+        #pragma warning restore 0649
 
         public string Guid => this.guid;
 

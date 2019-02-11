@@ -43,8 +43,10 @@ namespace Lost
 
         public string Text { get; private set; }
 
-        public UnityTask<StringInputResult> Show(string title, string body, string startingText)
+        public UnityTask<StringInputResult> Show(string title, string body, string startingText, int maxCharacterCount = 0)
         {
+            this.inputField.characterLimit = maxCharacterCount;
+
             return UnityTask<StringInputResult>.Run(this.ShowInternal(title, body, startingText));
         }
 

@@ -25,6 +25,8 @@ namespace Lost
 
         #if USING_FACEBOOK_SDK
         public Facebook.Unity.ILoginResult FacebookLoginResult { get; private set; }
+
+        public List<string> FacebookPermissions { get; private set; } = new List<string> { "public_profile", "email" };
         #endif
 
         public LoginHelper()
@@ -134,9 +136,24 @@ namespace Lost
 
         #region Login and linking with Facebook
 
-        public UnityTask<LoginResult> LoginWithFacebook(bool createAccount, GetPlayerCombinedInfoRequestParams combinedInfoParams = null)
+        public UnityTask<LoginResult> LoginWithFacebook(bool createAccount)
         {
-            return UnityTask<LoginResult>.Run(this.LoginWithFacebookCoroutine(createAccount, combinedInfoParams));
+            return UnityTask<LoginResult>.Run(this.LoginWithFacebookCoroutine(createAccount, null, null));
+        }
+
+        public UnityTask<LoginResult> LoginWithFacebook(bool createAccount, List<string> facebookPermissions)
+        {
+            return UnityTask<LoginResult>.Run(this.LoginWithFacebookCoroutine(createAccount, null, facebookPermissions));
+        }
+
+        public UnityTask<LoginResult> LoginWithFacebook(bool createAccount, GetPlayerCombinedInfoRequestParams combinedInfoParams)
+        {
+            return UnityTask<LoginResult>.Run(this.LoginWithFacebookCoroutine(createAccount, combinedInfoParams, null));
+        }
+        
+        public UnityTask<LoginResult> LoginWithFacebook(bool createAccount, GetPlayerCombinedInfoRequestParams combinedInfoParams, List<string> facebookPermissions)
+        {
+            return UnityTask<LoginResult>.Run(this.LoginWithFacebookCoroutine(createAccount, combinedInfoParams, facebookPermissions));
         }
 
         public UnityTask<LinkFacebookAccountResult> LinkFacebook()
@@ -182,7 +199,7 @@ namespace Lost
             {
                 this.FacebookLoginResult = null;
 
-                Facebook.Unity.FB.LogInWithReadPermissions(new[] { "public_profile", "email" }, (loginResult) => { this.FacebookLoginResult = loginResult; });
+                Facebook.Unity.FB.LogInWithReadPermissions(this.FacebookPermissions, (loginResult) => { this.FacebookLoginResult = loginResult; });
 
                 // waiting for FB login to complete
                 while (this.FacebookLoginResult == null)
@@ -209,8 +226,17 @@ namespace Lost
             #endif
         }
 
-        private IEnumerator<LoginResult> LoginWithFacebookCoroutine(bool createAccount, GetPlayerCombinedInfoRequestParams combinedInfoParams = null)
+        private IEnumerator<LoginResult> LoginWithFacebookCoroutine(bool createAccount, GetPlayerCombinedInfoRequestParams combinedInfoParams, List<string> facebookPermissions)
         {
+            // Making sure all passed in facebook permissions are appended to the global list
+            if (facebookPermissions != null)
+            {
+                foreach (var facebookPermission in facebookPermissions)
+                {
+                    this.FacebookPermissions.AddIfUnique(facebookPermission);
+                }
+            }
+
             var accessToken = this.GetFacebookAccessToken();
 
             while (accessToken.IsDone == false)

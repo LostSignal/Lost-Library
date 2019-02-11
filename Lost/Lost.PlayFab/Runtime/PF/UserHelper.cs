@@ -43,6 +43,26 @@ namespace Lost
             return UnityTask<bool>.Run(this.ChangeDisplayNameWithPopupCoroutine());
         }
 
+        #if USING_FACEBOOK_SDK
+        public bool HasFacebookPermission(string permission)
+        {
+            if (this.IsFacebookLinked && Facebook.Unity.FB.IsLoggedIn)
+            {
+                var permissions = Facebook.Unity.AccessToken.CurrentAccessToken?.Permissions;
+
+                foreach (var p in permissions)
+                {
+                    if (p == permission)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        #endif
+
         private IEnumerator<bool> ChangeDisplayNameCoroutine(string newDisplayName)
         {
             var updateDisplayName = PF.Do(new UpdateUserTitleDisplayNameRequest
