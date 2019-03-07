@@ -10,7 +10,6 @@ namespace Lost
 {
     using System;
     using System.Collections.Generic;
-    using Lost.AppConfig;
     using UnityEditor;
     using UnityEngine;
 
@@ -49,18 +48,16 @@ namespace Lost
 
         private Type GetType(SerializedProperty property)
         {
-            Type type;
-
-            if (typeCache.TryGetValue(property.type, out type) == false)
+            if (typeCache.TryGetValue(property.propertyPath, out Type type) == false)
             {
-                Type propertyType = TypeUtil.GetTypeByName<LazyAsset>(property.type);
+                Type propertyType = property.GetSerializedPropertyType();
                 object propertyObject = Activator.CreateInstance(propertyType);
                 LazyAsset lazyAsset = propertyObject as LazyAsset;
-
+            
                 type = lazyAsset.Type;
-                typeCache.Add(property.type, type);
+                typeCache.Add(property.propertyPath, type);
             }
-
+            
             return type;
         }
 

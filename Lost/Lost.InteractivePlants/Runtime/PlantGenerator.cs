@@ -6,8 +6,6 @@
 
 namespace Lost.PlantGenerator
 {
-    using System;
-    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
@@ -17,72 +15,19 @@ namespace Lost.PlantGenerator
     public class PlantGenerator : MonoBehaviour
     {
         /// <summary>
-        /// The name of the Layer the plants use for their physics.
-        /// </summary>
-        private static readonly string LayerName = "InteractivePlants";
-
-        /// <summary>
         /// Stores the layer id the branches will live on.
         /// </summary>
         private static int layerId = -1;
 
         /// <summary>
-        /// Parameters associated with creating a group of branches.
+        /// The plant definition for how it should be generated.
         /// </summary>
-        [Serializable]
-        public class BranchGroupParameters
-        {
-            /// <summary>
-            /// Name of the group.
-            /// </summary>
-            public string Name;
-
-            /// <summary>
-            /// Collection of all the different branch prefabs to spawn from.
-            /// </summary>
-            public GameObject[] Variations = new GameObject[0];
-
-            /// <summary>
-            /// The minimum number of branches to spawn in this group.
-            /// </summary>
-            public int MinCount = 1;
-
-            /// <summary>
-            /// The maximum number of branches to spawn in this group.
-            /// </summary>
-            public int MaxCount = 5;
-
-            /// <summary>
-            /// Branches are evenly rotated, but this adds randomness +/- this value to the rotation.
-            /// </summary>
-            public float RandomRotationOffset = 10;
-
-            /// <summary>
-            /// the desired minimum space between each of the branches in this group.
-            /// </summary>
-            public int RotationalWidth = 10;
-
-            /// <summary>
-            /// The materials that a branch can be randomly assigned.  All renderers of the
-            /// branch prefab will be set to the random material.
-            /// </summary>
-            public Material[] Materials;
-
-            /// <summary>
-            /// Varies the vertical height of the branch by +/- this offset.
-            /// </summary>
-            public float VerticalOffset = 0f;
-        }
+        public PlantDefinition plantDefinition;
 
         /// <summary>
         /// Set this if you always want the plant to look different when you run the game.
         /// </summary>
         public bool RandomizeOnStart = false;
-
-        /// <summary>
-        /// All the branch parameters associated with this plant generator.
-        /// </summary>
-        public BranchGroupParameters[] GroupParameters = new BranchGroupParameters[1] { new BranchGroupParameters() };
 
         /// <summary>
         /// The random seed used to generate the looks of this generated plant.
@@ -103,16 +48,18 @@ namespace Lost.PlantGenerator
         private bool destroyChildren = false;
 
         /// <summary>
+        /// The plant definition for how it should be generated.
+        /// </summary>
+        public PlantDefinition Definition
+        {
+            get { return this.plantDefinition; }
+        }
+
+        /// <summary>
         /// Makes sure the plant is generated when enabled.
         /// </summary>
         public void Awake()
         {
-            // making sure group parameters are never null
-            if (this.GroupParameters == null)
-            {
-                this.GroupParameters = new PlantGenerator.BranchGroupParameters[0];
-            }
-
             if (this.RandomizeOnStart)
             {
                 this.GenerateNewRandomSeed();
@@ -162,26 +109,6 @@ namespace Lost.PlantGenerator
         }
 
         /// <summary>
-        /// Returns the min and max branch count the generated plant can have.
-        /// </summary>
-        /// <param name="minBranchCount">Min branches possible.</param>
-        /// <param name="maxBranchCount">Max branches possible.</param>
-        public void GetMinMaxBranchCount(out int minBranchCount, out int maxBranchCount)
-        {
-            minBranchCount = 0;
-            maxBranchCount = 0;
-
-            if (this.GroupParameters != null)
-            {
-                for (int i = 0; i < this.GroupParameters.Length; i++)
-                {
-                    minBranchCount += this.GroupParameters[i].MinCount;
-                    maxBranchCount += this.GroupParameters[i].MaxCount;
-                }
-            }
-        }
-
-        /// <summary>
         /// Uses the the plant parameters to generates a new plant.
         /// </summary>
         private void Generate()
@@ -195,11 +122,11 @@ namespace Lost.PlantGenerator
             // making sure layerId gets initialized
             if (layerId == -1)
             {
-                layerId = LayerMask.NameToLayer(LayerName);
+                layerId = LayerMask.NameToLayer(PlantDefinition.LayerName);
 
                 if (layerId == -1)
                 {
-                    string message = string.Format("PlantGenerator couldn't find layer \"{0}\".  To stop the plants from jiggling, go to the menu \"Edit -> Project Settings -> Tags and Layers\" and make sure the layer \"{0}\" exists.", LayerName);
+                    string message = string.Format("PlantGenerator couldn't find layer \"{0}\".  To stop the plants from jiggling, go to the menu \"Edit -> Project Settings -> Tags and Layers\" and make sure the layer \"{0}\" exists.", PlantDefinition.LayerName);
                     Debug.LogError(message, this.gameObject);
                 }
                 else
@@ -211,15 +138,15 @@ namespace Lost.PlantGenerator
             System.Random rand = new System.Random(this.Seed);
             SuitableRotationSystem suitableRotationSystem = new SuitableRotationSystem(rand);
 
-            if (this.GroupParameters.Length == 0)
+            if (this.plantDefinition.GroupParameters.Length == 0)
             {
                 Debug.LogError("Plant doesn't have any Group Parameters specified", this.gameObject);
                 return;
             }
 
-            for (int i = 0; i < this.GroupParameters.Length; i++)
+            for (int i = 0; i < this.plantDefinition.GroupParameters.Length; i++)
             {
-                BranchGroupParameters groupParameters = this.GroupParameters[i];
+                PlantDefinition.BranchGroupParameters groupParameters = this.plantDefinition.GroupParameters[i];
 
                 if (groupParameters.MinCount < 0 || groupParameters.MaxCount < 0)
                 {
