@@ -46,15 +46,20 @@ namespace Lost
         #if USING_FACEBOOK_SDK
         public bool HasFacebookPermission(string permission)
         {
-            if (this.IsFacebookLinked && Facebook.Unity.FB.IsLoggedIn)
+            if (this.IsFacebookLinked)
             {
                 var permissions = Facebook.Unity.AccessToken.CurrentAccessToken?.Permissions;
 
-                foreach (var p in permissions)
+                if (permissions != null)
                 {
-                    if (p == permission)
+                    UnityEngine.Debug.Log("Facebook Permissions: " + string.Join(", ", permissions));
+
+                    foreach (var p in permissions)
                     {
-                        return true;
+                        if (p == permission)
+                        {
+                            return true;
+                        }
                     }
                 }
             }

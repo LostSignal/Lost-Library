@@ -33,7 +33,14 @@ namespace Lost
             {
                 foreach (var titleDataKeyValuePair in titleDataDictionary)
                 {
-                    this.titleData.Add(titleDataKeyValuePair.Key, titleDataKeyValuePair.Value);
+                    if (this.titleData.ContainsKey(titleDataKeyValuePair.Key))
+                    {
+                        this.titleData[titleDataKeyValuePair.Key] = titleDataKeyValuePair.Value;
+                    }
+                    else
+                    {
+                        this.titleData.Add(titleDataKeyValuePair.Key, titleDataKeyValuePair.Value);
+                    }                    
                 }
             }
         }

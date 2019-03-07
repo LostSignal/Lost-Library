@@ -74,8 +74,8 @@ namespace Lost
 
         public void RefreshLeaderboard()
         {
-            this.SetCount(0);
             this.entries.Clear();
+            this.SetCount(0);
             this.ScrollRect.verticalNormalizedPosition = 0.0f;  // Reset the ScrollRect back to the top
 
             this.StartCoroutine(this.RefreshLeaderboardCoroutine(null));
