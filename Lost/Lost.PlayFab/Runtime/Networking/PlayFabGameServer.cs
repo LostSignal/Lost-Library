@@ -23,6 +23,7 @@
 namespace Lost.Networking
 {
     using System;
+    using System.Collections.Generic;
     using System.Timers;
     using PlayFab;
     using PlayFab.ServerModels;
@@ -146,6 +147,10 @@ namespace Lost.Networking
         private PlayFabServerSettingsData serverSettings;
         private Timer heartbeatTimer;
 
+        // Reconnection members
+        private Dictionary<long, ReconnectInfo> reconnectUsers = new Dictionary<long, ReconnectInfo>();
+        private bool isClosedToNewUsers = false;
+
         public PlayFabServerSettingsData ServerSettingsData
         {
             get { return this.serverSettings; }
@@ -171,6 +176,18 @@ namespace Lost.Networking
             if (this.serverSettings.IsDebugLocalBuild)
             {
                 return true;
+            }
+
+            // Testing if this is a reconnect
+            if (this.reconnectUsers.TryGetValue(joinServerRequestMessage.UserInfo.UserId, out ReconnectInfo reconnectInfo))
+            {
+                if (this.isClosedToNewUsers && reconnectInfo.MatchmakerTicket == joinServerRequestMessage.CustomData)
+                {
+                    joinServerRequestMessage.UserInfo.SetPlayFabId(reconnectInfo.PlayFabId);
+                    joinServerRequestMessage.UserInfo.SetUsername(reconnectInfo.Username);
+                    joinServerRequestMessage.UserInfo.SetDisplayName(reconnectInfo.DisplayName);
+                    return true;
+                }
             }
 
             var redeemMatchmakerTicket = PlayFabServerAPI.RedeemMatchmakerTicketAsync(new RedeemMatchmakerTicketRequest
@@ -216,6 +233,18 @@ namespace Lost.Networking
                     joinServerRequestMessage.UserInfo.SetPlayFabId(playfabId);
                     joinServerRequestMessage.UserInfo.SetUsername(username);
                     joinServerRequestMessage.UserInfo.SetDisplayName(displayName);
+
+                    // Remembering this conection so they can re-connect mid session and not have to 
+                    if (this.reconnectUsers.ContainsKey(joinServerRequestMessage.UserInfo.UserId) == false)
+                    {
+                        this.reconnectUsers.Add(joinServerRequestMessage.UserInfo.UserId, new ReconnectInfo
+                        {
+                            PlayFabId = playfabId,
+                            Username = username,
+                            DisplayName = displayName,
+                            MatchmakerTicket = joinServerRequestMessage.CustomData,
+                        });
+                    }
 
                     return true;
                 }
@@ -343,6 +372,7 @@ namespace Lost.Networking
             else
             {
                 Debug.Log("PlayFabGameServer: Successfully Set Game's Instance State to Closed.");
+                this.isClosedToNewUsers = true;
             }
         }
 
@@ -372,6 +402,7 @@ namespace Lost.Networking
             else
             {
                 Debug.Log("PlayFabGameServer: Successfully Set Game's Instance State to Open.");
+                this.isClosedToNewUsers = false;
             }
         }
 
@@ -423,6 +454,14 @@ namespace Lost.Networking
             {
                 Debug.LogErrorFormat("PlayFabGameServer: Unable to Refresh Game Server Instance: Error {0}", refreshGameServerInstance.Result.Error.ErrorMessage);
             }
+        }
+
+        private class ReconnectInfo
+        {
+            public string PlayFabId { get; set; }
+            public string Username { get; set; }
+            public string DisplayName { get; set; }
+            public string MatchmakerTicket { get; set; }
         }
     }
 }
