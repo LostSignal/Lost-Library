@@ -48,13 +48,11 @@ namespace Lost
         {
             if (this.IsFacebookLinked)
             {
-                var permissions = Facebook.Unity.AccessToken.CurrentAccessToken?.Permissions;
+                var facebookPermissions = Facebook.Unity.AccessToken.CurrentAccessToken?.Permissions;
 
-                if (permissions != null)
+                if (facebookPermissions != null)
                 {
-                    UnityEngine.Debug.Log("Facebook Permissions: " + string.Join(", ", permissions));
-
-                    foreach (var p in permissions)
+                    foreach (var p in facebookPermissions)
                     {
                         if (p == permission)
                         {
@@ -65,6 +63,22 @@ namespace Lost
             }
 
             return false;
+        }
+        
+        public bool HasFacebookPermissions(List<string> permissions)
+        {
+            if (permissions.IsNullOrEmpty() == false)
+            {
+                foreach (var permission in permissions)
+                {
+                    if (this.HasFacebookPermission(permission) == false)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
         #endif
 

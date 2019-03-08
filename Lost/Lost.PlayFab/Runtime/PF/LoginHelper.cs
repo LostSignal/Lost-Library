@@ -195,7 +195,7 @@ namespace Lost
             {
                 throw new FacebookException("Initialization Failed!");
             }
-            else if (Facebook.Unity.FB.IsLoggedIn == false)
+            else if (Facebook.Unity.FB.IsLoggedIn == false || PF.User.HasFacebookPermissions(this.FacebookPermissions) == false)
             {
                 this.FacebookLoginResult = null;
 
