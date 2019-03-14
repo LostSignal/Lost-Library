@@ -141,6 +141,20 @@ namespace Lost
             return UnityTask<LoginResult>.Run(this.LoginWithFacebookCoroutine(createAccount, null, null));
         }
 
+        public void LogoutOfFacebook()
+        {
+            #if !USING_FACEBOOK_SDK
+            throw new FacebookException("USING_FACEBOOK_SDK is not defined!  Check your AppSettings.");
+            #else
+
+            if (Facebook.Unity.FB.IsLoggedIn)
+            {
+                Facebook.Unity.FB.LogOut();
+            }
+            
+            #endif
+        }
+
         public UnityTask<LoginResult> LoginWithFacebook(bool createAccount, List<string> facebookPermissions)
         {
             return UnityTask<LoginResult>.Run(this.LoginWithFacebookCoroutine(createAccount, null, facebookPermissions));
@@ -150,7 +164,7 @@ namespace Lost
         {
             return UnityTask<LoginResult>.Run(this.LoginWithFacebookCoroutine(createAccount, combinedInfoParams, null));
         }
-        
+
         public UnityTask<LoginResult> LoginWithFacebook(bool createAccount, GetPlayerCombinedInfoRequestParams combinedInfoParams, List<string> facebookPermissions)
         {
             return UnityTask<LoginResult>.Run(this.LoginWithFacebookCoroutine(createAccount, combinedInfoParams, facebookPermissions));
@@ -182,6 +196,8 @@ namespace Lost
             if (Facebook.Unity.FB.IsInitialized == false)
             {
                 bool initializationFinished = false;
+
+                Debug.Log("Calling Facebook.Unity.FB.Init()...");
                 Facebook.Unity.FB.Init(() => { initializationFinished = true; });
 
                 // waiting for FB to initialize
@@ -191,6 +207,8 @@ namespace Lost
                 }
             }
 
+            this.PrintFacebookInfo();
+
             if (Facebook.Unity.FB.IsInitialized == false)
             {
                 throw new FacebookException("Initialization Failed!");
@@ -199,6 +217,7 @@ namespace Lost
             {
                 this.FacebookLoginResult = null;
 
+                Debug.Log("Calling Facebook.Unity.FB.LogInWithReadPermissions(...)");
                 Facebook.Unity.FB.LogInWithReadPermissions(this.FacebookPermissions, (loginResult) => { this.FacebookLoginResult = loginResult; });
 
                 // waiting for FB login to complete
@@ -206,6 +225,8 @@ namespace Lost
                 {
                     yield return null;
                 }
+
+                this.PrintFacebookInfo();
 
                 // checking for errors
                 if (this.FacebookLoginResult.Cancelled)
@@ -389,6 +410,22 @@ namespace Lost
             {
                 this.forceRelogin = true;
             }
+        }
+
+        private void PrintFacebookInfo()
+        {
+            Debug.Log("Facebook.Unity.FB.IsInitialized = " + Facebook.Unity.FB.IsInitialized);
+            Debug.Log("Facebook.Unity.FB.IsLoggedIn = " + Facebook.Unity.FB.IsLoggedIn);
+
+            var currentAccessToken = Facebook.Unity.AccessToken.CurrentAccessToken;
+            var permissionsList = currentAccessToken?.Permissions;
+            var permissionsString = (permissionsList != null ? string.Join(", ", permissionsList) : string.Empty);
+
+            Debug.Log("Facebook.Unity.AccessToken.CurrentAccessToken.ExpirationTime = " + currentAccessToken?.ExpirationTime);
+            Debug.Log("Facebook.Unity.AccessToken.CurrentAccessToken.LastRefresh = " + currentAccessToken?.LastRefresh);
+            Debug.Log("Facebook.Unity.AccessToken.CurrentAccessToken.Permissions = " + permissionsString);
+            Debug.Log("Facebook.Unity.AccessToken.CurrentAccessToken.UserId = " + currentAccessToken?.UserId);
+            Debug.Log("Facebook.Unity.AccessToken.CurrentAccessToken.TokenString = " + currentAccessToken?.TokenString);
         }
     }
 }

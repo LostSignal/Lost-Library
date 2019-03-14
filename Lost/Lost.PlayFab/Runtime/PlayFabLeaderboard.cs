@@ -78,17 +78,17 @@ namespace Lost
             this.SetCount(0);
             this.ScrollRect.verticalNormalizedPosition = 0.0f;  // Reset the ScrollRect back to the top
 
-            this.StartCoroutine(this.RefreshLeaderboardCoroutine(null));
+            CoroutineRunner.Instance.StartCoroutine(this.RefreshLeaderboardCoroutine(null));
         }
 
         public void AddMoreToTop()
         {
-            this.StartCoroutine(this.AddToTopCoroutine());
+            CoroutineRunner.Instance.StartCoroutine(this.AddToTopCoroutine());
         }
 
         public void AddMoreToBottom()
         {
-            this.StartCoroutine(this.AddToBottomCoroutine());
+            CoroutineRunner.Instance.StartCoroutine(this.AddToBottomCoroutine());
         }
 
         protected abstract void ShowLeaderboardEntry(T item, PlayerLeaderboardEntry entry, bool isCurrentPlayer);
@@ -169,8 +169,11 @@ namespace Lost
             this.profileContraints.ShowDisplayName = true;
             this.profileContraints.ShowAvatarUrl = this.shouldShowAvatarUrl;
 
-            this.moreBottomEntriesExist = true;
-            this.moreTopEntiresExist = true;
+            if (startPosition.HasValue == false)
+            {
+                this.moreBottomEntriesExist = true;
+                this.moreTopEntiresExist = true;
+            }
 
             if (this.isFriendLeaderboard)
             {
@@ -290,17 +293,8 @@ namespace Lost
 
             if (this.entries.Count > 0)
             {
-                int oldLastPostion = this.entries[this.entries.Count - 1].Position;
-
                 PlayerLeaderboardEntry lastEntry = this.entries[this.entries.Count - 1];
                 yield return this.RefreshLeaderboardCoroutine(lastEntry.Position + 1);
-
-                int newLastPostion = this.entries[this.entries.Count - 1].Position;
-
-                // TODO [bgish]: Need to be able to detect if an error occored, if one did, it would make this.moreBottomEntriesExist false when it shouldn't
-
-                // If we asked for more, but didn't get a full list back, then there aren't any more to get
-                this.moreBottomEntriesExist = (newLastPostion - oldLastPostion) == this.maxResultsCount;
             }
 
             this.coroutineRunning = false;
@@ -342,7 +336,9 @@ namespace Lost
             }
             else
             {
+                // Adding to the end of the list
                 this.entries.AddRange(leaderboardEntries);
+                this.moreBottomEntriesExist = leaderboardEntries.Count >= this.maxResultsCount;
             }
 
             // Trimming elements that are over the max entries size
