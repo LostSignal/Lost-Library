@@ -249,6 +249,10 @@ namespace Lost
 
         private IEnumerator<LoginResult> LoginWithFacebookCoroutine(bool createAccount, GetPlayerCombinedInfoRequestParams combinedInfoParams, List<string> facebookPermissions)
         {
+            #if !USING_FACEBOOK_SDK
+            throw new FacebookException("USING_FACEBOOK_SDK is not defined!  Check your AppSettings.");
+            #else
+
             // Making sure all passed in facebook permissions are appended to the global list
             if (facebookPermissions != null)
             {
@@ -280,6 +284,8 @@ namespace Lost
             }
 
             yield return facebookLogin.Value;
+
+            #endif
         }
 
         private IEnumerator<LinkFacebookAccountResult> LinkFacebookCoroutine()
