@@ -8,31 +8,127 @@
 
 namespace Lost
 {
-    using BigBlindInteractive.TienLen;
     using PlayFab;
     using UnityEngine;
+
+    #if USING_UNITY_PURCHASING
     using UnityEngine.Purchasing;
+    #endif
 
     public static class PlayFabMessages
     {
+        // Changing Display Name Localization Keys
+        private const string ChangeNameTitleKey = "CHANGE-NAME-TITLE";
+        private const string ChangeNameBodyKey = "CHANGE-NAME-BODY";
+        private const string ChangeNameFailedTitleKey = "CHANGE-NAME-FAILED-TITLE";
+        private const string ChangeNameFailedNotAvailableKey = "CHANGE-NAME-FAILED-NOT-AVAILABLE";
+        private const string ChangeNameFailedProfaneKey = "CHANGE-NAME-FAILED-PROFANE";
+        
+        // Connecting To Store Localization Keys
+        private const string ConnectingToStoreBodyKey = "CONNECTING-TO-STORE-BODY";
+
+        // Insufficient Currency Localization Keys
+        private const string InsufficientCurrencyTitleKey = "INSUFFICIENT-CURRENCY-TITLE";
+        private const string InsufficientCurrencyBodyKey = "INSUFFICIENT-CURRENCY-BODY";
+        
+        // Purchasing Localization Keys
+        private const string PurchaseFailedTitleKey = "PURCHASE-FAILED-TITLE";
+        private const string PurchaseFailedDuplicateTransactionKey = "PURCHASE-FAILED-DUPLICATE-TRANSACTION";
+        private const string PurchaseFailedExistingPurchasePendingKey = "PURCHASE-FAILED-PURCHASE-PENDING";
+        private const string PurchaseFailedPaymentDeclinedKey = "PURCHASE-FAILED-PAYMENT-DECLINED";
+        private const string PurchaseFailedProductUnavailableKey = "PURCHASE-FAILED-PRODUCT-UNAVAILABLE";
+        private const string PurchaseFailedPurchasingUnavailableKey = "PURCHASE-FAILED-PURCHASING-UNVAILABLE";
+        private const string PurchaseFailedSignatureInvalidKey = "PURCHASE-FAILED-SIGNATURE-INVALID";
+        private const string PurchaseFailedUnknownKey = "PURCHASE-FAILED-UNKNOWN";
+        private const string PurchaseFailedUnableToValidateReceiptKey = "PURCHASE-FAILED-UNABLE-TO-VALIDATE-RECEIPT";
+
+        // Store Localization Keys
+        private const string StoreFailedTitleKey = "STORE-FAILED-TITLE";
+        private const string StoreFailedAppNotKnownKey = "STORE-FAILED-APP-NOT-KNOWN";
+        private const string StoreFailedNoProductsAvailableKey = "STORE-FAILED-NO-PRODUCTS-AVAILABLE";
+        private const string StoreFailedPurchasingUnavailableKey = "STORE-FAILED-PURCHASING-UNAVAILABLE";
+        private const string StoreFailedConnectionTimeOutKey = "STORE-FAILED-CONNECTION-TIME-OUT";
+        
+        // TODO [bgish]: Need to move all of this to a localization table
+        private static string Get(string localizationKey)
+        {
+            bool english = Localization.Localization.CurrentLanguage == Localization.Languages.English;
+
+            switch (localizationKey)
+            {
+                // Changing Display Name
+                case ChangeNameTitleKey:
+                    return english ? "Display Name" : "Tên hiển thị";
+                case ChangeNameBodyKey:
+                    return english ? "Enter in your new display name." : "Nhập tên mới ...";
+                case ChangeNameFailedTitleKey:
+                    return english ? "Rename Failed" : "Lỗi khi đổi tên";
+                case ChangeNameFailedNotAvailableKey:
+                    return english ? "That name is currently not available." : "Tên mới không khả dụng";
+                case ChangeNameFailedProfaneKey:
+                    return english ? "That name contains profanity." : "Tên mới tồn tại tự thô tục.";
+
+                // Connecting To Store
+                case ConnectingToStoreBodyKey:
+                    return english ? "Connecting to store..." : "Đang kết tối tới Cửa Hàng...";
+
+                // Insufficient Currency
+                case InsufficientCurrencyTitleKey:
+                    return english ? "Not Enough Currency" : "Không đủ tiền tệ";
+                case InsufficientCurrencyBodyKey:
+                    return english ? "You'll need to buy more currency from the store.<br>Would you like to go there now?" : "Bạn cần thêm tiền từ Cửa Hàng? Đến Cửa Hàng ngay?";
+
+                // Purchasing 
+                case PurchaseFailedTitleKey:
+                    return english ? "Purchase failed" : "Giao dịch thất bại";
+                case PurchaseFailedDuplicateTransactionKey:
+                    return english ? "We've encountered a duplicate transaction." : "Phát hiện giao dịch bị trùng lặp";
+                case PurchaseFailedExistingPurchasePendingKey:
+                    return english ? "An existing purchase is already pending." : "Giao dịch đã tồn tại và đang được xử lý.";
+                case PurchaseFailedPaymentDeclinedKey:
+                    return english ? "The payment has been declined." : "Giao dịch bị từ chối";
+                case PurchaseFailedProductUnavailableKey:
+                    return english ? "The product is unavailable." : "Sản phẩm không khả dụng";
+                case PurchaseFailedPurchasingUnavailableKey:
+                    return english ? "Purchasing is currenctly unavailable." : "Tạm thời không thực hiện được giao dịch";
+                case PurchaseFailedSignatureInvalidKey:
+                    return english ? "Signature was invalid." : "Chữ kí không có hợp lệ";
+                case PurchaseFailedUnknownKey:
+                    return english ? "Sorry we've encountered an unknown error." : "Xảy ra lỗi không xác định.";
+                case PurchaseFailedUnableToValidateReceiptKey:
+                    return english ? "Unable to validate receipt." : "Không thể xác nhận đơn hàng.";
+
+                // Store 
+                case StoreFailedTitleKey:
+                    return english ? "Store Error" : "Lỗi Cửa hàng";
+                case StoreFailedAppNotKnownKey:
+                    return english ? "The store doesn't recognize this application." : "Ứng dụng không tồn tại trong Cửa hàng";
+                case StoreFailedNoProductsAvailableKey:
+                    return english ? "There are no valid products available for this application." : "Không tồn tại sản phẩm nào khả dụng cho ứng dụng này.";
+                case StoreFailedPurchasingUnavailableKey:
+                    return english ? "Unable to purchase.  Purchases have been turned off for this application." : "Không thể thực hiện thanh toán. Ứng dụng này đã bị tắt tính năng thanh toán.";
+                case StoreFailedConnectionTimeOutKey:
+                    return english ? "We timed out trying to connect to the store." : "Quá thời gian chờ phản hồi từ Cửa hàng";
+
+                default:
+                    return null;
+            }
+        }
+
         public static UnityTask<YesNoResult> ShowInsufficientCurrency()
         {
-            var localizeStrings = BigBlindInteractive.TienLen.MessageBoxLocalization.Instance.insufficientCurrency;
-            return MessageBox.Instance.ShowYesNo(localizeStrings.Title, localizeStrings.Body);
+            return MessageBox.Instance.ShowYesNo(Get(InsufficientCurrencyTitleKey), Get(InsufficientCurrencyBodyKey));
         }
 
         public static void ShowConnectingToStoreSpinner()
         {
-            var localizeStrings = BigBlindInteractive.TienLen.MessageBoxLocalization.Instance.connectingToStoreSpinner;
-            SpinnerBox.Instance.UpdateBodyText(localizeStrings.Body);
+            SpinnerBox.Instance.UpdateBodyText(Get(ConnectingToStoreBodyKey));
         }
 
         public static UnityTask<StringInputResult> ShowChangeDisplayNameInputBox(string currentDisplayName)
         {
-            var localizeStrings = BigBlindInteractive.TienLen.MessageBoxLocalization.Instance.changeName;
-            var title = localizeStrings.Title;
-            var body = localizeStrings.Body;
-
+            var title = Get(ChangeNameTitleKey);
+            var body = Get(ChangeNameBodyKey);
             return StringInputBox.Instance.Show(title, body, currentDisplayName, 15);
         }
 
@@ -56,21 +152,18 @@ namespace Lost
                 return null;
             }
 
-            var changeNameStrings = BigBlindInteractive.TienLen.MessageBoxLocalization.Instance.changeName;
-            var purchaseFailedStrings = BigBlindInteractive.TienLen.MessageBoxLocalization.Instance.failedPurchase;
-
             switch (playfabException.Error.Error)
             {
                 // Display Name Changing Errors
                 case PlayFabErrorCode.NameNotAvailable:
                     {
-                        MessageBox.Instance.ShowOk(changeNameStrings.RenameFailedTitle, changeNameStrings.RenameFailed_NotAvaialbe);
+                        MessageBox.Instance.ShowOk(Get(ChangeNameFailedTitleKey), Get(ChangeNameFailedNotAvailableKey));
                         break;
                     }
 
                 case PlayFabErrorCode.ProfaneDisplayName:
                     {
-                        MessageBox.Instance.ShowOk(changeNameStrings.RenameFailedTitle, changeNameStrings.RenameFailed_ProfaneDisplayName);
+                        MessageBox.Instance.ShowOk(Get(ChangeNameFailedTitleKey), Get(ChangeNameFailedProfaneKey));
                         break;
                     }
 
@@ -96,7 +189,7 @@ namespace Lost
                 case PlayFabErrorCode.NoRealMoneyPriceForCatalogItem:
                     {
                         Debug.LogErrorFormat("Hit Error {0} while validating receipt", playfabException.Error.Error);
-                        MessageBox.Instance.ShowOk(purchaseFailedStrings.Title, purchaseFailedStrings.UnableToValidateReceipt);
+                        MessageBox.Instance.ShowOk(Get(PurchaseFailedTitleKey), Get(PurchaseFailedUnableToValidateReceiptKey));
                         break;
                     }
 
@@ -114,21 +207,19 @@ namespace Lost
             {
                 return null;
             }
-
-            var localizeStrings = BigBlindInteractive.TienLen.MessageBoxLocalization.Instance.storeError;
-
+            
             switch (purchasingInitializationException.FailureReason)
             {
                 case InitializationFailureReason.AppNotKnown:
                     Debug.LogErrorFormat("Error initializing purchasing \"{0}\"", purchasingInitializationException.FailureReason.ToString());
-                    return MessageBox.Instance.ShowOk(localizeStrings.Title, localizeStrings.AppNotKnown);
+                    return MessageBox.Instance.ShowOk(Get(StoreFailedTitleKey), Get(StoreFailedAppNotKnownKey));
 
                 case InitializationFailureReason.NoProductsAvailable:
                     Debug.LogErrorFormat("Error initializing purchasing \"{0}\"", purchasingInitializationException.FailureReason.ToString());
-                    return MessageBox.Instance.ShowOk(localizeStrings.Title, localizeStrings.NoProductsAvailable);
+                    return MessageBox.Instance.ShowOk(Get(StoreFailedTitleKey), Get(StoreFailedNoProductsAvailableKey));
 
                 case InitializationFailureReason.PurchasingUnavailable:
-                    return MessageBox.Instance.ShowOk(localizeStrings.Title, localizeStrings.PurchasingUnavailable);
+                    return MessageBox.Instance.ShowOk(Get(StoreFailedTitleKey), Get(StoreFailedPurchasingUnavailableKey));
 
                 default:
                     return null;
@@ -141,8 +232,8 @@ namespace Lost
             {
                 return null;
             }
-            var localizeStrings = BigBlindInteractive.TienLen.MessageBoxLocalization.Instance.storeError;
-            return MessageBox.Instance.ShowOk(localizeStrings.Title, localizeStrings.ConnectTimeOut);
+
+            return MessageBox.Instance.ShowOk(Get(StoreFailedTitleKey), Get(StoreFailedConnectionTimeOutKey));
         }
 
         private static UnityTask<OkResult> HandlePurchasingError(PurchasingException purchasingException)
@@ -152,31 +243,30 @@ namespace Lost
                 return null;
             }
 
-            var localizeStrings = MessageBoxLocalization.Instance.failedPurchase;
-            string messageBoxTitle = localizeStrings.Title;
+            string title = Get(PurchaseFailedTitleKey);
 
             switch (purchasingException.FailureReason)
             {
                 case PurchaseFailureReason.DuplicateTransaction:
-                    return MessageBox.Instance.ShowOk(messageBoxTitle, localizeStrings.DuplicateTransaction);
+                    return MessageBox.Instance.ShowOk(title, Get(PurchaseFailedDuplicateTransactionKey));
 
                 case PurchaseFailureReason.ExistingPurchasePending:
-                    return MessageBox.Instance.ShowOk(messageBoxTitle, localizeStrings.ExistingPurchasePending);
+                    return MessageBox.Instance.ShowOk(title, Get(PurchaseFailedExistingPurchasePendingKey));
 
                 case PurchaseFailureReason.PaymentDeclined:
-                    return MessageBox.Instance.ShowOk(messageBoxTitle, localizeStrings.PaymentDeclined);
+                    return MessageBox.Instance.ShowOk(title, Get(PurchaseFailedPaymentDeclinedKey));
 
                 case PurchaseFailureReason.ProductUnavailable:
-                    return MessageBox.Instance.ShowOk(messageBoxTitle, localizeStrings.ProductUnavailable);
+                    return MessageBox.Instance.ShowOk(title, Get(PurchaseFailedProductUnavailableKey));
 
                 case PurchaseFailureReason.PurchasingUnavailable:
-                    return MessageBox.Instance.ShowOk(messageBoxTitle, localizeStrings.PurchasingUnavailable);
+                    return MessageBox.Instance.ShowOk(title, Get(PurchaseFailedPurchasingUnavailableKey));
 
                 case PurchaseFailureReason.SignatureInvalid:
-                    return MessageBox.Instance.ShowOk(messageBoxTitle, localizeStrings.SignatureInvalid);
+                    return MessageBox.Instance.ShowOk(title, Get(PurchaseFailedSignatureInvalidKey));
 
                 case PurchaseFailureReason.Unknown:
-                    return MessageBox.Instance.ShowOk(messageBoxTitle, localizeStrings.Unknown);
+                    return MessageBox.Instance.ShowOk(title, Get(PurchaseFailedUnknownKey));
 
                 case PurchaseFailureReason.UserCancelled:
                     // Do nothing, they know they canceled it
