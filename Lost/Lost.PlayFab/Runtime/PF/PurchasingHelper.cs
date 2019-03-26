@@ -16,7 +16,11 @@ namespace Lost
     using PlayFab;
     using PlayFab.ClientModels;
     using UnityEngine;
+
+    #if USING_UNITY_PURCHASING
     using UnityEngine.Purchasing;
+    #endif
+    
     using UnityEngine.SceneManagement;
 
     public class PurchasingHelper
@@ -94,12 +98,14 @@ namespace Lost
             yield return this.IsInitialized;
         }
 
+        #if USING_UNITY_PURCHASING
         private ProductType GetProductType(CatalogItem catalogItem)
         {
             return catalogItem.Consumable != null ?
                 UnityEngine.Purchasing.ProductType.Consumable :
                 UnityEngine.Purchasing.ProductType.NonConsumable;
         }
+        #endif
 
         public UnityTask<bool> PurchaseStoreItem(string storeId, StoreItem storeItem, bool showPurchaseItemDialog, Action showStore = null)
         {
@@ -260,6 +266,8 @@ namespace Lost
                 yield return isSuccessful;
             }
         }
+
+        #if USING_UNITY_PURCHASING
 
         private int GetPurchasePrice(PurchaseEventArgs e)
         {
@@ -472,6 +480,8 @@ namespace Lost
                 }
             }
         }
+
+        #endif
 
         private UnityTask<PurchaseItemResult> Do(PurchaseItemRequest request)
         {
