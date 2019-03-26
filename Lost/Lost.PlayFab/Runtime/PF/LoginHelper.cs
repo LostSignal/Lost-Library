@@ -418,6 +418,7 @@ namespace Lost
             }
         }
 
+        #if USING_FACEBOOK_SDK
         private void PrintFacebookInfo()
         {
             Debug.Log("Facebook.Unity.FB.IsInitialized = " + Facebook.Unity.FB.IsInitialized);
@@ -433,6 +434,7 @@ namespace Lost
             Debug.Log("Facebook.Unity.AccessToken.CurrentAccessToken.UserId = " + currentAccessToken?.UserId);
             Debug.Log("Facebook.Unity.AccessToken.CurrentAccessToken.TokenString = " + currentAccessToken?.TokenString);
         }
+        #endif
     }
 }
 
