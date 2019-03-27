@@ -101,6 +101,7 @@ namespace Lost
                 new Define("USING_UNITY_AR_FOUNDATION", false),
 
                 // Thrid Party Packages Defines
+                new Define("USING_TIINOO", false),
                 new Define("USING_PLAYFAB_SDK", false),
                 new Define("USING_FACEBOOK_SDK", false),
                 new Define("USING_ANDROID_FIREBASE_MESSAGING", false),

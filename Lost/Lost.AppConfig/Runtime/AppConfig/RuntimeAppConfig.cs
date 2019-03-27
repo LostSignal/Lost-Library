@@ -142,6 +142,16 @@ namespace Lost.AppConfig
             return null;
         }
 
+        public bool GetBool(string key)
+        {
+            this.Initialize();
+
+            string value;
+            this.values.TryGetValue(key, out value);
+
+            return value == "true" || value == "True" || value == "1";
+        }
+
         private void Initialize()
         {
             if (this.isInitialized == false)
