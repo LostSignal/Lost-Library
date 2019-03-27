@@ -24,7 +24,7 @@ namespace Lost{
                 {
                     AdsManager.Instance.SetAdProvider(new UnityAdsProvider(
                         RuntimeAppConfig.Instance.GetString(AppleAppStoreIdKey),
-                        RuntimeAppConfig.Instance.GetString(GooglePlayAppStoreIdKey));
+                        RuntimeAppConfig.Instance.GetString(GooglePlayAppStoreIdKey)));
                 }
                 #endif
             }
