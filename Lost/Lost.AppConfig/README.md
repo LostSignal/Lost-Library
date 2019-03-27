@@ -16,3 +16,7 @@ This package contains the Lost Signal AppConfig system.  It's a simple system fo
 ### Dependencies
 -----------------
 No Dependencies
+
+### Bugs
+* If you have a PlayFab config in Root, then child configs (Dev/Live) can't create a PlayFab config to override it.
+
