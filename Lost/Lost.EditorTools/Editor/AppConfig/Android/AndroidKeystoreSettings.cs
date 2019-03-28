@@ -14,13 +14,15 @@ namespace Lost
     public class AndroidKeystoreSettings : AppConfigSettings
     {
         #pragma warning disable 0649
+        [SerializeField] private bool useCustomKeystore = true;
+
         [Header("KeyStore")]
-        [SerializeField] public string keystoreFile;  // relative path
-        [SerializeField] public string keystorePassword;
+        [SerializeField] private string keystoreFile;  // relative path
+        [SerializeField] private string keystorePassword;
 
         [Header("KeyAlias")]
-        [SerializeField] public string keyAliasName;
-        [SerializeField] public string keyAliasePassword;
+        [SerializeField] private string keyAliasName;
+        [SerializeField] private string keyAliasePassword;
         #pragma warning restore 0649
 
         public override string DisplayName => "Android Keystore";
@@ -28,26 +30,15 @@ namespace Lost
 
         public override void InitializeOnLoad(AppConfig.AppConfig appConfig)
         {
-            // Key Store
-            if (string.IsNullOrWhiteSpace(this.keystoreFile) == false)
-            {
-                PlayerSettings.Android.keystoreName = this.keystoreFile;
-            }
+            var settings = appConfig.GetSettings<AndroidKeystoreSettings>();
 
-            if (string.IsNullOrWhiteSpace(this.keystorePassword) == false)
+            if (settings != null)
             {
-                PlayerSettings.Android.keystorePass = this.keystorePassword;
-            }
-
-            // Key Alias
-            if (string.IsNullOrWhiteSpace(this.keyAliasName) == false)
-            {
-                PlayerSettings.Android.keyaliasName = this.keyAliasName;
-            }
-
-            if (string.IsNullOrWhiteSpace(this.keyAliasePassword) == false)
-            {
-                PlayerSettings.Android.keyaliasPass = this.keyAliasePassword;
+                PlayerSettings.Android.useCustomKeystore = settings.useCustomKeystore;
+                PlayerSettings.Android.keystoreName = settings.keystoreFile;
+                PlayerSettings.Android.keystorePass = settings.keystorePassword;
+                PlayerSettings.Android.keyaliasName = settings.keyAliasName;
+                PlayerSettings.Android.keyaliasPass = settings.keyAliasePassword;
             }
         }
     }
