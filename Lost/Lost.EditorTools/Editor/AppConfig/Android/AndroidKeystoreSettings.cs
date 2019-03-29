@@ -14,7 +14,9 @@ namespace Lost
     public class AndroidKeystoreSettings : AppConfigSettings
     {
         #pragma warning disable 0649
+        #if UNITY_2019_1_OR_NEWER
         [SerializeField] private bool useCustomKeystore = true;
+        #endif
 
         [Header("KeyStore")]
         [SerializeField] private string keystoreFile;  // relative path
@@ -34,7 +36,10 @@ namespace Lost
 
             if (settings != null)
             {
+                #if UNITY_2019_1_OR_NEWER
                 PlayerSettings.Android.useCustomKeystore = settings.useCustomKeystore;
+                #endif
+
                 PlayerSettings.Android.keystoreName = settings.keystoreFile;
                 PlayerSettings.Android.keystorePass = settings.keystorePassword;
                 PlayerSettings.Android.keyaliasName = settings.keyAliasName;
