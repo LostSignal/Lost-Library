@@ -6,9 +6,13 @@
 
 #if USING_TIINOO
 
-namespace Lost{
+namespace Lost
+{
     using Lost.AppConfig;
-    using UnityEngine;    public static class TiinooSettingsRuntime    {
+    using UnityEngine;
+
+    public static class TiinooSettingsRuntime
+    {
         public static readonly string InitializeAtStartupKey = "Tiinoo.InitializeAtStartup";
 
         [RuntimeInitializeOnLoadMethod]
@@ -18,6 +22,8 @@ namespace Lost{
             {
                 Tiinoo.DeviceConsole.DCLoader.Load();
             }
-        }    }}
+        }
+    }
+}
 
 #endif

@@ -206,8 +206,15 @@ namespace Lost
         {
             if (!this.cameraCache)
             {
-                this.cameraCache = Camera.main;
-                this.Dialog.Canvas.worldCamera = this.cameraCache;
+                if (this.Dialog.Canvas.worldCamera)
+                {
+                    this.cameraCache = this.Dialog.Canvas.worldCamera;
+                }
+                else
+                {
+                    this.cameraCache = Camera.main;
+                    this.Dialog.Canvas.worldCamera = this.cameraCache;
+                }
             }
 
             if (this.showFps == false)

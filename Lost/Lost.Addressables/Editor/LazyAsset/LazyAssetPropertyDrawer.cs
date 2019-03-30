@@ -53,11 +53,11 @@ namespace Lost
                 Type propertyType = property.GetSerializedPropertyType();
                 object propertyObject = Activator.CreateInstance(propertyType);
                 LazyAsset lazyAsset = propertyObject as LazyAsset;
-            
+
                 type = lazyAsset.Type;
                 typeCache.Add(property.propertyPath, type);
             }
-            
+
             return type;
         }
 

@@ -151,7 +151,7 @@ namespace Lost
             {
                 Facebook.Unity.FB.LogOut();
             }
-            
+
             #endif
         }
 

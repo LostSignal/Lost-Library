@@ -234,7 +234,7 @@ namespace Lost.Networking
                     joinServerRequestMessage.UserInfo.SetUsername(username);
                     joinServerRequestMessage.UserInfo.SetDisplayName(displayName);
 
-                    // Remembering this conection so they can re-connect mid session and not have to 
+                    // Remembering this conection so they can re-connect mid session and not have to
                     if (this.reconnectUsers.ContainsKey(joinServerRequestMessage.UserInfo.UserId) == false)
                     {
                         this.reconnectUsers.Add(joinServerRequestMessage.UserInfo.UserId, new ReconnectInfo

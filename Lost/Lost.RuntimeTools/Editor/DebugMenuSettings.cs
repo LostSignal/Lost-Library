@@ -14,6 +14,8 @@ namespace Lost
     public class DebugMenuSettings : AppConfigSettings
     {
         #pragma warning disable 0649
+        [SerializeField] private bool initializeAtStartup = true;
+
         [Header("Overlay Options")]
         [SerializeField] private bool showAppVersionToLowerLeft = true;
         [SerializeField] private bool showPlayFabIdInLowerRight = true;
@@ -33,6 +35,8 @@ namespace Lost
 
             if (settings != null)
             {
+                runtimeConfigSettings.Add(DebugMenuSettingsRuntime.InitializeAtStartupKey, settings.initializeAtStartup ? "1" : "0");
+
                 // Overlay
                 runtimeConfigSettings.Add(DebugMenuSettingsRuntime.ShowAppVersionInLowerLeftKey, settings.showAppVersionToLowerLeft ? "1" : "0");
                 runtimeConfigSettings.Add(DebugMenuSettingsRuntime.ShowPlayFabIdInLowerRightKey, settings.showPlayFabIdInLowerRight ? "1" : "0");

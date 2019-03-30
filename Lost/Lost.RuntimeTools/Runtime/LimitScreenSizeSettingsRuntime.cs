@@ -4,9 +4,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Lost{
+namespace Lost
+{
     using Lost.AppConfig;
-    using UnityEngine;    public static class LimitScreenSizeSettingsRuntime    {
+    using UnityEngine;
+
+    public static class LimitScreenSizeSettingsRuntime
+    {
         private static readonly int MaxScreenSize = 1920;
 
         public static readonly string LimitScreenSizeKey = "LimitScreenSize";
@@ -15,7 +19,8 @@ namespace Lost{
         private static void OnStartup()
         {
             if (RuntimeAppConfig.Instance.GetBool(LimitScreenSizeKey))
-            {                LimitScreenResolution();
+            {
+                LimitScreenResolution();
             }
         }
 
@@ -42,4 +47,5 @@ namespace Lost{
                 Screen.SetResolution(newWidth, newHeight, true);
             }
         }
-    }}
+    }
+}

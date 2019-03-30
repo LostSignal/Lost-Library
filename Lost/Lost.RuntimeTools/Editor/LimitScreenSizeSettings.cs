@@ -23,7 +23,7 @@ namespace Lost
         public override void GetRuntimeConfigSettings(AppConfig.AppConfig appConfig, Dictionary<string, string> runtimeConfigSettings)
         {
             var settings = appConfig.GetSettings<LimitScreenSizeSettings>();
-            
+
             if (settings != null)
             {
                 runtimeConfigSettings.Add(LimitScreenSizeSettingsRuntime.LimitScreenSizeKey, settings.limitScreenSize ? "1" : "0");

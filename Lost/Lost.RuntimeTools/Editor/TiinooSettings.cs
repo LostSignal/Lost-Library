@@ -16,7 +16,7 @@ namespace Lost
     public class TiinooSettings : AppConfigSettings
     {
         #pragma warning disable 0649
-        [SerializeField] private bool loadAtStartup = true;
+        [SerializeField] private bool initializeAtStartup = true;
         #pragma warning restore 0649
 
         public override string DisplayName => "Tiinoo";
@@ -28,7 +28,7 @@ namespace Lost
 
             if (settings != null)
             {
-                runtimeConfigSettings.Add(TiinooSettingsRuntime.InitializeAtStartupKey, settings.loadAtStartup ? "1" : "0");
+                runtimeConfigSettings.Add(TiinooSettingsRuntime.InitializeAtStartupKey, settings.initializeAtStartup ? "1" : "0");
             }
         }
     }

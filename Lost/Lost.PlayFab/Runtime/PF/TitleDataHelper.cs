@@ -40,7 +40,7 @@ namespace Lost
                     else
                     {
                         this.titleData.Add(titleDataKeyValuePair.Key, titleDataKeyValuePair.Value);
-                    }                    
+                    }
                 }
             }
         }

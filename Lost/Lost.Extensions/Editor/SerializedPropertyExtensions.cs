@@ -1,10 +1,11 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SerializedPropertyExtensions.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Lost{
+namespace Lost
+{
     using System;
     using System.Reflection;
     using UnityEditor;
@@ -37,7 +38,7 @@ namespace Lost{
                 {
                     Type fieldType = currentFieldInfo.FieldType;
                     Type elementType = null;
-                    
+
                     if (fieldType.IsArray)
                     {
                         elementType = fieldType.GetElementType();

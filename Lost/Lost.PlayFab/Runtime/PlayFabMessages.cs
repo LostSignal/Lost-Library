@@ -23,14 +23,14 @@ namespace Lost
         private const string ChangeNameFailedTitleKey = "CHANGE-NAME-FAILED-TITLE";
         private const string ChangeNameFailedNotAvailableKey = "CHANGE-NAME-FAILED-NOT-AVAILABLE";
         private const string ChangeNameFailedProfaneKey = "CHANGE-NAME-FAILED-PROFANE";
-        
+
         // Connecting To Store Localization Keys
         private const string ConnectingToStoreBodyKey = "CONNECTING-TO-STORE-BODY";
 
         // Insufficient Currency Localization Keys
         private const string InsufficientCurrencyTitleKey = "INSUFFICIENT-CURRENCY-TITLE";
         private const string InsufficientCurrencyBodyKey = "INSUFFICIENT-CURRENCY-BODY";
-        
+
         // Purchasing Localization Keys
         private const string PurchaseFailedTitleKey = "PURCHASE-FAILED-TITLE";
         private const string PurchaseFailedDuplicateTransactionKey = "PURCHASE-FAILED-DUPLICATE-TRANSACTION";
@@ -48,7 +48,7 @@ namespace Lost
         private const string StoreFailedNoProductsAvailableKey = "STORE-FAILED-NO-PRODUCTS-AVAILABLE";
         private const string StoreFailedPurchasingUnavailableKey = "STORE-FAILED-PURCHASING-UNAVAILABLE";
         private const string StoreFailedConnectionTimeOutKey = "STORE-FAILED-CONNECTION-TIME-OUT";
-        
+
         // TODO [bgish]: Need to move all of this to a localization table
         private static string Get(string localizationKey)
         {
@@ -78,7 +78,7 @@ namespace Lost
                 case InsufficientCurrencyBodyKey:
                     return english ? "You'll need to buy more currency from the store.<br>Would you like to go there now?" : "Bạn cần thêm tiền từ Cửa Hàng? Đến Cửa Hàng ngay?";
 
-                // Purchasing 
+                // Purchasing
                 case PurchaseFailedTitleKey:
                     return english ? "Purchase failed" : "Giao dịch thất bại";
                 case PurchaseFailedDuplicateTransactionKey:
@@ -98,7 +98,7 @@ namespace Lost
                 case PurchaseFailedUnableToValidateReceiptKey:
                     return english ? "Unable to validate receipt." : "Không thể xác nhận đơn hàng.";
 
-                // Store 
+                // Store
                 case StoreFailedTitleKey:
                     return english ? "Store Error" : "Lỗi Cửa hàng";
                 case StoreFailedAppNotKnownKey:
@@ -207,7 +207,7 @@ namespace Lost
             {
                 return null;
             }
-            
+
             switch (purchasingInitializationException.FailureReason)
             {
                 case InitializationFailureReason.AppNotKnown:

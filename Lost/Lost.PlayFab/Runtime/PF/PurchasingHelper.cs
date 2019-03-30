@@ -20,7 +20,7 @@ namespace Lost
     #if USING_UNITY_PURCHASING
     using UnityEngine.Purchasing;
     #endif
-    
+
     using UnityEngine.SceneManagement;
 
     public class PurchasingHelper
@@ -276,31 +276,31 @@ namespace Lost
             switch (e.purchasedProduct.metadata.isoCurrencyCode)
             {
                 // https://en.wikipedia.org/wiki/List_of_circulating_currencies
-                // 
+                //
                 // case "BHD": // Bahrain
-                // case "IQD": // Iraq   
-                // case "KWD": // Kuwait 
-                // case "LYD": // Libya  
-                // case "OMR": // Oman   
+                // case "IQD": // Iraq
+                // case "KWD": // Kuwait
+                // case "LYD": // Libya
+                // case "OMR": // Oman
                 // case "TND": // Tunisia
                 //     {
                 //         fractionalUnit = 1000;
                 //         break;
                 //     }
-                // 
+                //
                 // case "MGA": // Madagascar
                 // case "MRU": // Mauritania, Sahrawi Republic (Mauritanian ouguiya)
                 //     {
                 //         fractionalUnit = 5;
                 //         break;
                 //     }
-                // 
-                // case "VUV": // Vanuatu   
+                //
+                // case "VUV": // Vanuatu
                 //     {
                 //         fractionalUnit = 1;
                 //         break;
                 //     }
-                // 
+                //
                 // NOTE [bgish]: May need this for IAP to work in Vietname
                 // case "VND": // Vietname
                 //     {

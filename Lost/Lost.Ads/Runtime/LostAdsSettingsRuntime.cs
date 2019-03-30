@@ -4,9 +4,13 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Lost{
+namespace Lost
+{
     using Lost.AppConfig;
-    using UnityEngine;    public static class LostAdsSettingsRuntime    {
+    using UnityEngine;
+
+    public static class LostAdsSettingsRuntime
+    {
         public static readonly string InitializeAtStartupKey = "Lost.Ads.InitializeAtStartup";
         public static readonly string RegisterUnityAdsProviderKey = "Lost.Ads.RegisterUnityAdsProvider";
         public static readonly string AppleAppStoreIdKey = "Lost.Ads.AppleStoreId";
@@ -28,4 +32,6 @@ namespace Lost{
                 }
                 #endif
             }
-        }    }}
+        }
+    }
+}

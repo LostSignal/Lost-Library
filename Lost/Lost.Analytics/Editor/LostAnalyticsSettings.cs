@@ -31,7 +31,10 @@ namespace Lost
             if (settings != null)
             {
                 runtimeConfigSettings.Add(LostAnalyticsSettingsRuntime.InitializeAtStartupKey, settings.initializeLostAnalyticsAtStartup ? "1" : "0");
+
+                #if USING_PLAYFAB_SDK
                 runtimeConfigSettings.Add(LostAnalyticsSettingsRuntime.RegisterPlayFabAnalyticsProvider, settings.registerPlayFabAnalyticsProvider ? "1" : "0");
+                #endif
             }
         }
     }
