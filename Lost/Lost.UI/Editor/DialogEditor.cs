@@ -20,6 +20,8 @@ namespace Lost
 
         private SerializedObject dialogObject;
 
+        private SerializedProperty isOverlayCamera;
+
         private SerializedProperty showOnAwake;
         private SerializedProperty blockInput;
         private SerializedProperty tapOutsideToDismiss;
@@ -92,6 +94,8 @@ namespace Lost
         {
             this.dialogObject = new SerializedObject(this.target);
 
+            this.isOverlayCamera = this.dialogObject.FindProperty("isOverlayCamera");
+
             this.showOnAwake = this.dialogObject.FindProperty("showOnAwake");
             this.dontChangeStateWhileTransitioning = this.dialogObject.FindProperty("dontChangeStateWhileTransitioning");
             this.blockInput = this.dialogObject.FindProperty("blockInput");
@@ -146,6 +150,9 @@ namespace Lost
                 {
                     dialog.Canvas.worldCamera = newRenderCamera;
                 }
+
+                // dialog.Canvas.renderMode
+                EditorGUILayout.PropertyField(this.isOverlayCamera);
 
                 // Canvas.planeDistance
                 var planeDistance = dialog.Canvas.planeDistance;

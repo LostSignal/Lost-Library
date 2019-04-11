@@ -38,6 +38,7 @@ namespace Lost
         #pragma warning disable 0649
         [Header("General")]
         [SerializeField] private bool showOnAwake = false;
+        [SerializeField] private bool isOverlayCamera = false;
 
         [Tooltip("If true, then Hide() and Show() won't work while dialog is transitioning.")]
         [SerializeField] private bool dontChangeStateWhileTransitioning = true;
@@ -257,29 +258,14 @@ namespace Lost
 
         public void InitializeFields()
         {
-            if (this.hdCanvas == null)
-            {
-                this.hdCanvas = this.GetComponent<HDCanvas>();
-            }
-
-            if (this.canvas == null)
-            {
-                this.canvas = this.GetComponent<Canvas>();
-            }
-
-            if (this.animator == null)
-            {
-                this.animator = this.GetComponent<Animator>();
-            }
+            this.AssertGetComponent<HDCanvas>(ref this.hdCanvas);
+            this.AssertGetComponent<Canvas>(ref this.canvas);
+            this.AssertGetComponent<Animator>(ref this.animator);
+            this.AssertGetComponent<GraphicRaycaster>(ref this.graphicRaycaster);
 
             if (this.dialogStateMachine == null)
             {
                 this.dialogStateMachine = this.animator.GetBehaviour<DialogStateMachine>();
-            }
-
-            if (this.graphicRaycaster == null)
-            {
-                this.graphicRaycaster = this.GetComponent<GraphicRaycaster>();
             }
 
             if (this.contentRectTransform == null || this.contentRectTransform.gameObject.name != "Content")
@@ -293,6 +279,9 @@ namespace Lost
                 GameObject blockerObject = this.gameObject.GetChild("Blocker");
                 this.blocker = blockerObject != null ? blockerObject.GetComponent<InputBlocker>() : null;
             }
+
+            // Setting up the render mode
+            this.canvas.renderMode = this.isOverlayCamera ? RenderMode.ScreenSpaceOverlay : RenderMode.ScreenSpaceCamera;
         }
 
         private void Awake()
@@ -300,7 +289,6 @@ namespace Lost
             this.InitializeFields();
 
             // making the Animator is setup correctly
-            Debug.AssertFormat(this.animator != null, this, "Dialog {0} doesn't have an Animator.", this.gameObject.name);
             Debug.AssertFormat(this.dialogStateMachine != null, this, "Dialog {0} doesn't have a DialogStateMachine behavior attached to it's Animator.", this.gameObject.name);
             Debug.AssertFormat(this.animator.HasState(0, ShowHash), this, "Dialog {0}'s Animator doesn't have a \"Show\" state.", this.gameObject.name);
             Debug.AssertFormat(this.animator.HasState(0, HideHash), this, "Dialog {0}'s Animator doesn't have a \"Hide\" state.", this.gameObject.name);

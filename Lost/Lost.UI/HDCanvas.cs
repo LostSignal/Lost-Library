@@ -63,12 +63,7 @@ namespace Lost
         {
             this.CacheComponents();
 
-            // setting up the canvas
-            if (this.canvas.renderMode != RenderMode.ScreenSpaceCamera)
-            {
-                this.canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            }
-
+            // Finding a valid camera if we don't have one
             if (!this.canvas.worldCamera)
             {
                 this.canvas.worldCamera = Camera.main;
@@ -80,7 +75,7 @@ namespace Lost
                 this.canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             }
 
-            bool isPortrait = Screen.currentResolution.height > Screen.currentResolution.width;
+            bool isPortrait = Screen.height > Screen.width;
 
             if (isPortrait)
             {

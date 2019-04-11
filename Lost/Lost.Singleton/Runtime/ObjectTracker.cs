@@ -79,5 +79,20 @@ namespace Lost
                 }
             }
         }
+
+        public static T GetFirstObject<T>() where T : class
+        {
+            List<object> objectsList = null;
+
+            if (objects.TryGetValue(typeof(T), out objectsList))
+            {
+                if (objectsList.Count > 0)
+                {
+                    return objectsList[0] as T;
+                }
+            }
+
+            return null;
+        }
     }
 }
