@@ -51,7 +51,15 @@ namespace Lost
         private void OnValidate()
         {
             this.CacheComponents();
+            this.SetupCanvasScaler();
         }
+
+        #if UNITY_EDITOR
+        private void Update()
+        {
+            this.SetupCanvasScaler();
+        }
+        #endif
 
         private void CacheComponents()
         {
@@ -62,14 +70,17 @@ namespace Lost
         private void Setup()
         {
             this.CacheComponents();
+            this.SetupCanvasScaler();
 
             // Finding a valid camera if we don't have one
             if (!this.canvas.worldCamera)
             {
                 this.canvas.worldCamera = Camera.main;
             }
+        }
 
-            // setting up the canvas scaler
+        private void SetupCanvasScaler()
+        {
             if (this.canvasScaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize)
             {
                 this.canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
