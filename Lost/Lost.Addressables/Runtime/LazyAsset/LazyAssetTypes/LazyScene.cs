@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if !UNITY || USING_UNITY_ADDRESSABLES
+#if !UNITY_2018_3_OR_NEWER || USING_UNITY_ADDRESSABLES
 
 namespace Lost
 {

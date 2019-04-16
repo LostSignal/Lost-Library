@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if !UNITY || USING_UNITY_ADDRESSABLES
+#if !UNITY_2018_3_OR_NEWER || USING_UNITY_ADDRESSABLES
 
 namespace Lost
 {
@@ -12,7 +12,7 @@ namespace Lost
     using UnityEngine;
 
     [Serializable]
-    #if UNITY
+    #if UNITY_2018_3_OR_NEWER
     public class LazySprite : LazyAsset<Sprite>
     #else
     public class LazySprite : LazyAsset<object>

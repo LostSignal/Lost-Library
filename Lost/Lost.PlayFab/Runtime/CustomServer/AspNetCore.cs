@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if UNITY
+#if UNITY_2018_3_OR_NEWER
 
 namespace Microsoft.AspNetCore.Mvc
 {

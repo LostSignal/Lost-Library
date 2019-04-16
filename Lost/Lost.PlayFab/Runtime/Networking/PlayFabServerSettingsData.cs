@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if !UNITY || ENABLE_PLAYFABSERVER_API
+#if !UNITY_2018_3_OR_NEWER || ENABLE_PLAYFABSERVER_API
 
 namespace Lost.Networking
 {

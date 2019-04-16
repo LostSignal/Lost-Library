@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if !UNITY || ENABLE_PLAYFABSERVER_API
+#if !UNITY_2018_3_OR_NEWER || ENABLE_PLAYFABSERVER_API
 
 //// NOTE [bgish]: Will I ever need to set the Server Instance and Tag Data?
 ////

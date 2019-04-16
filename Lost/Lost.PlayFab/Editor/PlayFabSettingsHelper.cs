@@ -12,7 +12,7 @@ namespace Lost
 
     public static class PlayFabSettingsHelper
     {
-        #if UNITY
+        #if UNITY_2018_3_OR_NEWER
 
         public static void Initialize()
         {

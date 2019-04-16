@@ -4,11 +4,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if !UNITY || USING_UNITY_ADDRESSABLES
+#if !UNITY_2018_3_OR_NEWER || USING_UNITY_ADDRESSABLES
 
 namespace Lost
 {
-    #if UNITY
+    #if UNITY_2018_3_OR_NEWER
 
     using System;
     using UnityEngine;

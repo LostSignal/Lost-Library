@@ -91,8 +91,6 @@ namespace Lost
         {
             List<Define> validDefines = new List<Define>
             {
-                new Define("UNITY", true),
-
                 // Unity Packages Defines
                 new Define("USING_UNITY_ADS", false),
                 new Define("USING_UNITY_ANALYTICS", false),

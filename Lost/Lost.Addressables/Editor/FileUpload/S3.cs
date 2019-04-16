@@ -52,7 +52,7 @@ namespace Lost.Addressables
 
             if (useUnityWebRequest)
             {
-                #if UNITY
+                #if UNITY_2018_3_OR_NEWER
                 SendWithUnityWebRequest(uri, headers, data);
                 #else
                 UnityEngine.Debug.LogError("Uploading file to S3 with UnityWebRequest not allowed on non-unity platforms");
@@ -84,7 +84,7 @@ namespace Lost.Addressables
             reqS3.GetResponse();
         }
 
-        #if UNITY
+        #if UNITY_2018_3_OR_NEWER
         private static void SendWithUnityWebRequest(string uri, Dictionary<string, string> headers, byte[] data)
         {
             using (var www = UnityEngine.Networking.UnityWebRequest.Put(uri, data))
