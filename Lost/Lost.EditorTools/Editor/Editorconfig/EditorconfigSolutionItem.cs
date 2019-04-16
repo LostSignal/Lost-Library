@@ -6,7 +6,7 @@
 
 //
 // https://forum.unity.com/threads/issues-with-the-auto-generation-of-c-project-in-unity.380710/
-// 
+//
 
 namespace Lost
 {
@@ -41,9 +41,9 @@ namespace Lost
         {
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("Project(\"{2150E333-8FDC-42A3-9474-1A3956D46DE8}\") = \"Solution Items\", \"Solution Items\", \"{NEW_GUID}\"");
-            builder.AppendLine("	ProjectSection(SolutionItems) = preProject");
-            builder.AppendLine("		.editorconfig = .editorconfig");
-            builder.AppendLine("	EndProjectSection");
+            builder.AppendLine("    ProjectSection(SolutionItems) = preProject");
+            builder.AppendLine("        .editorconfig = .editorconfig");
+            builder.AppendLine("    EndProjectSection");
             builder.AppendLine("EndProject");
 
             return builder.ToString().Replace("NEW_GUID", Guid.NewGuid().ToString().ToUpper());
