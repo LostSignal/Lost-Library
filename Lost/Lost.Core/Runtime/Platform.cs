@@ -25,6 +25,8 @@ namespace Lost
         private static AndroidJavaObject Vibrator = CurrentActivity.Call<AndroidJavaObject>("getSystemService", "vibrator");
         #endif
 
+        public static bool IsApplicationQuitting { get; private set; }
+
         // TODO [bgish]: Try to make this function work by purely using Application.platform
         public static DevicePlatform CurrentDevicePlatform
         {
@@ -230,6 +232,21 @@ namespace Lost
             Application.OpenURL(mailToUrl);
         }
 
+        [RuntimeInitializeOnLoadMethod]
+        private static void RunOnStartup()
+        {
+            IsApplicationQuitting = false;
+
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.playModeStateChanged += (state) =>
+            {
+                IsApplicationQuitting = UnityEditor.EditorApplication.isPlaying && (state == UnityEditor.PlayModeStateChange.ExitingPlayMode);
+            };
+            #endif
+
+            Application.quitting += () => IsApplicationQuitting = true;
+        }
+        
         //// NOTE [bgish]: Probably wont need these till we start saving Analytics and Logging to disk
         ////
         //// public static bool DoesLocalFileExist(string localFileName)
