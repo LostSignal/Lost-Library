@@ -6,6 +6,7 @@
 
 namespace Lost
 {
+    using System.Collections;
     using UnityEngine;
 
     public static class TransformExtensions
@@ -30,6 +31,31 @@ namespace Lost
             if (transform != null)
             {
                 transform.gameObject.SafeSetActive(active);
+            }
+        }
+
+        public static Coroutine LookAt(this Transform transform, Transform lookAtTransform, float time)
+        {
+            return CoroutineRunner.Instance.StartCoroutine(LookAtCoroutine());
+
+            IEnumerator LookAtCoroutine()
+            {
+                Quaternion startRotation = transform.rotation;
+
+                float currentTime = 0.0f;
+
+                while (currentTime / time < 1.0f)
+                {
+                    Quaternion lookAtRotation = Quaternion.LookRotation(lookAtTransform.position - transform.position);
+
+                    transform.rotation = Quaternion.Lerp(startRotation, lookAtRotation, currentTime / time);
+
+                    currentTime += Time.deltaTime;
+
+                    yield return null;
+                }
+
+                transform.rotation = Quaternion.LookRotation(lookAtTransform.position - transform.position);
             }
         }
     }

@@ -85,37 +85,37 @@ namespace Lost
             #endif
         }
 
-        public static void ExecuteAtEndOfFrame(this MonoBehaviour lhs, Action action)
+        public static Coroutine ExecuteAtEndOfFrame(this MonoBehaviour lhs, Action action)
         {
-            lhs.StartCoroutine(DelayTillEndOfFrameCoroutine(action));
+            return CoroutineRunner.Instance.StartCoroutine(DelayTillEndOfFrameCoroutine());
+
+            IEnumerator DelayTillEndOfFrameCoroutine()
+            {
+                yield return WaitForUtil.EndOfFrame;
+                action?.Invoke();
+            }
         }
 
-        public static void ExecuteDelayed(this MonoBehaviour lhs, float delayInSeconds, Action action)
+        public static Coroutine ExecuteDelayed(this MonoBehaviour lhs, float delayInSeconds, Action action)
         {
-            lhs.StartCoroutine(DelayInSecondsCoroutine(delayInSeconds, action));
+            return CoroutineRunner.Instance.StartCoroutine(DelayInSecondsCoroutine());
+
+            IEnumerator DelayInSecondsCoroutine()
+            {
+                yield return WaitForUtil.Seconds(delayInSeconds);
+                action?.Invoke();
+            }
         }
 
-        public static void ExecuteDelayedRealtime(this MonoBehaviour lhs, float delayInRealtimeSeconds, Action action)
+        public static Coroutine ExecuteDelayedRealtime(this MonoBehaviour lhs, float delayInRealtimeSeconds, Action action)
         {
-            lhs.StartCoroutine(DelayExecuteRealtimeCoroutine(delayInRealtimeSeconds, action));
-        }
+            return CoroutineRunner.Instance.StartCoroutine(DelayExecuteRealtimeCoroutine());
 
-        private static IEnumerator DelayTillEndOfFrameCoroutine(Action action)
-        {
-            yield return WaitForUtil.EndOfFrame;
-            action?.Invoke();
-        }
-
-        private static IEnumerator DelayInSecondsCoroutine(float delayInSeconds, Action action)
-        {
-            yield return WaitForUtil.Seconds(delayInSeconds);
-            action?.Invoke();
-        }
-
-        private static IEnumerator DelayExecuteRealtimeCoroutine(float delayInRealtimeSeconds, Action action)
-        {
-            yield return WaitForUtil.RealtimeSeconds(delayInRealtimeSeconds);
-            action?.Invoke();
+            IEnumerator DelayExecuteRealtimeCoroutine()
+            {
+                yield return WaitForUtil.RealtimeSeconds(delayInRealtimeSeconds);
+                action?.Invoke();
+            }
         }
 
         private static string GetFullName(MonoBehaviour monoBehaviour)

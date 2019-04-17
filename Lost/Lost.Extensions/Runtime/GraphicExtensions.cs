@@ -12,24 +12,29 @@ namespace Lost
 
     public static class GraphicExtensions
     {
-        public static IEnumerator FadeAlpha(this Graphic image, float startAlpha, float endAlpha, float timeLengthInSeconds, float delayInSeconds = 0.0f)
+        public static Coroutine FadeAlpha(this Graphic image, float startAlpha, float endAlpha, float timeLengthInSeconds, float delayInSeconds = 0.0f)
         {
-            float percentage = 0.0f;
-            float time = 0.0f;
+            return CoroutineRunner.Instance.StartCoroutine(FadeAlphaCoroutine());
 
-            do
+            IEnumerator FadeAlphaCoroutine()
             {
-                image.color = image.color.SetA(Mathf.Lerp(startAlpha, endAlpha, percentage));
+                float percentage = 0.0f;
+                float time = 0.0f;
 
-                yield return null;
+                do
+                {
+                    image.color = image.color.SetA(Mathf.Lerp(startAlpha, endAlpha, percentage));
 
-                percentage = Mathf.Max(0.0f, time - delayInSeconds) / timeLengthInSeconds;
+                    yield return null;
 
-                time += Time.deltaTime;
+                    percentage = Mathf.Max(0.0f, time - delayInSeconds) / timeLengthInSeconds;
+
+                    time += Time.deltaTime;
+                }
+                while (percentage < 1.0f);
+
+                image.color = image.color.SetA(endAlpha);
             }
-            while (percentage < 1.0f);
-
-            image.color = image.color.SetA(endAlpha);
         }
     }
 }

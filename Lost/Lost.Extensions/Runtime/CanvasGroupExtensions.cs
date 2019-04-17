@@ -11,30 +11,30 @@ namespace Lost
 
     public static class CanvasGroupExtensions
     {
-        public static IEnumerator EnableAndFadeIn(this CanvasGroup canvasGroup, float time)
+        public static Coroutine EnableAndFadeIn(this CanvasGroup canvasGroup, float time)
         {
             canvasGroup.gameObject.SafeSetActive(true);
             canvasGroup.alpha = 0;
-            yield return Fade(canvasGroup, canvasGroup.alpha, 1.0f, time);
+
+            return CoroutineRunner.Instance.StartCoroutine(FadeCoroutine(canvasGroup, canvasGroup.alpha, 1.0f, time));
         }
 
-        public static IEnumerator FadeOutAndDisable(this CanvasGroup canvasGroup, float time)
+        public static Coroutine FadeOutAndDisable(this CanvasGroup canvasGroup, float time)
         {
-            yield return Fade(canvasGroup, canvasGroup.alpha, 0.0f, time);
-            canvasGroup.gameObject.SafeSetActive(false);
+            return CoroutineRunner.Instance.StartCoroutine(FadeCoroutine(canvasGroup, canvasGroup.alpha, 0.0f, time, true));
         }
 
-        public static IEnumerator FadeIn(this CanvasGroup canvasGroup, float time)
+        public static Coroutine FadeIn(this CanvasGroup canvasGroup, float time)
         {
-            return Fade(canvasGroup, canvasGroup.alpha, 1.0f, time);
+            return CoroutineRunner.Instance.StartCoroutine(FadeCoroutine(canvasGroup, canvasGroup.alpha, 1.0f, time));
         }
 
-        public static IEnumerator FadeOut(this CanvasGroup canvasGroup, float time)
+        public static Coroutine FadeOut(this CanvasGroup canvasGroup, float time)
         {
-            return Fade(canvasGroup, canvasGroup.alpha, 0.0f, time);
+            return CoroutineRunner.Instance.StartCoroutine(FadeCoroutine(canvasGroup, canvasGroup.alpha, 0.0f, time));
         }
 
-        private static IEnumerator Fade(CanvasGroup canvasGroup, float startAlpha, float endAlpha, float time)
+        private static IEnumerator FadeCoroutine(CanvasGroup canvasGroup, float startAlpha, float endAlpha, float time, bool disableCanvasGroupWhenDone = false)
         {
             float currentTime = 0.0f;
 
@@ -47,6 +47,11 @@ namespace Lost
             }
 
             canvasGroup.alpha = endAlpha;
+
+            if (disableCanvasGroupWhenDone)
+            {
+                canvasGroup.gameObject.SafeSetActive(false);
+            }
         }
     }
 }

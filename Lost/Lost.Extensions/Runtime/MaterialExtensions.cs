@@ -11,24 +11,29 @@ namespace Lost
 
     public static class MaterialExtensions
     {
-        public static IEnumerator FadeAlpha(this Material material, float startAlpha, float endAlpha, float timeLengthInSeconds, float delayInSeconds = 0.0f)
+        public static Coroutine FadeAlpha(this Material material, float startAlpha, float endAlpha, float timeLengthInSeconds, float delayInSeconds = 0.0f)
         {
-            float percentage = 0.0f;
-            float time = 0.0f;
+            return CoroutineRunner.Instance.StartCoroutine(FadeAlphaCoroutine());
 
-            do
+            IEnumerator FadeAlphaCoroutine()
             {
-                material.color = material.color.SetA(Mathf.Lerp(startAlpha, endAlpha, percentage));
+                float percentage = 0.0f;
+                float time = 0.0f;
 
-                yield return null;
+                do
+                {
+                    material.color = material.color.SetA(Mathf.Lerp(startAlpha, endAlpha, percentage));
 
-                percentage = Mathf.Max(0.0f, time - delayInSeconds) / timeLengthInSeconds;
+                    yield return null;
 
-                time += Time.deltaTime;
+                    percentage = Mathf.Max(0.0f, time - delayInSeconds) / timeLengthInSeconds;
+
+                    time += Time.deltaTime;
+                }
+                while (percentage < 1.0f);
+
+                material.color = material.color.SetA(endAlpha);
             }
-            while (percentage < 1.0f);
-
-            material.color = material.color.SetA(endAlpha);
         }
     }
 }
