@@ -80,6 +80,16 @@ namespace Lost
             }
         }
 
+        public static int GetObjectCount<T>() where T : class
+        {
+            if (objects.TryGetValue(typeof(T), out List<object> objectsList))
+            {
+                return objectsList.Count;
+            }
+
+            return 0;
+        }
+
         public static T GetFirstObject<T>() where T : class
         {
             List<object> objectsList = null;
