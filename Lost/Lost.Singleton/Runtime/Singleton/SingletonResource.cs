@@ -36,6 +36,12 @@ namespace Lost
         /// </summary>
         public static void Initialize()
         {
+            if (Platform.IsApplicationQuitting)
+            {
+                Debug.LogErrorFormat("Tried initializing a SingletonResource {0} while application was quitting.", typeof(T).Name);
+                return;
+            }
+
             if (IsInitialized)
             {
                 return;
