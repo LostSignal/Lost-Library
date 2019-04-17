@@ -41,9 +41,9 @@ namespace Lost
         {
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("Project(\"{2150E333-8FDC-42A3-9474-1A3956D46DE8}\") = \"Solution Items\", \"Solution Items\", \"{NEW_GUID}\"");
-            builder.AppendLine("    ProjectSection(SolutionItems) = preProject");
-            builder.AppendLine("        .editorconfig = .editorconfig");
-            builder.AppendLine("    EndProjectSection");
+            builder.AppendLine("\tProjectSection(SolutionItems) = preProject");
+            builder.AppendLine("\t\t.editorconfig = .editorconfig");
+            builder.AppendLine("\tEndProjectSection");
             builder.AppendLine("EndProject");
 
             return builder.ToString().Replace("NEW_GUID", Guid.NewGuid().ToString().ToUpper());
