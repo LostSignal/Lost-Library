@@ -10,7 +10,7 @@ namespace Hourglass
 
     public class DisableAnimatorOnExit : StateMachineBehaviour
     {
-        public override void OnStateMachineExit(Animator animator, int stateMachinePathHash) 
+        public override void OnStateMachineExit(Animator animator, int stateMachinePathHash)
         {
             animator.enabled = false;
         }

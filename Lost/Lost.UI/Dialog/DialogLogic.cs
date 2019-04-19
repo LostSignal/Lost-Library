@@ -38,6 +38,13 @@ namespace Lost
             this.dialog.OnShow.AddListener(this.OnShow);
             this.dialog.OnHide.AddListener(this.OnHide);
             this.dialog.OnBackButtonPressed.AddListener(this.OnBackButtonPressed);
+
+            DialogManager.RegisterDialog(this);
+        }
+
+        protected virtual void OnDestroy()
+        {
+            DialogManager.UnregisterDialog(this);
         }
 
         protected virtual void OnShow()

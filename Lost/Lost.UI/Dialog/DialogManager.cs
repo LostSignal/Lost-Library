@@ -13,6 +13,28 @@ namespace Lost
     {
         private LinkedList<Dialog> dialogs = new LinkedList<Dialog>();
 
+        private static Dictionary<System.Type, DialogLogic> dialogTypes = new Dictionary<System.Type, DialogLogic>();
+
+        public static void RegisterDialog(DialogLogic dialogLogic)
+        {
+            dialogTypes.Add(dialogLogic.GetType(), dialogLogic);
+        }
+
+        public static void UnregisterDialog(DialogLogic dialogLogic)
+        {
+            dialogTypes.Remove(dialogLogic.GetType());
+        }
+
+        public static T GetDialog<T>() where T : DialogLogic
+        {
+            if (dialogTypes.TryGetValue(typeof(T), out DialogLogic dialogLogic))
+            {
+                return (T)dialogLogic;
+            }
+
+            return null;
+        }
+
         public bool IsTopMostDialog(Dialog dialog)
         {
             return this.dialogs.Last != null && this.dialogs.Last.Value == dialog;

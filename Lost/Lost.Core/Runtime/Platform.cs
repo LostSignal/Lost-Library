@@ -246,7 +246,7 @@ namespace Lost
 
             Application.quitting += () => IsApplicationQuitting = true;
         }
-        
+
         //// NOTE [bgish]: Probably wont need these till we start saving Analytics and Logging to disk
         ////
         //// public static bool DoesLocalFileExist(string localFileName)
