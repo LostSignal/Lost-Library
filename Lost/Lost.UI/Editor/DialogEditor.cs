@@ -49,6 +49,7 @@ namespace Lost
                 if (GUILayout.Button("Runtime Toggle Dilaog (Show/Hide)"))
                 {
                     dialog.Toggle();
+                    EditorUtility.SetDirty(this.target);
                 }
 
                 GUILayout.Space(15);
@@ -83,9 +84,17 @@ namespace Lost
 
             GUILayout.Space(10);
 
-            this.DrawAnimator(dialog);
-            this.DrawCanvas(dialog);
-            this.DrawDialog(dialog);
+            using (var change = new EditorGUI.ChangeCheckScope())
+            {
+                this.DrawAnimator(dialog);
+                this.DrawCanvas(dialog);
+                this.DrawDialog(dialog);
+
+                if (change.changed)
+                {
+                    EditorUtility.SetDirty(this.target);
+                }
+            }
 
             this.dialogObject.ApplyModifiedProperties();
         }
@@ -166,7 +175,7 @@ namespace Lost
                 string sortingLayer = dialog.Canvas.sortingLayerName;
                 List<string> layersList = SortingLayer.layers.Select(x => x.name).ToList();
                 string[] layersArray = layersList.ToArray();
-                int layerIndex = layersList.IndexOf(sortingLayer);
+                int layerIndex = Mathf.Max(0, layersList.IndexOf(sortingLayer));
                 int newLayerIndex = EditorGUILayout.Popup("Sorting Layer", layerIndex, layersArray);
 
                 if (layerIndex != newLayerIndex)
