@@ -1,9 +1,14 @@
 root = true
 
 [*.{cs,meta,csproj,sln}]
-indent_style = space
-indent_size = 4
-insert_final_newline = true
-charset = utf-8-bom
-end_of_line = lf
-trim_trailing_whitespace = true
+
+# roslyn
+indent_style                        = space
+indent_size                         = 4
+insert_final_newline                = true
+charset                             = utf-8-bom
+dotnet_sort_system_directives_first = true
+trim_trailing_whitespace            = true
+
+# lf (\n), cr (\r), crlf (\r\n)
+end_of_line                         = lf
