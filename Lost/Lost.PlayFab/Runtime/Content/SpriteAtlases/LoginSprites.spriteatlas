@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: LoginSprites
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 0
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: d7fa2443c9168d34ebfa88a99adabc72, type: 3}
+    totalSpriteSurfaceArea: 1403399
+    bindAsDefault: 1
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: ed435950a2c564c629c0484afdaccaaa, type: 3}
+  - {fileID: 21300000, guid: fd2e7e636029448d59eacc407a5b4994, type: 3}
+  - {fileID: 21300000, guid: c84231d311d274246a6fadc7f9dfd6fd, type: 3}
+  - {fileID: 21300000, guid: 06805e6684af84002b13647eec7b722d, type: 3}
+  - {fileID: 21300000, guid: 2a2465a8baddf480d91cea31b8c0cddb, type: 3}
+  - {fileID: 21300000, guid: 1f0b48fa5023941348c8dfd18965782f, type: 3}
+  - {fileID: 21300000, guid: 0d51970b4d9e742b28f42765608e5dae, type: 3}
+  - {fileID: 21300000, guid: 2943ededcfa4c4c01a57fd535d351f8f, type: 3}
+  - {fileID: 21300000, guid: a16ad5ee75898427cb13a0fdb3706939, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Mail-Icon-Small
+  - User-Plus-Icon-Small
+  - White-Button
+  - Checked-Icon
+  - Popup-Close-Icon
+  - Box-Small
+  - White-Popup-Background
+  - Rectangle-Basic
+  - Lock-Icon-Small
+  m_Tag: LoginSprites
+  m_IsVariant: 0

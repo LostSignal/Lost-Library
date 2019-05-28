@@ -29,6 +29,15 @@ namespace Lost
             gameObject.StartCoroutine(this.InternalCoroutine(coroutine));
         }
 
+        private UnityTask(T value)
+        {
+            this.Exception = null;
+            this.IsCanceled = false;
+            this.DidTimeout = false;
+            this.IsDone = true;
+            this.value = value;
+        }
+
         public Exception Exception { get; private set; }
 
         public bool HasError
@@ -58,6 +67,11 @@ namespace Lost
         public override bool keepWaiting
         {
             get { return this.IsDone == false; }
+        }
+
+        public static UnityTask<T> Empty(T value)
+        {
+            return new UnityTask<T>(value);
         }
 
         public static UnityTask<T> Run(IEnumerator<T> coroutine, float timeoutInSeconds = float.MaxValue)

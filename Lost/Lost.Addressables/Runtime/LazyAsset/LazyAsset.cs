@@ -14,17 +14,19 @@ namespace Lost
     [Serializable]
     public class LazyAsset
     {
-        #pragma warning disable 0649
+#pragma warning disable 0649
         [SerializeField] private string assetGuid;
-        #pragma warning restore 0649
+#pragma warning restore 0649
+
+        public object RuntimeKey => this.assetGuid;
 
         public string AssetGuid
         {
             get { return this.assetGuid; }
 
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             set { this.assetGuid = value; }
-            #endif
+#endif
         }
 
         public virtual System.Type Type

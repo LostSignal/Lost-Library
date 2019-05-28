@@ -29,6 +29,8 @@ namespace Lost.Networking
 
         void Start(int port);
 
+        void Update();
+
         void SendData(long connectionId, byte[] data, uint offset, uint length);
 
         void Shutdown();

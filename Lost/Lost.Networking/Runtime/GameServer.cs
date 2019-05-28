@@ -28,6 +28,20 @@ namespace Lost.Networking
         // tracking data
         private ServerStats stats = new ServerStats();
 
+        public delegate void ServerUserConnectedDelegate(UserInfo userInfo, bool isReconnect);
+        public delegate void ServerUserInfoUpdatedDelegate(UserInfo userInfo);
+        public delegate void ServerUserDisconnectedDelegate(UserInfo userInfo, bool wasConnectionLost);
+        public delegate void ServerReceivedMessageDelegate(UserInfo userInfo, Message message);
+        public delegate void ServerStartedDelegate();
+        public delegate void ServerShutdownDelegate();
+
+        public ServerUserConnectedDelegate ServerUserConnected;
+        public ServerUserInfoUpdatedDelegate ServerUserInfoUpdated;
+        public ServerUserDisconnectedDelegate ServerUserDisconnected;
+        public ServerReceivedMessageDelegate ServerReceivedMessage;
+        public ServerStartedDelegate ServerStarted;
+        public ServerShutdownDelegate ServerShutdown;
+
         public IServerStats Stats
         {
             get { return this.stats; }
@@ -90,6 +104,7 @@ namespace Lost.Networking
                 {
                     if (this.OnServerStart())
                     {
+                        this.ServerStarted?.Invoke();
                         return true;
                     }
                     else
@@ -111,6 +126,7 @@ namespace Lost.Networking
                 this.transportLayer.Shutdown();
 
                 this.OnServerShutdown();
+                this.ServerShutdown?.Invoke();
             }
         }
 
@@ -177,6 +193,8 @@ namespace Lost.Networking
 
         public virtual void Update()
         {
+            this.transportLayer?.Update();
+
             ServerEvent serverEvent;
 
             while (this.transportLayer.TryDequeueServerEvent(out serverEvent))
@@ -318,6 +336,7 @@ namespace Lost.Networking
                         else
                         {
                             this.ReceivedMessage(userInfo, message);
+                            this.ServerReceivedMessage?.Invoke(userInfo, message);
                         }
 
                         break;
@@ -346,6 +365,7 @@ namespace Lost.Networking
             {
                 existingUserInfo.CopyFrom(userInfoUpdate);
                 this.UserInfoUpdated(existingUserInfo);
+                this.ServerUserInfoUpdated?.Invoke(existingUserInfo);
             }
             else
             {
@@ -353,11 +373,17 @@ namespace Lost.Networking
                 newUserInfo = new UserInfo();
                 newUserInfo.CopyFrom(userInfoUpdate);
 
+                // making sure this user is now in the list and map
+                this.users.Add(newUserInfo);
+
                 bool isReconnect = this.knownUserIds.Contains(newUserInfo.UserId);
-                this.UserConneceted(newUserInfo, isReconnect);
 
                 this.knownUserIds.Add(newUserInfo.UserId);
                 this.stats.NumberOfReconnects += (uint)(isReconnect ? 1 : 0);
+
+                // Telling base class and event that someone has connected
+                this.UserConneceted(newUserInfo, isReconnect);
+                this.ServerUserConnected?.Invoke(newUserInfo, isReconnect);
 
                 // Since this user is new, send them all the known user infos to them
                 userInfoMessage = (UserInfoMessage)this.messageCollection.GetMessage(UserInfoMessage.Id);
@@ -369,9 +395,6 @@ namespace Lost.Networking
                 }
 
                 this.messageCollection.RecycleMessage(userInfoMessage);
-
-                // making sure this user is now in the list and map
-                this.users.Add(newUserInfo);
             }
 
             UserInfo user = newUserInfo ?? existingUserInfo;
@@ -440,6 +463,7 @@ namespace Lost.Networking
 
             // telling child classes of the disconnect
             this.UserDisconnected(userInfo, connectionLost);
+            this.ServerUserDisconnected?.Invoke(userInfo, connectionLost);
         }
 
         private void SendData(long connectionId, byte[] data, uint length)

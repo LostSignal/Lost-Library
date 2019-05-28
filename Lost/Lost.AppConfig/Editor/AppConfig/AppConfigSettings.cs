@@ -65,14 +65,14 @@ namespace Lost.AppConfig
 
             while (prop.NextVisible(true))
             {
-                if (prop.name == "m_Script")
+                if (prop.name == "m_Script" || prop.hasVisibleChildren)
                 {
                     continue;
                 }
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty(prop.name), true, GUILayout.Width(width));
+                    EditorGUILayout.PropertyField(prop, false, GUILayout.Width(width));
                 }
             }
 

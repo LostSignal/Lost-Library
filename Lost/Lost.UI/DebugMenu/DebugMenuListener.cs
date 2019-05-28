@@ -17,8 +17,8 @@ namespace Lost
 
         private const float HoldTime = 2.0f;
 
-        private float threeFingerHoldTime = 0.0f;
-        private float spaceHoldTime = 0.0f;
+        private float fingerHoldTime = 0.0f;
+        private float keyHoldTime = 0.0f;
 
         private void OnValidate()
         {
@@ -32,43 +32,43 @@ namespace Lost
 
         private void Update()
         {
-            this.CheckForFingers();
-            this.CheckForSpaceBar();
+            this.CheckTouch();
+            this.CheckKeyboard();
         }
 
-        private void CheckForFingers()
+        private void CheckTouch()
         {
-            if (UnityEngine.Input.touchCount == 3)
+            if (UnityEngine.Input.touchCount == this.debugMenu.Settings.FingerDownCount)
             {
-                this.threeFingerHoldTime += Time.unscaledDeltaTime;
+                this.fingerHoldTime += Time.unscaledDeltaTime;
 
-                if (this.threeFingerHoldTime > HoldTime)
+                if (this.fingerHoldTime > this.debugMenu.Settings.FingerDownTime)
                 {
-                    this.threeFingerHoldTime = 0.0f;
+                    this.fingerHoldTime = 0.0f;
                     this.debugMenu.ShowMenu();
                 }
             }
             else
             {
-                this.threeFingerHoldTime = 0.0f;
+                this.fingerHoldTime = 0.0f;
             }
         }
 
-        private void CheckForSpaceBar()
+        private void CheckKeyboard()
         {
-            if (UnityEngine.Input.GetKey(KeyCode.Space))
+            if (UnityEngine.Input.GetKey(this.debugMenu.Settings.Key))
             {
-                this.spaceHoldTime += Time.unscaledDeltaTime;
+                this.keyHoldTime += Time.unscaledDeltaTime;
 
-                if (this.spaceHoldTime > HoldTime)
+                if (this.keyHoldTime > this.debugMenu.Settings.KeyHoldTime)
                 {
-                    this.spaceHoldTime = 0.0f;
+                    this.keyHoldTime = 0.0f;
                     this.debugMenu.ShowMenu();
                 }
             }
             else
             {
-                this.spaceHoldTime = 0.0f;
+                this.keyHoldTime = 0.0f;
             }
         }
     }

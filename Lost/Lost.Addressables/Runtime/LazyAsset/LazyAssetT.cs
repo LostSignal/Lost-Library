@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="LazyAsset.cs" company="Lost Signal LLC">
+// <copyright file="LazyAssetT.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -8,9 +8,10 @@
 
 namespace Lost
 {
-    #if UNITY_2018_3_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
 
     using System;
+    using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;
@@ -18,91 +19,184 @@ namespace Lost
     [Serializable]
     public class LazyAsset<T> : LazyAsset, ILazyAsset, IValidate where T : UnityEngine.Object
     {
-        // TODO [bgish]: Once addressables are working, make asset NonSerialized and load it from addressables
-
-        #pragma warning disable 0649
-        [SerializeField] private T asset;
-        #pragma warning restore 0649
-
-        [NonSerialized] private bool isLoaded = true;
+        private AsyncOperationHandle operation;
+        private UnityTask<T> cachedTask;
 
         public override Type Type
         {
             get { return typeof(T); }
         }
 
-        public T Asset
+        public UnityTask<T> Load()
         {
-            get
+            #if UNITY_EDITOR
+            if (typeof(T).IsSubclassOf(typeof(Component)) || typeof(T) == typeof(GameObject))
             {
-                if (this.isLoaded == false)
+                Debug.LogWarningFormat("You are loading LastAsset<{0}> as if it were a resource, you should instead use Instantiate instead of Load.", typeof(T).Name);
+            }
+            #endif
+
+            if (this.cachedTask != null)
+            {
+                return this.cachedTask;
+            }
+            else
+            {
+                return UnityTask<T>.Run(Coroutine());
+            }
+
+            IEnumerator<T> Coroutine()
+            {
+                if (typeof(T) == typeof(Sprite))
                 {
-                    Debug.LogWarningFormat("Tried accessing asset {0} before loading it.", this.AssetGuid);
+                    this.operation = Addressables.LoadAssetAsync<Sprite>(this.RuntimeKey);
+                }
+                else
+                {
+                    this.operation = Addressables.LoadAssetAsync<UnityEngine.Object>(this.RuntimeKey);
                 }
 
-                return this.asset;
+                while (this.operation.IsDone == false && this.operation.Status != AsyncOperationStatus.Failed)
+                {
+                    yield return default(T);
+                }
+
+                if (this.operation.Status == AsyncOperationStatus.Failed)
+                {
+                    Debug.LogErrorFormat("Unable to successfully load asset {0} of type {1}", this.AssetGuid, typeof(T).Name);
+                    yield return default(T);
+                    yield break;
+                }
+
+                T value;
+
+                if (typeof(T).IsSubclassOf(typeof(Component)))
+                {
+                    var gameObject = operation.Result as GameObject;
+
+                    if (gameObject == null)
+                    {
+                        Debug.LogErrorFormat("LazyAsset {0} is not of type GameObject, so can't get Component {1} from it.", this.AssetGuid, typeof(T).Name);
+                        yield break;
+                    }
+
+                    value = gameObject?.GetComponent<T>();
+
+                    if (value == null)
+                    {
+                        Debug.LogErrorFormat("LazyAsset {0} does not have Component {1} on it.", this.AssetGuid, typeof(T).Name);
+                        yield break;
+                    }
+                }
+                else
+                {
+                    value = operation.Result as T;
+
+                    if (value == null)
+                    {
+                        Debug.LogErrorFormat("LazyAsset {0} is not of type {1}.", this.AssetGuid, typeof(T).Name);
+                        yield break;
+                    }
+                }
+
+                this.cachedTask = UnityTask<T>.Empty(value);
+                yield return value;
             }
         }
 
-        public bool IsLoaded
+        public UnityTask<T> Instantiate(Transform parent = null, bool reset = true)
         {
-            get { return this.isLoaded; }
-        }
-
-        public IAsyncOperation<T> LoadAsset()
-        {
-            if (this.isLoaded)
+            #if UNITY_EDITOR
+            if (typeof(T).IsSubclassOf(typeof(Component)) == false && typeof(T) != typeof(GameObject))
             {
-                Debug.LogWarningFormat("Loading asset {0} when already loaded.", this.AssetGuid);
+                Debug.LogWarningFormat("You are Instantiating LastAsset<{0}> as if it were a GameObject, you should instead use Load instead of Instantiate.", typeof(T).Name);
             }
+            #endif
 
-            var loadOp = Addressables.LoadAsset<T>(this.GetRuntimeKey());
+            return UnityTask<T>.Run(Coroutine());
 
-            loadOp.Completed += op =>
+            IEnumerator<T> Coroutine()
             {
-                this.asset = op.Result;
-                this.isLoaded = true;
-            };
+                var instantiateOperation = Addressables.InstantiateAsync(this.RuntimeKey, parent);
 
-            return loadOp;
+                while (instantiateOperation.IsDone == false && instantiateOperation.Status != AsyncOperationStatus.Failed)
+                {
+                    yield return default(T);
+                }
+
+                if (instantiateOperation.Status == AsyncOperationStatus.Failed)
+                {
+                    Debug.LogErrorFormat("Unable to successfully instantiate asset {0} of type {1}", this.AssetGuid, typeof(T).Name);
+                    yield return default(T);
+                    yield break;
+                }
+
+                var gameObject = instantiateOperation.Result;
+
+                if (gameObject != null && reset)
+                {
+                    gameObject.transform.Reset();
+                }
+
+                if (typeof(T) == typeof(GameObject))
+                {
+                    yield return gameObject as T;
+                }
+                else if (typeof(T).IsSubclassOf(typeof(Component)))
+                {
+                    if (gameObject == null)
+                    {
+                        Debug.LogErrorFormat("LazyAsset {0} is not of type GameObject, so can't get Component {1} from it.", this.AssetGuid, typeof(T).Name);
+                        yield break;
+                    }
+
+                    var component = gameObject?.GetComponent<T>();
+
+                    if (component == null)
+                    {
+                        Debug.LogErrorFormat("LazyAsset {0} does not have Component {1} on it.", this.AssetGuid, typeof(T).Name);
+                        yield break;
+                    }
+
+                    yield return component;
+                }
+                else
+                {
+                    Debug.LogError("LazyAssetT hit unknown if/else situtation.");
+                }
+            }
         }
 
-        public void ReleaseAsset()
+        public void Release()
         {
-            if (this.isLoaded == false)
+            if (this.operation.IsValid() == false)
             {
-                Debug.LogWarningFormat("Tried releasing asset {0} when not loaded.", this.AssetGuid);
+                Debug.LogWarning("Cannot release a null or unloaded asset.");
                 return;
             }
 
-            Addressables.ReleaseAsset(this.asset);
-            this.asset = null;
-            this.isLoaded = false;
-        }
-
-        private Hash128 GetRuntimeKey()
-        {
-            return Hash128.Parse(this.AssetGuid);
+            Addressables.Release(this.operation);
+            this.operation = default(AsyncOperationHandle);
+            this.cachedTask = null;
         }
 
         void IValidate.Validate()
         {
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             // TODO [bgish]: Verify Guid is valid and the object can be cast as T
             throw new NotImplementedException();
-            #endif
+#endif
         }
     }
 
-    #else
+#else
 
-    [System.Serializable]
+        [System.Serializable]
     public class LazyAsset<T> : LazyAsset, ILazyAsset
     {
-        public bool IsLoaded => false;
     }
 
-    #endif
+#endif
 }
 
 #endif

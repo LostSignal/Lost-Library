@@ -11,8 +11,6 @@ namespace Lost
     public interface ILazyAsset
     {
         string AssetGuid { get; }
-
-        bool IsLoaded { get; }
     }
 }
 

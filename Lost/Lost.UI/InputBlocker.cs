@@ -58,15 +58,20 @@ namespace Lost
 
         private void Setup()
         {
-            this.AssertGetComponentInParent<GraphicRaycaster>(ref this.graphicRaycaster);
-            this.AssertGetComponent<CanvasRenderer>(ref this.canvasRenderer);
-            this.AssertGetComponent<RectTransform>(ref this.rectTransform);
-            this.AssertGetComponent<Image>(ref this.image);
+            this.AssertGetComponent(ref this.canvasRenderer);
+            this.AssertGetComponent(ref this.rectTransform);
+            this.AssertGetComponent(ref this.image);
 
-            // making sure all our components exist
+            // Making sure we have a graphic raycaster
+            if (this.graphicRaycaster == null)
+            {
+                this.graphicRaycaster = this.GetComponentInParent<GraphicRaycaster>();
+            }
+
+            // Making sure onClick isn't null
             this.onClick = this.onClick == null ? new UnityEvent() : this.onClick;
 
-            // seting up initial values
+            // Setting up initial values
             this.canvasRenderer.cullTransparentMesh = true;
             this.image.raycastTarget = true;
 

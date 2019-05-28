@@ -4,6 +4,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if USING_UNITY_ANALYTICS && !UNITY_XBOXONE
+#define UNITY_ANALYTICS_SUPPORTED
+#endif
+
 namespace Lost.Analytics
 {
     using System;
@@ -114,7 +118,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnAchievementStepIndex, stepIndex)
                 .SafeAdd(EventColumnAchievementId, achievementId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.AchievementStep(stepIndex, achievementId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -127,7 +131,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnAchievementId, achievementId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.AchievementUnlocked(achievementId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -147,7 +151,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnAdNetwork, network)
                 .SafeAdd(EventColumnAdPlacementId, placementId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.AdComplete(rewarded, network, placementId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -167,7 +171,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnAdNetwork, network)
                 .SafeAdd(EventColumnAdPlacementId, placementId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.AdOffer(rewarded, network, placementId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -187,7 +191,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnAdNetwork, network)
                 .SafeAdd(EventColumnAdPlacementId, placementId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.AdSkip(rewarded, network, placementId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -207,7 +211,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnAdNetwork, network)
                 .SafeAdd(EventColumnAdPlacementId, placementId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.AdStart(rewarded, network, placementId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -218,7 +222,7 @@ namespace Lost.Analytics
         {
             CustomEvent(EventNameChatMessageSent, eventData);
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.ChatMessageSent(eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -229,7 +233,7 @@ namespace Lost.Analytics
         {
             CustomEvent(eventName, eventData);
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.Custom(eventName, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -242,7 +246,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnCutsceneName, name));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.CutsceneSkip(name, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -255,7 +259,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnCutsceneName, name));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.CutsceneStart(name, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -268,7 +272,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnActionId, actionId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.FirstInteraction(actionId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -281,7 +285,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelName, name));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.GameOver(name, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -295,7 +299,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnLevelIndex, index)
                 .SafeAdd(EventColumnLevelName, name));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.GameOver(index, name, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -306,7 +310,7 @@ namespace Lost.Analytics
         {
             CustomEvent(EventNameGameStart, eventData);
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.GameStart(eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -324,7 +328,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnMonetizationLevel, level)
                 .SafeAdd(EventColumnMonetizationTransactionId, transactionId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.IAPTransaction(transactionContext, price, itemId, itemType, level, transactionId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -349,7 +353,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnMonetizationLevel, level)
                 .SafeAdd(EventColumnMonetizationTransactionId, transactionId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             if (balance == float.MinValue)
             {
                 return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.ItemAcquired(AnalyticsEnums.Convert(currencyType), transactionContext, amount, itemId, itemType, level, transactionId, eventData));
@@ -381,7 +385,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnMonetizationLevel, level)
                 .SafeAdd(EventColumnMonetizationTransactionId, transactionId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             if (balance == float.MinValue)
             {
                 return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.ItemSpent(AnalyticsEnums.Convert(currencyType), transactionContext, amount, itemId, itemType, level, transactionId, eventData));
@@ -401,7 +405,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelName, name));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelComplete(name, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -414,7 +418,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelComplete(index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -428,7 +432,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnLevelName, name)
                 .SafeAdd(EventColumnLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelComplete(name, index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -441,7 +445,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelName, name));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelFail(name, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -454,7 +458,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelFail(index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -468,7 +472,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnLevelName, name)
                 .SafeAdd(EventColumnLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelFail(name, index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -482,7 +486,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnLevelName, name)
                 .SafeAdd(EventColumnLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelQuit(name, index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -495,7 +499,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelName, name));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelQuit(name, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -508,7 +512,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelQuit(index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -521,7 +525,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelName, name));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelSkip(name, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -534,7 +538,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelSkip(index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -548,7 +552,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnLevelName, name)
                 .SafeAdd(EventColumnLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelSkip(name, index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -561,7 +565,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelName, name));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelStart(name, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -574,7 +578,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelStart(index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -588,7 +592,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnLevelName, name)
                 .SafeAdd(EventColumnLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelStart(name, index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -601,7 +605,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnNewLevelName, name));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelUp(name, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -615,7 +619,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnNewLevelName, name)
                 .SafeAdd(EventColumnNewLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelUp(name, index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -628,7 +632,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnNewLevelIndex, index));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.LevelUp(index, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -648,7 +652,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnAdNetwork, network)
                 .SafeAdd(EventColumnAdPlacementId, placementId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.PostAdAction(rewarded, network, placementId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -661,7 +665,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnPushNotificationMessageId, message_id));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.PushNotificationClick(message_id, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -672,7 +676,7 @@ namespace Lost.Analytics
         {
             CustomEvent(EventNamePushNotificationEnable, eventData);
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.PushNotificationEnable(eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -690,7 +694,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnScreenName, screenName));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.ScreenVisit(screenName, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -721,7 +725,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnSocialSenderId, senderId)
                 .SafeAdd(EventColumnSocialRecipientId, recipientId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.SocialShare(shareType, socialNetwork, senderId, recipientId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -752,7 +756,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnSocialSenderId, senderId)
                 .SafeAdd(EventColumnSocialRecipientId, recipientId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.SocialShareAccept(shareType, socialNetwork, senderId, recipientId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -767,7 +771,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnMonetizationItemId, itemId)
                 .SafeAdd(EventColumnMonetizationItemName, itemName));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.StoreItemClick(AnalyticsEnums.Convert(storeType), itemId, itemName, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -780,7 +784,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnMonetizationStoreType, AnalyticsEnums.Get(storeType)));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.StoreOpened(AnalyticsEnums.Convert(storeType), eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -793,7 +797,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnTutorialId, tutorialId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.TutorialComplete(tutorialId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -806,7 +810,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnTutorialId, tutorialId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.TutorialSkip(tutorialId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -819,7 +823,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnTutorialId, tutorialId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.TutorialStart(tutorialId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -833,7 +837,7 @@ namespace Lost.Analytics
                 .SafeAdd(EventColumnTutorialStepIndex, stepIndex)
                 .SafeAdd(EventColumnTutorialId, tutorialId));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.TutorialStep(stepIndex, tutorialId, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();
@@ -851,7 +855,7 @@ namespace Lost.Analytics
                 .Copy()
                 .SafeAdd(EventColumnSocialAuthorizationNetwork, authorizationNetwork));
 
-            #if USING_UNITY_ANALYTICS
+            #if UNITY_ANALYTICS_SUPPORTED
             return AnalyticsEnums.Convert(UnityEngine.Analytics.AnalyticsEvent.UserSignup(authorizationNetwork, eventData));
             #else
             return GetNoUnityAnalyitcsDefineResult();

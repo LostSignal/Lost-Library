@@ -11,18 +11,47 @@ namespace Lost
     using PlayFab;
     using UnityEngine;
 
-    #if USING_UNITY_PURCHASING
+    #if USING_UNITY_PURCHASING && !UNITY_XBOXONE
     using UnityEngine.Purchasing;
     #endif
 
     public static class PlayFabMessages
     {
+        // Exit App Keys
+        private const string ExitAppTitleKey = "EXIT-APP-TITLE";
+        private const string ExitAppBodyKey = "EXIT-APP-BODY";
+
+        // Forgot Password Keys
+        private const string ForgotPasswordTitleKey = "FORGOT-PASSWORD-TITLE";
+        private const string ForgotPasswordBodyKey = "FORGOT-PASSWORD-BODY";
+
         // Changing Display Name Localization Keys
         private const string ChangeNameTitleKey = "CHANGE-NAME-TITLE";
         private const string ChangeNameBodyKey = "CHANGE-NAME-BODY";
         private const string ChangeNameFailedTitleKey = "CHANGE-NAME-FAILED-TITLE";
         private const string ChangeNameFailedNotAvailableKey = "CHANGE-NAME-FAILED-NOT-AVAILABLE";
         private const string ChangeNameFailedProfaneKey = "CHANGE-NAME-FAILED-PROFANE";
+
+        // Create User Account with Email/Password
+        private const string CreateAccountTitleKey = "CREATE-ACCOUNT-TITLE";
+        private const string CreateAccountEmailNotAvailableKey = "CREATE-ACCOUNT-EMAIL-NOT-AVAILABLE";
+        private const string CreateAccountUsernameNotAvailableKey = "CREATE-ACCOUNT-USERNAME-NOT-AVAILABLE";
+        private const string CreateAccountInvalidEmailKey = "CREATE-ACCOUNT-EMAIL-INVALID";
+        private const string CreateAccountInvalidPasswordKey = "CREATE-ACCOUNT-PASSWORD-INVALID";
+        private const string CreateAccountInvalidUsernameKey = "CREATE-ACCOUNT-USERNAME-INVALID";
+
+        // PlayFab Internal Error
+        private const string PlayFabErrorTitleKey = "INTERNAL-PLAYFAB-ERROR-TITLE";
+        private const string PlayFabErrorBodyKey = "INTERNAL-PLAYFAB-ERROR-BODY";
+
+        // Login Failed Keys
+        private const string LoginFailedTitleKey = "LOGIN-FAILED-TITLE";
+        private const string AccountNotFoundKey = "LOGIN-ACCOUNT-NOT-FOUND";
+        private const string InvalidEmailOrPasswordKey = "INVALID-EMAIL-OR-PASSWORD";
+
+        // Contact Email Address Not Found
+        private const string ContactEmailNotFoundTitleKey = "CONTACT-EMAIL-NOT-FOUND-TITLE";
+        private const string ContactEmailNotFoundBodyKey = "CONTACT-EMAIL-NOT-FOUND-BODY";
 
         // Connecting To Store Localization Keys
         private const string ConnectingToStoreBodyKey = "CONNECTING-TO-STORE-BODY";
@@ -56,6 +85,52 @@ namespace Lost
 
             switch (localizationKey)
             {
+                // Exit App Keys
+                case ExitAppTitleKey:
+                    return english ? "Exit?" : "";
+                case ExitAppBodyKey:
+                    return english ? "Are you sure you want to exit?" : "";
+
+                // Forgot Password Keys
+                case ForgotPasswordTitleKey:
+                    return english ? "Forgot Password" : "";
+                case ForgotPasswordBodyKey:
+                    return english ? "Are you sure you wish to send an account recovery email to \"{email}\"?" : "";
+
+                // Internal PlayFab Error Keys
+                case PlayFabErrorTitleKey:
+                    return english ? "Internal Error" : "";
+                case PlayFabErrorBodyKey:
+                    return english ? "We have encountered an internal error.  Please try again later." : "";
+
+                // Login Failure Keys
+                case LoginFailedTitleKey:
+                    return english? "Login Failed" : "";
+                case AccountNotFoundKey:
+                    return english? "The specified account could not be found." : "";
+                case InvalidEmailOrPasswordKey:
+                    return english? "The given email address or password is incorrect." : "";
+
+                // Creating User Account
+                case CreateAccountTitleKey:
+                    return english ? "Create Account Failed" : "";
+                case CreateAccountEmailNotAvailableKey:
+                    return english ? "The specified email address is not available." : "";
+                case CreateAccountUsernameNotAvailableKey:
+                    return english ? "The specified username is not available." : "";
+                case CreateAccountInvalidEmailKey:
+                    return english ? "The specified email address is invalid." : "";
+                case CreateAccountInvalidPasswordKey:
+                    return english ? "The specified password is invalid.  Must be between 5 and 100 characters long." : "";
+                case CreateAccountInvalidUsernameKey:
+                    return english ? "The specified username is invalid.  Must be between 3 and 20 characters long." : "";
+
+                // No Contact Email
+                case ContactEmailNotFoundTitleKey:
+                    return english ? "Email Not Found" : "";
+                case ContactEmailNotFoundBodyKey:
+                    return english ? "The specified email address could not be found." : "";
+
                 // Changing Display Name
                 case ChangeNameTitleKey:
                     return english ? "Display Name" : "Tên hiển thị";
@@ -115,6 +190,16 @@ namespace Lost
             }
         }
 
+        public static UnityTask<YesNoResult> ShowExitAppPrompt()
+        {
+            return MessageBox.Instance.ShowYesNo(Get(ExitAppTitleKey), Get(ExitAppBodyKey));
+        }
+
+        public static UnityTask<YesNoResult> ShowForgotPasswordPrompt(string email)
+        {
+            return MessageBox.Instance.ShowYesNo(Get(ForgotPasswordTitleKey), Get(ForgotPasswordBodyKey).Replace("{email}", email));
+        }
+
         public static UnityTask<YesNoResult> ShowInsufficientCurrency()
         {
             return MessageBox.Instance.ShowYesNo(Get(InsufficientCurrencyTitleKey), Get(InsufficientCurrencyBodyKey));
@@ -136,7 +221,7 @@ namespace Lost
         {
             UnityTask<OkResult> result = null;
 
-            #if USING_UNITY_PURCHASING
+            #if USING_UNITY_PURCHASING && !UNITY_XBOXONE
             result = result ?? HandlePurchasingError(exception as PurchasingException);
             result = result ?? HandlePurchasingInitializationError(exception as PurchasingInitializationException);
             result = result ?? HandlePurchasingInitializationTimeOutError(exception as PurchasingInitializationTimeOutException);
@@ -154,6 +239,19 @@ namespace Lost
 
             switch (playfabException.Error.Error)
             {
+                // Major Errors
+                case PlayFabErrorCode.InvalidPartnerResponse:
+                case PlayFabErrorCode.InvalidTitleId:
+                case PlayFabErrorCode.SmtpAddonNotEnabled:
+                case PlayFabErrorCode.InvalidParams:
+                    {
+                        Debug.LogErrorFormat("Internal PlayFab Error: {0}", playfabException.Error.Error);
+                        Debug.LogException(playfabException);
+
+                        MessageBox.Instance.ShowOk(Get(PlayFabErrorTitleKey), Get(PlayFabErrorBodyKey));
+                        break;
+                    }
+
                 // Display Name Changing Errors
                 case PlayFabErrorCode.NameNotAvailable:
                     {
@@ -164,6 +262,57 @@ namespace Lost
                 case PlayFabErrorCode.ProfaneDisplayName:
                     {
                         MessageBox.Instance.ShowOk(Get(ChangeNameFailedTitleKey), Get(ChangeNameFailedProfaneKey));
+                        break;
+                    }
+
+                // Registering PlayFab User Errors
+                case PlayFabErrorCode.EmailAddressNotAvailable:
+                    {
+                        MessageBox.Instance.ShowOk(Get(CreateAccountTitleKey), Get(CreateAccountEmailNotAvailableKey));
+                        break;
+                    }
+
+                case PlayFabErrorCode.UsernameNotAvailable:
+                    {
+                        MessageBox.Instance.ShowOk(Get(CreateAccountTitleKey), Get(CreateAccountUsernameNotAvailableKey));
+                        break;
+                    }
+
+                case PlayFabErrorCode.InvalidEmailAddress:
+                    {
+                        MessageBox.Instance.ShowOk(Get(CreateAccountTitleKey), Get(CreateAccountInvalidEmailKey));
+                        break;
+                    }
+
+                case PlayFabErrorCode.InvalidPassword:
+                    {
+                        MessageBox.Instance.ShowOk(Get(CreateAccountTitleKey), Get(CreateAccountInvalidPasswordKey));
+                        break;
+                    }
+
+                case PlayFabErrorCode.InvalidUsername:
+                    {
+                        MessageBox.Instance.ShowOk(Get(CreateAccountTitleKey), Get(CreateAccountInvalidUsernameKey));
+                        break;
+                    }
+
+                // Login Errors
+                case PlayFabErrorCode.AccountNotFound:
+                    {
+                        MessageBox.Instance.ShowOk(Get(LoginFailedTitleKey), Get(AccountNotFoundKey));
+                        break;
+                    }
+
+                case PlayFabErrorCode.InvalidEmailOrPassword:
+                    {
+                        MessageBox.Instance.ShowOk(Get(LoginFailedTitleKey), Get(InvalidEmailOrPasswordKey));
+                        break;
+                    }
+
+                // Email Address Not Found
+                case PlayFabErrorCode.NoContactEmailAddressFound:
+                    {
+                        MessageBox.Instance.ShowOk(Get(ContactEmailNotFoundTitleKey), Get(ContactEmailNotFoundBodyKey));
                         break;
                     }
 
@@ -199,7 +348,7 @@ namespace Lost
             return null;
         }
 
-        #if USING_UNITY_PURCHASING
+        #if USING_UNITY_PURCHASING && !UNITY_XBOXONE
 
         private static UnityTask<OkResult> HandlePurchasingInitializationError(PurchasingInitializationException purchasingInitializationException)
         {

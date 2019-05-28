@@ -6,7 +6,6 @@
 
 namespace Lost
 {
-    using System.Text;
     using TMPro;
     using UnityEngine;
     using UnityEngine.Events;
@@ -36,6 +35,8 @@ namespace Lost
         [SerializeField] private TMP_Text lowerLeftText;
         [SerializeField] private TMP_Text lowerRightText;
         #pragma warning restore 0649
+
+        public DebugMenuSettings Settings { get; private set; } = new DebugMenuSettings();
 
         // fps related variables
         private readonly int fpsUpdateTicks = 10;
@@ -174,6 +175,16 @@ namespace Lost
 
         #endregion
 
+        public void SetSettings(DebugMenuSettings settings)
+        {
+            if (settings == null)
+            {
+                return;
+            }
+
+            this.Settings = settings;
+        }
+
         public void SetCamera(Camera camera)
         {
             this.cameraCache = camera;
@@ -268,6 +279,25 @@ namespace Lost
         private int GetDecimalPoint(float num)
         {
             return (int)((num - (int)num) * 10.0f);
+        }
+
+        [System.Serializable]
+        public class DebugMenuSettings
+        {
+            #pragma warning disable 0649
+            [Header("Keyboard")]
+            [SerializeField] private KeyCode key = KeyCode.Space;
+            [SerializeField] private float keyHoldTime = 2.0f;
+
+            [Header("Touch")]
+            [SerializeField] private int fingerDownCount = 3;
+            [SerializeField] private float fingerDownTime = 2.0f;
+            #pragma warning restore 0649
+
+            public KeyCode Key => this.key;
+            public float KeyHoldTime => this.keyHoldTime;
+            public int FingerDownCount => this.fingerDownCount;
+            public float FingerDownTime => this.fingerDownTime;
         }
     }
 }

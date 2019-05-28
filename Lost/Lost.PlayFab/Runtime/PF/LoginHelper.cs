@@ -9,6 +9,7 @@
 namespace Lost
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using Lost.AppConfig;
     using PlayFab;
@@ -75,7 +76,128 @@ namespace Lost
             get { return AnalyticsManager.Instance.AnonymousId; }
         }
 
+        public string LastLoginEmail
+        {
+            get
+            {
+                return LostPlayerPrefs.GetString("LastLoginEmail", string.Empty);
+            }
+
+            set
+            {
+                LostPlayerPrefs.SetString("LastLoginEmail", value);
+                LostPlayerPrefs.Save();
+            }
+        }
+
+        public bool AutoLoginWithDeviceId
+        {
+            get
+            {
+                return LostPlayerPrefs.GetBool("AutoLoginWithDeviceId", false);
+            }
+
+            set
+            {
+                LostPlayerPrefs.SetBool("AutoLoginWithDeviceId", value);
+                LostPlayerPrefs.Save();
+            }
+        }
+
+        public bool HasEverLoggedIn
+        {
+            get
+            {
+                return LostPlayerPrefs.GetBool("HasEverLoggedIn", false);
+            }
+
+            set
+            {
+                LostPlayerPrefs.SetBool("HasEverLoggedIn", value);
+                LostPlayerPrefs.Save();
+            }
+        }
+
         #region Login and linking with device id
+
+        public IEnumerator LoginWithEmailAndPasswordDialog(GetPlayerCombinedInfoRequestParams infoRequestParams = null)
+        {
+            if (PF.Login.HasEverLoggedIn)
+            {
+                if (PF.Login.AutoLoginWithDeviceId)
+                {
+                    var login = PF.Login.LoginWithDeviceId(false, PF.Login.DeviceId, infoRequestParams);
+
+                    yield return login;
+
+                    if (login.HasError)
+                    {
+                        DialogManager.GetDialog<LogInDialog>().Show(infoRequestParams);
+                    }
+                    else if (PF.Login.IsLoggedIn)
+                    {
+                        yield break;
+                    }
+                    else
+                    {
+                        // NOTE [bgish]: This should never happen, but catching this case just in case
+                        Debug.LogError("LoginHelper.LoginWithDeviceId failed, but didn't correctly report the error.");
+                        DialogManager.GetDialog<LogInDialog>().Show(infoRequestParams);
+                    }
+                }
+                else
+                {
+                    DialogManager.GetDialog<LogInDialog>().Show(infoRequestParams);
+                }
+            }
+            else
+            {
+                DialogManager.GetDialog<SignUpDialog>().Show(infoRequestParams);
+            }
+
+            while (PF.Login.IsLoggedIn == false)
+            {
+                yield return null;
+            }
+        }
+
+        public UnityTask<SendAccountRecoveryEmailResult> SendAccountRecoveryEmail(string email, string emailTemplateId)
+        {
+            return PF.Do<SendAccountRecoveryEmailRequest, SendAccountRecoveryEmailResult>(
+                new SendAccountRecoveryEmailRequest
+                {
+                    Email = email,
+                    EmailTemplateId = emailTemplateId,
+                },
+                PlayFabClientAPI.SendAccountRecoveryEmail);
+        }
+
+        public UnityTask<PlayFabLoginResultCommon> LoginWithEmail(bool createAccount, string email, string password, GetPlayerCombinedInfoRequestParams combinedInfoParams = null)
+        {
+            if (createAccount)
+            {
+                return PF.Do<RegisterPlayFabUserRequest, PlayFabLoginResultCommon>(
+                    new RegisterPlayFabUserRequest
+                    {
+                        Email = email,
+                        Password = password,
+                        InfoRequestParameters = this.GetCombinedInfoRequest(combinedInfoParams),
+                        RequireBothUsernameAndEmail = false,
+                    },
+                    PlayFabClientAPI.RegisterPlayFabUser);
+            }
+            else
+            {
+                return PF.Do<LoginWithEmailAddressRequest, PlayFabLoginResultCommon>(
+                        new LoginWithEmailAddressRequest
+                        {
+                            Email = email,
+                            Password = password,
+                            InfoRequestParameters = this.GetCombinedInfoRequest(combinedInfoParams),
+                        },
+                        PlayFabClientAPI.LoginWithEmailAddress);
+            }
+        }
 
         public UnityTask<LoginResult> LoginWithDeviceId(bool createAccount, string deviceId, GetPlayerCombinedInfoRequestParams combinedInfoParams = null)
         {
@@ -408,6 +530,7 @@ namespace Lost
             this.userAccountInfo = result?.InfoResultPayload?.AccountInfo;
             this.SessionTicket = result?.SessionTicket;
             this.forceRelogin = false;
+            this.HasEverLoggedIn = true;
         }
 
         private void PlayfabEvents_OnGlobalErrorEvent(PlayFabRequestCommon request, PlayFabError error)

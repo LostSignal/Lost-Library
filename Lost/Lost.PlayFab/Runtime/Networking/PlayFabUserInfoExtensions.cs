@@ -20,6 +20,16 @@ namespace Lost
             userInfo.CustomData["PlayFabId"] = playFabId;
         }
 
+        public static string GetCharacterId(this UserInfo userInfo)
+        {
+            return userInfo.CustomData["CharacterId"];
+        }
+
+        public static void SetCharacterId(this UserInfo userInfo, string characterId)
+        {
+            userInfo.CustomData["CharacterId"] = characterId;
+        }
+
         public static string GetUsername(this UserInfo userInfo)
         {
             return userInfo.CustomData["Username"];

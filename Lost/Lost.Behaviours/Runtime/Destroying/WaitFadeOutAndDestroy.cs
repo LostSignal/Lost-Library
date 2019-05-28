@@ -6,58 +6,78 @@
 
 namespace Lost
 {
+    using System.Collections;
     using UnityEngine;
 
     public class WaitFadeOutAndDestroy : MonoBehaviour
     {
-        private static Shader diffuseTrnasparentShader;
-
         #pragma warning disable 0649
         [SerializeField] private float waitTime = 10;
-        [SerializeField] private float fadeSpeed = 1.0f;
+        [SerializeField] private float fadeTime = 1.0f;
+
+        [SerializeField] private Material transparentMaterial;
+        [SerializeField] private string colorPropertyToAnimate = "_BaseColor";
+        [SerializeField] private string[] colorsPropertiesToCopy = new string[1] { "_BaseColor" };
+        [SerializeField] private string[] texturesPropertiesToCopy = new string[1] { "_BaseMap" };
         #pragma warning restore 0649
 
-        private MeshRenderer meshRenderer;
-        private float currentTime;
+        private Coroutine coroutine;
 
         private void OnEnable()
         {
-            this.currentTime = this.waitTime;
-
-            if (diffuseTrnasparentShader == null)
-            {
-                diffuseTrnasparentShader = Shader.Find("Transparent/Diffuse");
-            }
-
-            this.meshRenderer = this.GetComponent<MeshRenderer>();
+            this.coroutine = CoroutineRunner.Instance.StartCoroutine(this.FadeOutCoroutine());
         }
 
-        private void Update()
+        private void OnDisable()
         {
-            this.currentTime -= Time.deltaTime;
-
-            if (this.currentTime < 0)
+            if (Platform.IsApplicationQuitting == false)
             {
-                if (this.meshRenderer != null && this.meshRenderer.material != null)
-                {
-                    if (this.meshRenderer.material.shader != diffuseTrnasparentShader)
-                    {
-                        this.meshRenderer.material.shader = diffuseTrnasparentShader;
-                    }
-
-                    Color newColor = this.meshRenderer.material.color.OffsetA(-Time.deltaTime * this.fadeSpeed);
-                    this.meshRenderer.material.color = newColor;
-
-                    if (newColor.a <= 0.0f)
-                    {
-                        Pooler.Destroy(this.gameObject);
-                    }
-                }
-                else
-                {
-                    Pooler.Destroy(this.gameObject);
-                }
+                CoroutineRunner.Instance.StopCoroutine(this.coroutine);
             }
+        }
+
+        private IEnumerator FadeOutCoroutine()
+        {
+            yield return WaitForUtil.Seconds(this.waitTime);
+
+            var meshRenderer = this.GetComponent<MeshRenderer>();
+            var material = meshRenderer?.material;
+
+            if (this.transparentMaterial == null)
+            {
+                Debug.Log("this.transparentMaterial is NULL!");
+            }
+
+            if (material != null && this.transparentMaterial != null)
+            {
+                Material newTransparent = Object.Instantiate(this.transparentMaterial);
+
+                // Copy over color properties
+                if (this.colorsPropertiesToCopy != null)
+                {
+                    for (int i = 0; i < this.colorsPropertiesToCopy.Length; i++)
+                    {
+                        newTransparent.SetColor(this.colorsPropertiesToCopy[i], material.GetColor(this.colorsPropertiesToCopy[i]));
+                    }
+                }
+
+                // Copy over texture properties
+                if (this.texturesPropertiesToCopy != null)
+                {
+                    for (int i = 0; i < this.texturesPropertiesToCopy.Length; i++)
+                    {
+                        newTransparent.SetTexture(this.texturesPropertiesToCopy[i], material.GetTexture(this.texturesPropertiesToCopy[i]));
+                    }
+                }
+
+                meshRenderer.material = newTransparent;
+
+                yield return newTransparent.FadeAlpha(this.colorPropertyToAnimate, 1.0f, 0.0f, this.fadeTime);
+
+                Object.Destroy(newTransparent);
+            }
+
+            Pooler.Destroy(this.gameObject);
         }
     }
 }

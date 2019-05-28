@@ -29,6 +29,20 @@ namespace Lost
             return lhs;
         }
 
+        public static Vector3 SetXY(this Vector3 lhs, float x, float y)
+        {
+            lhs.x = x;
+            lhs.y = y;
+            return lhs;
+        }
+
+        public static Vector3 SetXZ(this Vector3 lhs, float x, float z)
+        {
+            lhs.x = x;
+            lhs.z = z;
+            return lhs;
+        }
+
         public static Vector3 SetZ(this Vector3 lhs, float val)
         {
             lhs.z = val;

@@ -320,6 +320,20 @@ namespace Lost.Networking
             return value == 1;
         }
 
+        public void ReadBytes(byte[] bytes, int count)
+        {
+            if (count < 0)
+            {
+                throw new IndexOutOfRangeException("NetworkReader ReadBytes " + count);
+            }
+            else if (bytes.Length < count)
+            {
+                throw new IndexOutOfRangeException(string.Format("NetworkReader was given byte array of size {0} and needs to be at least {1}", bytes.Length, count));
+            }
+
+            m_buf.ReadBytes(bytes, (uint)count);
+        }
+
         public byte[] ReadBytes(int count)
         {
             if (count < 0)

@@ -18,22 +18,23 @@ namespace Lost
 
             IEnumerator FadeAlphaCoroutine()
             {
-                float percentage = 0.0f;
+                yield return WaitForUtil.Seconds(delayInSeconds);
+
+                Color color = image.color;
                 float time = 0.0f;
 
-                do
+                while (time < timeLengthInSeconds)
                 {
-                    image.color = image.color.SetA(Mathf.Lerp(startAlpha, endAlpha, percentage));
+                    color = color.SetA(Mathf.Lerp(startAlpha, endAlpha, time / timeLengthInSeconds));
+                    image.color = color;
 
                     yield return null;
 
-                    percentage = Mathf.Max(0.0f, time - delayInSeconds) / timeLengthInSeconds;
-
                     time += Time.deltaTime;
                 }
-                while (percentage < 1.0f);
 
-                image.color = image.color.SetA(endAlpha);
+                color = color.SetA(endAlpha);
+                image.color = color;
             }
         }
     }

@@ -17,22 +17,59 @@ namespace Lost
 
             IEnumerator FadeAlphaCoroutine()
             {
-                float percentage = 0.0f;
+                yield return WaitForUtil.Seconds(delayInSeconds);
+
+                Color currentColor = material.color;
                 float time = 0.0f;
 
-                do
+                while (time < timeLengthInSeconds)
                 {
-                    material.color = material.color.SetA(Mathf.Lerp(startAlpha, endAlpha, percentage));
+                    if (material)
+                    {
+                        currentColor = currentColor.SetA(Mathf.Lerp(startAlpha, endAlpha, time / timeLengthInSeconds));
+                        material.color = currentColor;
+                    }
 
                     yield return null;
-
-                    percentage = Mathf.Max(0.0f, time - delayInSeconds) / timeLengthInSeconds;
-
                     time += Time.deltaTime;
                 }
-                while (percentage < 1.0f);
 
-                material.color = material.color.SetA(endAlpha);
+                if (material)
+                {
+                    currentColor = currentColor.SetA(endAlpha);
+                    material.color = currentColor;
+                }
+            }
+        }
+
+        public static Coroutine FadeAlpha(this Material material, string colorPropertyName, float startAlpha, float endAlpha, float timeLengthInSeconds, float delayInSeconds = 0.0f)
+        {
+            return CoroutineRunner.Instance.StartCoroutine(FadeAlphaCoroutine());
+
+            IEnumerator FadeAlphaCoroutine()
+            {
+                yield return WaitForUtil.Seconds(delayInSeconds);
+
+                Color currentColor = material.GetColor(colorPropertyName);
+                float time = 0.0f;
+
+                while (time < timeLengthInSeconds)
+                {
+                    if (material)
+                    {
+                        currentColor = currentColor.SetA(Mathf.Lerp(startAlpha, endAlpha, time / timeLengthInSeconds));
+                        material.SetColor(colorPropertyName, currentColor);
+                    }
+
+                    yield return null;
+                    time += Time.deltaTime;
+                }
+
+                if (material)
+                {
+                    currentColor = currentColor.SetA(endAlpha);
+                    material.SetColor(colorPropertyName, currentColor);
+                }
             }
         }
     }

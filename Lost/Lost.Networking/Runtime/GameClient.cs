@@ -117,9 +117,10 @@ namespace Lost.Networking
 
         public virtual void SendMessage(Message message)
         {
-            if (this.HasJoinedServer == false)
+            if (this.HasJoinedServer == false && message.GetId() != JoinServerRequestMessage.Id)
             {
                 // TODO [bgish]: throw some sort of error?
+                return;
             }
 
             this.messageWriter.SeekZero();
@@ -134,6 +135,8 @@ namespace Lost.Networking
 
         public virtual void Update()
         {
+            this.transportLayer?.Update();
+
             ClientEvent clientEvent;
 
             while (this.transportLayer.TryDequeueClientEvent(out clientEvent))
@@ -175,6 +178,24 @@ namespace Lost.Networking
             this.messageCollection.RecycleMessage(requestUpdateUserInfo);
         }
 
+        public delegate void ClientUserConnectedDelegate(UserInfo userInfo, bool wasReconnect);
+        public delegate void ClientUserDisconnectedDelegate(UserInfo userInfo, bool wasConnectionLost);
+        public delegate void ClientUserInfoUpdatedDelegate(UserInfo userInfo);
+        public delegate void ClientReceivedMessageDelegate(Message message);
+        public delegate void ClientConnectedToServerDelegate();
+        public delegate void ClientFailedToConnectToServerDelegate();
+        public delegate void ClientDisconnectedFromServerDelegate();
+        public delegate void ClientLostConnectionToServerDelegate();
+
+        public ClientUserConnectedDelegate ClientUserConnected;
+        public ClientUserDisconnectedDelegate ClientUserDisconnected;
+        public ClientUserInfoUpdatedDelegate ClientUserInfoUpdated;
+        public ClientReceivedMessageDelegate ClientReceivedMessage;
+        public ClientConnectedToServerDelegate ClientConnectedToServer;
+        public ClientFailedToConnectToServerDelegate ClientFailedToConnectToServer;
+        public ClientDisconnectedFromServerDelegate ClientDisconnectedFromServer;
+        public ClientLostConnectionToServerDelegate ClientLostConnectionToServer;
+
         public abstract void RegisterCustomMessages(MessageCollection messageCollection);
 
         public abstract void UserConneceted(UserInfo userInfo, bool wasReconnect);
@@ -208,6 +229,7 @@ namespace Lost.Networking
         {
             this.Reset();
             this.DisconnectedFromServer();
+            this.ClientDisconnectedFromServer?.Invoke();
         }
 
         private void ConnectionLost()
@@ -217,6 +239,7 @@ namespace Lost.Networking
             for (int i = 0; i < this.users.Count; i++)
             {
                 this.UserDisconnected(this.users[i], true);
+                this.ClientUserDisconnected?.Invoke(this.users[i], true);
             }
 
             this.users.Clear();
@@ -224,6 +247,7 @@ namespace Lost.Networking
             this.HasJoinedServer = false;
 
             this.LostConnectionToServer();
+            this.ClientLostConnectionToServer?.Invoke();
         }
 
         private void ReceivedData(byte[] data)
@@ -240,10 +264,12 @@ namespace Lost.Networking
                     {
                         this.HasJoinedServer = true;
                         this.ConnectedToServer();
+                        this.ClientConnectedToServer?.Invoke();
                     }
                     else
                     {
                         this.FailedToConnectToServer();
+                        this.ClientFailedToConnectToServer?.Invoke();
                     }
 
                     break;
@@ -269,6 +295,7 @@ namespace Lost.Networking
                         if (removedUserInfo != null)
                         {
                             this.UserDisconnected(removedUserInfo, userDisconnectedMessage.WasConnectionLost);
+                            this.ClientUserDisconnected?.Invoke(removedUserInfo, userDisconnectedMessage.WasConnectionLost);
                         }
 
                         break;
@@ -279,6 +306,7 @@ namespace Lost.Networking
             }
 
             this.ReceivedMessage(message);
+            this.ClientReceivedMessage?.Invoke(message);
 
             this.messageCollection.RecycleMessage(message);
         }
@@ -291,6 +319,7 @@ namespace Lost.Networking
                 userInfo.CopyFrom(messageUserInfo);
 
                 this.UserInfoUpdated(userInfo);
+                this.ClientUserInfoUpdated?.Invoke(userInfo);
             }
             else
             {
@@ -300,9 +329,11 @@ namespace Lost.Networking
                 this.userIdToUserInfoMap.Add(userInfo.UserId, userInfo);
                 this.users.Add(userInfo);
 
-                this.UserConneceted(userInfo, this.knownUserIds.Contains(userInfo.UserId));
-
+                bool wasReconnect = this.knownUserIds.Contains(userInfo.UserId);
                 this.knownUserIds.Add(userInfo.UserId);
+
+                this.UserConneceted(userInfo, wasReconnect);
+                this.ClientUserConnected?.Invoke(userInfo, wasReconnect);
             }
 
             return userInfo;

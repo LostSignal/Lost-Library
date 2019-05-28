@@ -33,5 +33,7 @@ namespace Lost.Networking
         void Shutdown();
 
         bool TryDequeueClientEvent(out ClientEvent clientEvent);
+
+        void Update();
     }
 }

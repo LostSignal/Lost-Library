@@ -44,6 +44,9 @@ namespace Lost
 
         protected override void Awake()
         {
+            // InputManager won't work correctly if simulateMouseWithTouches is on!
+            UnityEngine.Input.simulateMouseWithTouches = false;
+
             // populating the input cache
             for (int i = 0; i < InputCacheSize; i++)
             {

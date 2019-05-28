@@ -33,6 +33,7 @@ namespace Lost
         public static CloudScriptHelper CloudScript { get; private set; }
         public static PurchasingHelper Purchasing { get; private set; }
         public static InventoryHelper Inventory { get; private set; }
+        public static CharacterHelper Character { get; private set; }
         public static TitleDataHelper TitleData { get; private set; }
         public static VirtualCurrencyHelper VC { get; private set; }
         public static CatalogHelper Catalog { get; private set; }
@@ -75,6 +76,7 @@ namespace Lost
             CloudScript = new CloudScriptHelper();
             Purchasing = new PurchasingHelper();
             Inventory = new InventoryHelper();
+            Character = new CharacterHelper();
             TitleData = new TitleDataHelper();
             VC = new VirtualCurrencyHelper();
             Catalog = new CatalogHelper();

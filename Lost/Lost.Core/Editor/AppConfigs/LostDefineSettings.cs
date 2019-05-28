@@ -104,6 +104,7 @@ namespace Lost
                 new Define("USING_FACEBOOK_SDK", false),
                 new Define("USING_ANDROID_FIREBASE_MESSAGING", false),
                 new Define("USING_I2_LOCALIZATION", false),
+                new Define("USING_LITE_NET_LIB", false),
             };
 
             // Adding all valid defines to our list of defines (if they don't already exist)

@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if USING_UNITY_PURCHASING
+#if USING_UNITY_PURCHASING && !UNITY_XBOXONE
 
 namespace Lost.IAP
 {

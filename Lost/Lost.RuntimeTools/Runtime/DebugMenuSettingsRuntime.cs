@@ -13,6 +13,9 @@ namespace Lost
     {
         public static readonly string InitializeAtStartupKey = "DebugMenu.InitializeAtStartup";
 
+        // Settings
+        public static readonly string SettingsKey = "DebugMenu.Settings";
+
         // Overlay
         public static readonly string ShowAppVersionInLowerLeftKey = "DebugMenu.ShowAppVersionInLowerLeft";
         public static readonly string ShowPlayFabIdInLowerRightKey = "DebugMenu.ShowPlayFabIdInLowerRight";
@@ -28,6 +31,12 @@ namespace Lost
             if (RuntimeAppConfig.Instance.GetBool(InitializeAtStartupKey) == false)
             {
                 return;
+            }
+
+            string settingsJson = RuntimeAppConfig.Instance.GetString(SettingsKey);
+            if (string.IsNullOrEmpty(settingsJson) == false)
+            {
+                DebugMenu.Instance.SetSettings(JsonUtility.FromJson<DebugMenu.DebugMenuSettings>(settingsJson));
             }
 
             if (RuntimeAppConfig.Instance.GetBool(ShowAppVersionInLowerLeftKey))
@@ -61,7 +70,7 @@ namespace Lost
             }
         }
 
-        #if USING_PLAYFAB_SDK
+#if USING_PLAYFAB_SDK
         private static void PlayfabEvents_OnLoginResultEvent(PlayFab.ClientModels.LoginResult result)
         {
             DebugMenu.Instance.SetText(Corner.LowerRight, PF.Login.IsLoggedIn ? PF.User.PlayFabId : "Login Error!");

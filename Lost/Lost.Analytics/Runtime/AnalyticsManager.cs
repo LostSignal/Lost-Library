@@ -22,6 +22,10 @@ namespace Lost
         private bool pauseFlushing;
         private string anonymousId;
 
+        #if UNITY_XBOXONE
+        private long sessionId = BitConverter.ToInt64(Guid.NewGuid().ToByteArray(), 0);
+        #endif
+
         public string AnonymousId
         {
             get
@@ -48,7 +52,14 @@ namespace Lost
 
         public long SessionId
         {
-            get { return UnityEngine.Analytics.AnalyticsSessionInfo.sessionId; }
+            get
+            {
+                #if UNITY_XBOXONE
+                return this.sessionId;
+                #else
+                return UnityEngine.Analytics.AnalyticsSessionInfo.sessionId;
+                #endif
+            }
         }
 
         public void RegisterAnalyticsProvider(IAnalyticsProvider provider)
@@ -97,6 +108,7 @@ namespace Lost
         {
             base.Awake();
 
+#if !UNITY_XBOXONE
             UnityEngine.Analytics.Analytics.initializeOnStartup = true;
             UnityEngine.Analytics.Analytics.enabled = true;
 
@@ -107,6 +119,7 @@ namespace Lost
             {
                 UnityEngine.Analytics.Analytics.SetUserId(AnonymousId);
             }
+#endif
 
             Analytics.AnalyticsEvent.CustomEventFired += this.EventFired;
         }

@@ -77,6 +77,37 @@ namespace Lost
             }
         }
 
+        [MenuItem("Lost/Actions/Fix Bad Line Endings")]
+        public static void FixBadLineEndings()
+        {
+            string path = ".";
+
+            // If a directory is selected, then only convert the things under the directory
+            if (Selection.activeObject != null)
+            {
+                string rootDirectoryAssetPath = AssetDatabase.GetAssetPath(Selection.activeObject.GetInstanceID());
+
+                if (Directory.Exists(rootDirectoryAssetPath))
+                {
+                    path = rootDirectoryAssetPath;
+                }
+            }
+
+            foreach (string file in Directory.GetFiles(path, "*.cs", SearchOption.AllDirectories))
+            {
+                string text = File.ReadAllText(file);
+
+                if (text.Contains("\r\r\n"))
+                {
+                    text = text.Replace("\r\r\n", "\n");
+                    text = text.Replace("\r\n", "\n");
+
+                    Provider.Checkout(file.Replace("\\", "/").Replace("./", string.Empty), CheckoutMode.Asset).Wait();
+                    File.WriteAllText(file, text);
+                }
+            }
+        }
+
         [MenuItem("Lost/Actions/Convert all C# files to project line endings")]
         public static void ConvertAllCSharpFileLineEndings()
         {

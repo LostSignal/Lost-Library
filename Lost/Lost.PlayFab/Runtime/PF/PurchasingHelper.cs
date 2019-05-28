@@ -17,7 +17,7 @@ namespace Lost
     using PlayFab.ClientModels;
     using UnityEngine;
 
-    #if USING_UNITY_PURCHASING
+    #if USING_UNITY_PURCHASING && !UNITY_XBOXONE
     using UnityEngine.Purchasing;
     #endif
 
@@ -64,7 +64,7 @@ namespace Lost
                 yield return default(bool);
             }
 
-            #if USING_UNITY_PURCHASING
+            #if USING_UNITY_PURCHASING && !UNITY_XBOXONE
             // initializing purchasing, but no need to wait on it
             if (getCatalog.HasError == false && IAP.UnityPurchasingManager.Instance.IsIAPInitialized == false)
             {
@@ -89,7 +89,7 @@ namespace Lost
 
             this.isInitializationRunning = false;
 
-            #if USING_UNITY_PURCHASING
+            #if USING_UNITY_PURCHASING && !UNITY_XBOXONE
             this.IsInitialized = getCatalog.HasError == false && Lost.IAP.UnityPurchasingManager.IsInitialized;
             #else
             this.IsInitialized = getCatalog.HasError == false;
@@ -98,7 +98,7 @@ namespace Lost
             yield return this.IsInitialized;
         }
 
-        #if USING_UNITY_PURCHASING
+        #if USING_UNITY_PURCHASING && !UNITY_XBOXONE
         private ProductType GetProductType(CatalogItem catalogItem)
         {
             return catalogItem.Consumable != null ?
@@ -118,7 +118,7 @@ namespace Lost
 
             if (isIapItem)
             {
-                #if USING_UNITY_PURCHASING
+                #if USING_UNITY_PURCHASING && !UNITY_XBOXONE
 
                 // Making sure we're properly initialized
                 if (this.IsInitialized == false)
@@ -267,7 +267,7 @@ namespace Lost
             }
         }
 
-        #if USING_UNITY_PURCHASING
+        #if USING_UNITY_PURCHASING && !UNITY_XBOXONE
 
         private int GetPurchasePrice(PurchaseEventArgs e)
         {
