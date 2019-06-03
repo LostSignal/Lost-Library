@@ -192,6 +192,8 @@ namespace Lost
             }
 
             this.Dialog.Canvas.sortingOrder = this.Settings.OrderInLayer;
+            this.Dialog.Canvas.planeDistance = this.Settings.PlaneDistance;
+            this.Dialog.IsOverlayCamera = this.Settings.IsOverlayCamera;
         }
 
         public void SetCamera(Camera camera)
@@ -288,6 +290,10 @@ namespace Lost
             [SerializeField] private string sortingLayer = "Default";
             [SerializeField] private int orderInLayer = 1000;
 
+            [Header("Camera")]
+            [SerializeField] private bool isOverlayCamera = false;
+            [SerializeField] private float planeDistance = 5.0f;
+
             [Header("Keyboard")]
             [SerializeField] private KeyCode key = KeyCode.F2;
             [SerializeField] private float keyHoldTime = 0.01f;
@@ -299,8 +305,13 @@ namespace Lost
 
             public string SortingLayer => this.sortingLayer;
             public int OrderInLayer => this.orderInLayer;
+
+            public bool IsOverlayCamera => this.isOverlayCamera;
+            public float PlaneDistance => this.planeDistance;
+
             public KeyCode Key => this.key;
             public float KeyHoldTime => this.keyHoldTime;
+
             public int FingerDownCount => this.fingerDownCount;
             public float FingerDownTime => this.fingerDownTime;
         }

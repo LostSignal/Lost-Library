@@ -141,6 +141,20 @@ namespace Lost
             get { return this.IsShown == false && this.IsHidden == false; }
         }
 
+        public bool IsOverlayCamera
+        {
+            get
+            {
+                return this.isOverlayCamera;
+            }
+
+            set
+            {
+                this.isOverlayCamera = value;
+                this.UpdateRenderMode();
+            }
+        }
+
         public IEnumerator ShowAndWait()
         {
             this.Show();
@@ -280,7 +294,11 @@ namespace Lost
                 this.blocker = blockerObject != null ? blockerObject.GetComponent<InputBlocker>() : null;
             }
 
-            // Setting up the render mode
+            this.UpdateRenderMode();
+        }
+
+        private void UpdateRenderMode()
+        {
             this.canvas.renderMode = this.isOverlayCamera ? RenderMode.ScreenSpaceOverlay : RenderMode.ScreenSpaceCamera;
         }
 

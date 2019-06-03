@@ -4,12 +4,15 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Lost{
+namespace Lost
+{
     using UnityEditor;
     using UnityEngine;
     using UnityEngine.U2D;
 
-    [CustomEditor(typeof(SpriteAtlasLoader))]    public class SpriteAtlasLoaderEditor : Editor    {
+    [CustomEditor(typeof(SpriteAtlasLoader))]
+    public class SpriteAtlasLoaderEditor : Editor
+    {
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
@@ -43,4 +46,6 @@ namespace Lost{
 
                 EditorUtility.SetDirty(this.target);
             }
-        }    }}
+        }
+    }
+}

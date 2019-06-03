@@ -4,14 +4,16 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Lost{
+namespace Lost
+{
     using System;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.AddressableAssets;
     using UnityEngine.U2D;
 
-    public class SpriteAtlasLoader : MonoBehaviour    {
+    public class SpriteAtlasLoader : MonoBehaviour
+    {
         #pragma warning disable 0649
         [SerializeField] private List<Atlas> atlases = new List<Atlas>();
         #pragma warning restore 0649
@@ -68,4 +70,6 @@ namespace Lost{
                 get { return this.guid; }
                 set { this.guid = value; }
             }
-        }    }}
+        }
+    }
+}

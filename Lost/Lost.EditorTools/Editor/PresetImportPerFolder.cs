@@ -8,7 +8,8 @@
 //// This file taken from Unity docs - https://docs.unity3d.com/Manual//DefaultPresetsByFolder.html
 ////
 
-namespace Lost{
+namespace Lost
+{
     using System.IO;
     using UnityEditor;
     using UnityEditor.Presets;
@@ -44,4 +45,5 @@ namespace Lost{
                 }
             }
         }
-    }}
+    }
+}

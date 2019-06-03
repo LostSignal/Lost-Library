@@ -4,7 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Lost{
+namespace Lost
+{
     using System.Collections.Generic;
     using System.IO;
     using UnityEditor;
@@ -93,7 +94,9 @@ namespace Lost{
                     yield return sanitizedFilePath;
                 }
             }
-        }    }}
+        }
+    }
+}
 
 /* Notes
 --- !u!1 &795956156
@@ -127,7 +130,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  
+
 "--- !u!1 " -> GameObject
 "--- !u!4 " -> Transform
 "--- !u!224 " -> RectTransform
@@ -137,30 +140,30 @@ string lastFileId;
 
 foreach (var line in File.ReadAllLines())
 {
-	if (line.StartsWith("--- !u"))
-	{
-		lastFileId = blah;
-	}
-	else if (line.StartsWith("GameObject:"))
-	{
-		// Create new GameObjectInfo
-		// Set GameObjectInfo.FileId to lastFileId
-		// Add GameObjectInfo to fileIdToGameObjectMap
-		// Go through component list and add those ids to the componentIdToGameObjectMap
-	}
-	else if (line.StartsWith("m_Father") // Might want to make sure we're in a Transform or RectTransform
-	{
-		// Get the fileId
-		// gameObjectId = componentIdToGameObjectMap[lastFileId];
-		// parentFileId = componentIdToGameObjectMap[The parsed out "file:"];
-		// fileIdToGameObjectMap[gameObjectId].ParentId = parentFileId;
-	}	
-	else if (line.Contains("guid:"))
-	{
-		// Get the guid and see if it's in our guid map
-		gameObjectId = componentIdToGameObjectMap[lastFileId];
-		Debug.Log("Found Reference: " + GetFullName(gameObjectId));
-	}
+    if (line.StartsWith("--- !u"))
+    {
+        lastFileId = blah;
+    }
+    else if (line.StartsWith("GameObject:"))
+    {
+        // Create new GameObjectInfo
+        // Set GameObjectInfo.FileId to lastFileId
+        // Add GameObjectInfo to fileIdToGameObjectMap
+        // Go through component list and add those ids to the componentIdToGameObjectMap
+    }
+    else if (line.StartsWith("m_Father") // Might want to make sure we're in a Transform or RectTransform
+    {
+        // Get the fileId
+        // gameObjectId = componentIdToGameObjectMap[lastFileId];
+        // parentFileId = componentIdToGameObjectMap[The parsed out "file:"];
+        // fileIdToGameObjectMap[gameObjectId].ParentId = parentFileId;
+    }
+    else if (line.Contains("guid:"))
+    {
+        // Get the guid and see if it's in our guid map
+        gameObjectId = componentIdToGameObjectMap[lastFileId];
+        Debug.Log("Found Reference: " + GetFullName(gameObjectId));
+    }
 }
 
 Dictionary<string, GameObject> fileIdToGameObjectMap;
@@ -172,5 +175,5 @@ GameObjectInfo
   List<string> componentIds;
   Name
   ParentId
-  
+
 */
