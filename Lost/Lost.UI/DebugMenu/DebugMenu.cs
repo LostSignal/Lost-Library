@@ -21,9 +21,6 @@ namespace Lost
     public class DebugMenu : SingletonDialogResource<DebugMenu>
     {
         #pragma warning disable 0649
-        [Header("Camera")]
-        [SerializeField] private string sortingLayerName = "DebugMenu";
-
         [Header("Menu Items")]
         [SerializeField] private GameObject debugMenu;
         [SerializeField] private DebugMenuItem debugMenuItemPrefab;
@@ -183,6 +180,18 @@ namespace Lost
             }
 
             this.Settings = settings;
+
+            // setting the canvas sorting layer
+            if (SortingLayer.NameToID(this.Settings.SortingLayer) == -1)
+            {
+                Debug.LogErrorFormat(this, "Trying to use DebugMenu without creating a Sorting Layer of name \"{0}\".  The debug will not work unless create that layer.", this.Settings.SortingLayer);
+            }
+            else
+            {
+                this.Dialog.Canvas.sortingLayerName = this.Settings.SortingLayer;
+            }
+
+            this.Dialog.Canvas.sortingOrder = this.Settings.OrderInLayer;
         }
 
         public void SetCamera(Camera camera)
@@ -195,16 +204,6 @@ namespace Lost
         {
             base.Awake();
             this.HideMenu();
-
-            // setting the canvas sorting layer
-            if (SortingLayer.NameToID(this.sortingLayerName) == -1)
-            {
-                Debug.LogErrorFormat(this, "Trying to use DebugMenu without creating a Sorting Layer of name \"{0}\".  The debug will not work unless create that layer.", this.sortingLayerName);
-            }
-            else
-            {
-                this.Dialog.Canvas.sortingLayerName = this.sortingLayerName;
-            }
         }
 
         protected override void OnBackButtonPressed()
@@ -285,15 +284,21 @@ namespace Lost
         public class DebugMenuSettings
         {
             #pragma warning disable 0649
+            [Header("Layering")]
+            [SerializeField] private string sortingLayer = "Default";
+            [SerializeField] private int orderInLayer = 1000;
+
             [Header("Keyboard")]
-            [SerializeField] private KeyCode key = KeyCode.Space;
-            [SerializeField] private float keyHoldTime = 2.0f;
+            [SerializeField] private KeyCode key = KeyCode.F2;
+            [SerializeField] private float keyHoldTime = 0.01f;
 
             [Header("Touch")]
             [SerializeField] private int fingerDownCount = 3;
             [SerializeField] private float fingerDownTime = 2.0f;
             #pragma warning restore 0649
 
+            public string SortingLayer => this.sortingLayer;
+            public int OrderInLayer => this.orderInLayer;
             public KeyCode Key => this.key;
             public float KeyHoldTime => this.keyHoldTime;
             public int FingerDownCount => this.fingerDownCount;

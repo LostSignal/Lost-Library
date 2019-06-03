@@ -27,7 +27,7 @@ namespace Lost.Networking
         //     this.NetworkId = behaviour.NetworkId;
         //     this.BehaviourIndex = behaviour.BehaviourIndex;
         //     this.DataLength = writer.Position;
-        // 
+        //
         //     reader.Replace(writer.RawBuffer);
         //     reader.ReadBytes(this.Data, this.DataLength);
         // }

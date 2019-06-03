@@ -61,7 +61,7 @@ namespace Lost.Networking
                     else
                     {
                         this.transform.localPosition = Vector3.Lerp(this.transform.localPosition, this.desiredPosition, this.positionLerpPercentage);
-                    }                    
+                    }
                 }
 
                 if (this.sendRotation)
@@ -124,7 +124,7 @@ namespace Lost.Networking
             bool useGravity = NetworkUtil.GetBit(sent, 4);
             bool freezeRotation = NetworkUtil.GetBit(sent, 5);
             bool isKinematic = NetworkUtil.GetBit(sent, 6);
-            
+
             if (sentPosition)
             {
                 Vector3 newDesiredPosition = reader.ReadVector3();
@@ -146,17 +146,17 @@ namespace Lost.Networking
                 this.desiredPosition = newDesiredPosition;
                 this.lastVelocityUpdateTime = Time.realtimeSinceStartup;
             }
-            
+
             if (sentRotation)
             {
                 this.desiredRotation = reader.ReadQuaternion();
             }
-            
+
             if (sentScale)
             {
                 this.desiredScale = reader.ReadVector3();
             }
-            
+
             if (sentPhysics)
             {
                 this.rigidBody.velocity = reader.ReadVector3();

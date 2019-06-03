@@ -38,7 +38,7 @@ namespace Lost.Networking
             get
             {
                 return
-                    NetworkManager.IsInitialized && 
+                    NetworkManager.IsInitialized &&
                     (NetworkManager.Instance.IsOffline ||
                     (this.ownerId == 0 && NetworkManager.Instance.IsServer) ||
                     (this.ownerId == NetworkManager.Instance.UserId));

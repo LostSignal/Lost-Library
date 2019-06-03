@@ -144,7 +144,7 @@ namespace Lost
             else if (this.dynamicNetworkObjectsHash.TryGetValue(networkId, out NetworkIdentity dynamicNetworkIdentity))
             {
                 dynamicNetworkIdentity.Destroyed = null;
-            
+
                 this.dynamicNetworkObjectsHash.Remove(networkId);
                 this.dynamicNetworkObjectsList.Remove(dynamicNetworkIdentity);
 

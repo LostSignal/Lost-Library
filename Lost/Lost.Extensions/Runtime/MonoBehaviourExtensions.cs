@@ -39,6 +39,13 @@ namespace Lost
         public static void AssertGetComponentInParent<T>(this MonoBehaviour monoBehaviour, ref T memberVariable)
             where T : Component
         {
+            #if UNITY_EDITOR
+            if (monoBehaviour.gameObject.scene.IsValid() == false)
+            {
+                return;
+            }
+            #endif
+
             if (memberVariable == null)
             {
                 memberVariable = monoBehaviour.GetComponentInParent<T>();

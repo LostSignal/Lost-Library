@@ -256,13 +256,13 @@ namespace Lost
             {
                 if (File.Exists(filePath) == false)
                 {
-                    FileUtil.CreateFile(textAsset.text, filePath, true, EditorSettings.lineEndingsForNewScripts);
+                    FileUtil.CreateFile(textAsset.text, filePath, false, EditorSettings.lineEndingsForNewScripts);
                 }
                 else
                 {
                     try
                     {
-                        FileUtil.CopyFile(textAsset, filePath, true, EditorSettings.lineEndingsForNewScripts);
+                        FileUtil.CopyFile(textAsset, filePath, false, EditorSettings.lineEndingsForNewScripts);
                     }
                     catch
                     {
