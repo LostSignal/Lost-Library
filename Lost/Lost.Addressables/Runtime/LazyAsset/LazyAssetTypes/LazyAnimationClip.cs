@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="LazySprite.cs" company="Lost Signal LLC">
+// <copyright file="LazyGameObject.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -13,18 +13,11 @@ namespace Lost
 
     [Serializable]
     #if UNITY_2018_3_OR_NEWER
-    public class LazySprite : LazyAsset<Sprite>
+    public class LazyAnimationClip : LazyAsset<AnimationClip>
     #else
-    public class LazySprite : LazyAsset<object>
+    public class LazyAnimationClip : LazyAsset<object>
     #endif
     {
-        public LazySprite()
-        {
-        }
-
-        public LazySprite(string guid) : base(guid)
-        {
-        }
     }
 }
 

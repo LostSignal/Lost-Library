@@ -27,6 +27,14 @@ namespace Lost
             get { return typeof(T); }
         }
 
+        public LazyAsset()
+        {
+        }
+
+        public LazyAsset(string guid) : base(guid)
+        {
+        }
+
         public UnityTask<T> Load()
         {
             #if UNITY_EDITOR

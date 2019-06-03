@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="LazySprite.cs" company="Lost Signal LLC">
+// <copyright file="LazySpriteAtlas.cs" company="Lost Signal LLC">
 //     Copyright (c) Lost Signal LLC. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -9,22 +9,15 @@
 namespace Lost
 {
     using System;
-    using UnityEngine;
+    using UnityEngine.U2D;
 
     [Serializable]
     #if UNITY_2018_3_OR_NEWER
-    public class LazySprite : LazyAsset<Sprite>
+    public class LazySpriteAtlas : LazyAsset<SpriteAtlas>
     #else
-    public class LazySprite : LazyAsset<object>
+    public class LazySpriteAtlas : LazyAsset<object>
     #endif
     {
-        public LazySprite()
-        {
-        }
-
-        public LazySprite(string guid) : base(guid)
-        {
-        }
     }
 }
 

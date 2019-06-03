@@ -33,6 +33,15 @@ namespace Lost
         {
             get { return null; }
         }
+
+        public LazyAsset()
+        {
+        }
+
+        public LazyAsset(string guid)
+        {
+            this.assetGuid = guid;
+        }
     }
 }
 

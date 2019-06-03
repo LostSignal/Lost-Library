@@ -9,7 +9,6 @@ namespace Lost
     using System;
     using System.IO;
     using UnityEditor;
-    using UnityEditor.VersionControl;
 
     public static class ContextMenuTools
     {
