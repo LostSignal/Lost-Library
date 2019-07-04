@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if UNITY_2018_3_OR_NEWER
+
 namespace Lost.Networking
 {
     using System.Collections.Generic;
@@ -97,3 +99,5 @@ namespace Lost.Networking
         }
     }
 }
+
+#endif

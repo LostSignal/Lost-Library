@@ -277,8 +277,12 @@ namespace Lost.Networking
                 case UserInfoMessage.Id:
                     {
                         var userConnectedMessage = (UserInfoMessage)message;
-                        Debug.LogFormat("GameClient: UserInfoMessage For UserId {0}", userConnectedMessage.UserInfo.UserId);
-                        this.AddOrUpdateUserInfo(userConnectedMessage.UserInfo);
+
+                        if (userConnectedMessage.UserInfo.UserId != this.UserId)
+                        {
+                            Debug.LogFormat("GameClient: UserInfoMessage For UserId {0}", userConnectedMessage.UserInfo.UserId);
+                            this.AddOrUpdateUserInfo(userConnectedMessage.UserInfo);
+                        }
 
                         break;
                     }

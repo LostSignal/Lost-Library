@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if UNITY_2018_3_OR_NEWER
+
 namespace Lost.Networking
 {
     using System;
@@ -135,3 +137,5 @@ namespace Lost.Networking
         }
     }
 }
+
+#endif

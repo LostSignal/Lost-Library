@@ -10,13 +10,17 @@ namespace Lost
 {
     using System;
     using UnityEngine;
+
+    #if UNITY_2018_3_OR_NEWER
     using UnityEngine.AddressableAssets;
     using UnityEngine.ResourceManagement.AsyncOperations;
     using UnityEngine.SceneManagement;
+    #endif
 
     [Serializable]
     public class LazyScene : LazyAsset, ILazyScene
     {
+        #if UNITY_2018_3_OR_NEWER
         private AsyncOperationHandle operation;
 
         public bool IsLoaded => true;
@@ -38,6 +42,7 @@ namespace Lost
             Addressables.Release(this.operation);
             this.operation = default(AsyncOperationHandle);
         }
+        #endif
     }
 }
 

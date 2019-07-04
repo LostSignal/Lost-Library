@@ -11,10 +11,11 @@ namespace Lost
     // NOTE [bgish]: this must match UnityEngine.UI.Selectable.SelectionState
     public enum UIActionState
     {
-        Normal,
-        Highlighted,
-        Pressed,
-        Disabled
+        Normal = 0,
+        Highlighted = 1,
+        Pressed = 2,
+        Selected = 3,
+        Disabled = 4
     }
 
     [ExecuteInEditMode]

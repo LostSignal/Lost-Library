@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if UNITY_2018_3_OR_NEWER
+
 namespace Lost.Networking
 {
     public class NetworkBehaviourMessage : Message
@@ -61,3 +63,5 @@ namespace Lost.Networking
         }
     }
 }
+
+#endif

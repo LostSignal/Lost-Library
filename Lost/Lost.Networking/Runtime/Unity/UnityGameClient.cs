@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if UNITY_2018_3_OR_NEWER
+
 namespace Lost
 {
     using System.Collections.Generic;
@@ -261,3 +263,5 @@ namespace Lost
         }
     }
 }
+
+#endif

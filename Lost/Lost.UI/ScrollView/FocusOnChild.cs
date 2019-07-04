@@ -65,15 +65,7 @@ namespace Lost
 
         public int ChildCount
         {
-            get
-            {
-                if (this.scrollRect == null)
-                {
-                    this.scrollRect = this.GetComponent<ScrollRect>();
-                }
-
-                return this.scrollRect.content.childCount;
-            }
+            get { return this.scrollRect.content.childCount; }
         }
 
         public void InitializeDots()
@@ -142,7 +134,6 @@ namespace Lost
                     this.scrollRect.content.transform.position += new Vector3(distance, 0, 0) * (Time.deltaTime * this.scrollerSpeed);
 
                     this.closestChild = this.scrollRect.content.GetChild(this.ClosestChildIndex).gameObject;
-
                 }
             }
 

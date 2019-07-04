@@ -16,6 +16,9 @@ namespace Lost
         private List<ItemInstance> usersInventory = null;
         private bool getInventoryCoroutineRunning;
 
+        public delegate void OnInventoryChangedDelegate();
+        public event OnInventoryChangedDelegate InventoryChanged;
+
         public InventoryHelper()
         {
             PF.PlayfabEvents.OnLoginResultEvent += this.PlayfabEvents_OnLoginResultEvent;
@@ -26,30 +29,41 @@ namespace Lost
         public void InvalidateUserInventory()
         {
             this.usersInventory = null;
+            this.InventoryChanged?.Invoke();
         }
 
         public UnityTask<List<ItemInstance>> GetInventoryItems()
         {
-            return UnityTask<List<ItemInstance>>.Run(GetInventoryItemsCoroutine());
+            if (this.usersInventory != null)
+            {
+                return UnityTask<List<ItemInstance>>.Empty(this.usersInventory);
+            }
+            else
+            {
+                return UnityTask<List<ItemInstance>>.Run(GetInventoryItemsCoroutine());
+            }            
 
             IEnumerator <List<ItemInstance>> GetInventoryItemsCoroutine()
             {
                 // If it's already running, then wait for it to finish
-                while (this.getInventoryCoroutineRunning)
+                if (this.getInventoryCoroutineRunning)
                 {
-                    yield return default(List<ItemInstance>);
+                    while (this.getInventoryCoroutineRunning)
+                    {
+                        yield return default(List<ItemInstance>);
+                    }
+
+                    yield return this.usersInventory;
+                    yield break;
                 }
 
                 this.getInventoryCoroutineRunning = true;
 
-                if (this.usersInventory == null)
-                {
-                    var playfabGetInventory = PF.Do(new GetUserInventoryRequest());
+                var playfabGetInventory = PF.Do(new GetUserInventoryRequest());
 
-                    while (playfabGetInventory.IsDone == false)
-                    {
-                        yield return default(List<ItemInstance>);
-                    }
+                while (playfabGetInventory.IsDone == false)
+                {
+                    yield return default(List<ItemInstance>);
                 }
 
                 this.getInventoryCoroutineRunning = false;
@@ -91,14 +105,6 @@ namespace Lost
             }
         }
 
-        public void InternalAddCatalogItemToInventory(CatalogItem catalogItem)
-        {
-        }
-
-        public void InternalAddStoreItemToInventory(StoreItem storeItem)
-        {
-        }
-
         private void PlayfabEvents_OnLoginResultEvent(LoginResult result)
         {
             this.UpdateInventory(result.InfoResultPayload?.UserInventory);
@@ -128,6 +134,7 @@ namespace Lost
             if (inventory.IsNullOrEmpty() == false)
             {
                 this.usersInventory.AddRange(inventory);
+                this.InventoryChanged?.Invoke();
             }
         }
 

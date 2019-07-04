@@ -18,6 +18,7 @@ namespace Lost
     public class LazySprite : LazyAsset<object>
     #endif
     {
+        #if UNITY_2018_3_OR_NEWER
         public LazySprite()
         {
         }
@@ -25,6 +26,7 @@ namespace Lost
         public LazySprite(string guid) : base(guid)
         {
         }
+        #endif
     }
 }
 

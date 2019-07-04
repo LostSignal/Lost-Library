@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if UNITY_2018_3_OR_NEWER
+
 using UnityEngine;
 
 namespace Lost.Networking
@@ -43,3 +45,5 @@ namespace Lost.Networking
         }
     }
 }
+
+#endif

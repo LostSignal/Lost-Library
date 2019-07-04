@@ -15,7 +15,7 @@ namespace Lost
         public static void AssertGetComponent<T>(this MonoBehaviour monoBehaviour, ref T memberVariable)
             where T : Component
         {
-            if (memberVariable == null)
+            if (monoBehaviour && memberVariable == null)
             {
                 memberVariable = monoBehaviour.GetComponent<T>();
 

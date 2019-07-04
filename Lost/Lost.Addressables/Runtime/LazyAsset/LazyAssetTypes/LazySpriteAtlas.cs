@@ -9,7 +9,10 @@
 namespace Lost
 {
     using System;
+
+    #if UNITY_2018_3_OR_NEWER
     using UnityEngine.U2D;
+    #endif
 
     [Serializable]
     #if UNITY_2018_3_OR_NEWER

@@ -34,21 +34,40 @@ namespace Lost
 
         public static UnityEngine.GameObject Instantiate(UnityEngine.GameObject prefab)
         {
-            return Instantiate(prefab, null);
+            return Instantiate(prefab, null, false);
         }
 
         public static UnityEngine.GameObject Instantiate(UnityEngine.GameObject prefab, Transform parent)
+        {
+            return Instantiate(prefab, null, false);
+        }
+
+        public static UnityEngine.GameObject Instantiate(UnityEngine.GameObject prefab, Transform parent, bool reset)
         {
             int instanceId = prefab.GetInstanceID();
             Pool pool = null;
 
             if (pools.TryGetValue(instanceId, out pool))
             {
-                return pool.GetObjectFromPool(prefab, parent);
+                var result = pool.GetObjectFromPool(prefab, parent);
+
+                if (reset)
+                {
+                    result.transform.Reset();
+                }
+
+                return result;
             }
             else
             {
-                return GameObject.Instantiate(prefab, parent);
+                var result = GameObject.Instantiate(prefab, parent);
+
+                if (reset)
+                {
+                    result.transform.Reset();
+                }
+
+                return result;
             }
         }
 

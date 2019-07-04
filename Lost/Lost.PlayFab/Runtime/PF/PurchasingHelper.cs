@@ -107,12 +107,12 @@ namespace Lost
         }
         #endif
 
-        public UnityTask<bool> PurchaseStoreItem(string storeId, StoreItem storeItem, bool showPurchaseItemDialog, Action showStore = null)
+        public UnityTask<bool> PurchaseStoreItem(string storeId, StoreItem storeItem, Action showStore = null)
         {
-            return UnityTask<bool>.Run(this.PurchaseStoreItemInternal(storeId, storeItem, showPurchaseItemDialog, showStore));
+            return UnityTask<bool>.Run(this.PurchaseStoreItemInternal(storeId, storeItem, showStore));
         }
 
-        private IEnumerator<bool> PurchaseStoreItemInternal(string storeId, StoreItem storeItem, bool showPurchaseItemDialog, Action showStore)
+        private IEnumerator<bool> PurchaseStoreItemInternal(string storeId, StoreItem storeItem, Action showStore)
         {
             bool isIapItem = storeItem.GetVirtualCurrenyPrice("RM") > 0;
 
@@ -139,21 +139,6 @@ namespace Lost
                         }
 
                         yield return false;
-                        yield break;
-                    }
-                }
-
-                if (showPurchaseItemDialog)
-                {
-                    var purchaseItemDialog = PurchaseItem.Instance.ShowStoreItem(storeItem, true);
-
-                    while (purchaseItemDialog.IsDone == false)
-                    {
-                        yield return default(bool);
-                    }
-
-                    if (purchaseItemDialog.Value == PurchaseResult.Cancel)
-                    {
                         yield break;
                     }
                 }
@@ -208,21 +193,6 @@ namespace Lost
 
                 bool hasSufficientFunds = PF.VC[virtualCurrency] >= storeItemCost;
 
-                if (showPurchaseItemDialog)
-                {
-                    var purchaseItemDialog = PurchaseItem.Instance.ShowStoreItem(storeItem, hasSufficientFunds);
-
-                    while (purchaseItemDialog.IsDone == false)
-                    {
-                        yield return default(bool);
-                    }
-
-                    if (purchaseItemDialog.Value == PurchaseResult.Cancel)
-                    {
-                        yield break;
-                    }
-                }
-
                 if (hasSufficientFunds == false)
                 {
                     var messageBoxDialog = PlayFabMessages.ShowInsufficientCurrency();
@@ -234,10 +204,7 @@ namespace Lost
 
                     if (messageBoxDialog.Value == YesNoResult.Yes)
                     {
-                        if (showStore != null)
-                        {
-                            showStore.Invoke();
-                        }
+                        showStore?.Invoke();
                     }
 
                     yield break;
@@ -260,7 +227,7 @@ namespace Lost
 
                 if (isSuccessful)
                 {
-                    PF.Inventory.InternalAddStoreItemToInventory(storeItem);
+                    PF.Inventory.InvalidateUserInventory();
                 }
 
                 yield return isSuccessful;
@@ -426,7 +393,7 @@ namespace Lost
                 { "store", store },
             });
 
-            PF.Inventory.InternalAddCatalogItemToInventory(catalogItem);
+            PF.Inventory.InvalidateUserInventory();
 
             yield return true;
         }
@@ -471,7 +438,7 @@ namespace Lost
 
                 if (catalogItem != null)
                 {
-                    PF.Inventory.InternalAddCatalogItemToInventory(catalogItem);
+                    PF.Inventory.InvalidateUserInventory();
                     yield return true;
                 }
                 else

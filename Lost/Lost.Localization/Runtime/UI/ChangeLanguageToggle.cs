@@ -19,7 +19,7 @@ namespace Lost.Localization
 
         private void OnValidate()
         {
-            this.AssertGetComponent<Toggle>(ref this.toggle);
+            this.AssertGetComponent(ref this.toggle);
         }
 
         private void Awake()
