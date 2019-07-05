@@ -24,6 +24,8 @@ namespace Lost
 
         public string SessionTicket { get; private set; }
 
+        public Dictionary<string, UserDataRecord> UserData { get; private set; }
+
         #if USING_FACEBOOK_SDK
         public Facebook.Unity.ILoginResult FacebookLoginResult { get; private set; }
 
@@ -528,6 +530,7 @@ namespace Lost
         private void PlayfabEvents_OnLoginResultEvent(LoginResult result)
         {
             this.userAccountInfo = result?.InfoResultPayload?.AccountInfo;
+            this.UserData = result?.InfoResultPayload?.UserData;
             this.SessionTicket = result?.SessionTicket;
             this.forceRelogin = false;
             this.HasEverLoggedIn = true;
