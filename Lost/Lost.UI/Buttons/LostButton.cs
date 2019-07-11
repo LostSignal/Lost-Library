@@ -17,6 +17,7 @@ namespace Lost
         private List<UIAction> actions = new List<UIAction>();
         private bool isFirstStateChange = true;
         private RectTransform rectTransform;
+        private bool isInitialized = false;
 
         public RectTransform RectTransform
         {
@@ -31,14 +32,6 @@ namespace Lost
             }
         }
 
-        protected override void Awake()
-        {
-            base.Awake();
-
-            this.actions.AddRange(this.GetComponentsInChildren<UIAction>());
-            this.actions.Sort((x, y) => { return x.Order.CompareTo(y.Order); });
-        }
-
         protected override void DoStateTransition(SelectionState state, bool instant)
         {
             base.DoStateTransition(state, instant);
@@ -50,6 +43,8 @@ namespace Lost
             }
             #endif
 
+            this.Initialize();
+
             if (this.selectionState != state)
             {
                 this.UpdateButtonActions(this.selectionState, state);
@@ -57,19 +52,31 @@ namespace Lost
             }
         }
 
+        private void Initialize()
+        {
+            if (this.isInitialized)
+            {
+                return;
+            }
+
+            this.isInitialized = true;
+            this.actions.AddRange(this.GetComponentsInChildren<UIAction>());
+            this.actions.Sort((x, y) => { return x.Order.CompareTo(y.Order); });
+        }
+
         private void UpdateButtonActions(SelectionState oldState, SelectionState newState)
         {
-            // there's nothing to revert on the first state change
+            // There's nothing to revert on the first state change
             if (this.isFirstStateChange == false)
             {
-                // revert the old button actions
+                // Revert the old button actions
                 foreach (var action in this.actions.Where(x => (int)x.State == (int)oldState))
                 {
                     action.Revert();
                 }
             }
 
-            // apply the new button actions
+            // Apply the new button actions
             foreach (var action in this.actions.Where(x => (int)x.State == (int)newState))
             {
                 action.Apply();
