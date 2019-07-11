@@ -11,15 +11,25 @@ namespace Lost
 
     public enum TimespanTextFormat
     {
-        ColonSeparated,
-        SingleLetters,
+        ColonSeparatedDHMS = 100,
+        ColonSeparatedHMS,
+        ColonSeparatedMS,
+        ColonSeparatedS,
+
+        SingleLettersDHMS = 200,
+        SingleLettersHMS,
+        SingleLettersMS,
+        SingleLettersS,
     }
 
     [RequireComponent(typeof(Text))]
     public class TimespanText : MonoBehaviour
     {
         #pragma warning disable 0649
-        [SerializeField] private TimespanTextFormat format;
+        [SerializeField] private TimespanTextFormat daysLeftFormat;
+        [SerializeField] private TimespanTextFormat hoursLeftFormat;
+        [SerializeField] private TimespanTextFormat minutesLeftFormat;
+        [SerializeField] private TimespanTextFormat secondsLeftFormat;
 
         // Hidden Serialized Fields
         [SerializeField, HideInInspector] private Text text;
@@ -51,7 +61,7 @@ namespace Lost
 
         private void OnValidate()
         {
-            this.AssertGetComponent<Text>(ref this.text);
+            this.AssertGetComponent(ref this.text);
         }
 
         private void Awake()
@@ -64,6 +74,26 @@ namespace Lost
             this.UpdateText();
         }
 
+        private TimespanTextFormat GetFormat()
+        {
+            if (this.seconds > 86400)
+            {
+                return this.daysLeftFormat;
+            }
+            else if (this.seconds > 3600)
+            {
+                return this.hoursLeftFormat;
+            }
+            else if (this.seconds > 60)
+            {
+                return this.minutesLeftFormat;
+            }
+            else
+            {
+                return this.secondsLeftFormat;
+            }
+        }
+
         private void UpdateText()
         {
             // update text can be called before Awake is called, so this is very necessary, but this will get called again OnEnable
@@ -72,47 +102,102 @@ namespace Lost
                 return;
             }
 
-            int hours = this.seconds / 60 / 60;
-            int minutes = this.seconds / 60;
+            int days = this.seconds / 60 / 60 / 24;
+            int hours = (this.seconds / 60 / 60) % 24;
+            int minutes = (this.seconds / 60) % 60;
             int seconds = this.seconds % 60;
 
-            if (format == TimespanTextFormat.ColonSeparated)
+            switch (this.GetFormat())
             {
-                this.SetTextColonSeparated(hours, minutes, seconds);
-            }
-            else if (format == TimespanTextFormat.SingleLetters)
-            {
-                this.SetTextSingleLetters(hours, minutes, seconds);
-            }
-        }
+                case TimespanTextFormat.ColonSeparatedDHMS:
+                    {
+                        BetterStringBuilder.New()
+                            .Append(days).Append(":")
+                            .AppendTwoDigitNumber(hours).Append(":")
+                            .AppendTwoDigitNumber(minutes).Append(":")
+                            .AppendTwoDigitNumber(seconds)
+                            .Set(this.text);
 
-        private void SetTextColonSeparated(int hours, int minutes, int seconds)
-        {
-            if (hours > 0)
-            {
-                minutes -= hours * 60;
-                this.text.text = string.Format("{0}:{1:D2}:{2:D2}", hours, minutes, seconds);
-            }
-            else
-            {
-                this.text.text = string.Format("{0}:{1:D2}", minutes, seconds);
-            }
-        }
+                        break;
+                    }
 
-        private void SetTextSingleLetters(int hours, int minutes, int seconds)
-        {
-            if (hours > 0)
-            {
-                minutes -= hours * 60;
-                this.text.text = string.Format("{0}h {1}m", hours, minutes);
-            }
-            else if (minutes > 0)
-            {
-                this.text.text = string.Format("{0}m {1}s", minutes, seconds);
-            }
-            else
-            {
-                this.text.text = string.Format("{0}s", seconds);
+                case TimespanTextFormat.ColonSeparatedHMS:
+                    {
+                        BetterStringBuilder.New()
+                           .Append((days * 24) + hours).Append(":")
+                           .AppendTwoDigitNumber(minutes).Append(":")
+                           .AppendTwoDigitNumber(seconds)
+                           .Set(this.text);
+
+                        break;
+                    }
+
+                case TimespanTextFormat.ColonSeparatedMS:
+                    {
+                        BetterStringBuilder.New()
+                          .Append((((days * 24) + hours) * 60) + minutes).Append(":")
+                          .AppendTwoDigitNumber(seconds)
+                          .Set(this.text);
+
+                        break;
+                    }
+
+                case TimespanTextFormat.ColonSeparatedS:
+                    {
+                        BetterStringBuilder.New()
+                         .Append(this.seconds)
+                         .Set(this.text);
+
+                        break;
+                    }
+
+                case TimespanTextFormat.SingleLettersDHMS:
+                    {
+                        BetterStringBuilder.New()
+                            .Append(days).Append("d ")
+                            .AppendTwoDigitNumber(hours).Append("h ")
+                            .AppendTwoDigitNumber(minutes).Append("m ")
+                            .AppendTwoDigitNumber(seconds).Append("s")
+                            .Set(this.text);
+
+                        break;
+                    }
+
+                case TimespanTextFormat.SingleLettersHMS:
+                    {
+                        BetterStringBuilder.New()
+                           .Append((days * 24) + hours).Append("h ")
+                           .AppendTwoDigitNumber(minutes).Append("m ")
+                           .AppendTwoDigitNumber(seconds).Append("s")
+                           .Set(this.text);
+
+                        break;
+                    }
+
+                case TimespanTextFormat.SingleLettersMS:
+                    {
+                        BetterStringBuilder.New()
+                          .Append((((days * 24) + hours) * 60) + minutes).Append("m ")
+                          .AppendTwoDigitNumber(seconds).Append("s")
+                          .Set(this.text);
+
+                        break;
+                    }
+
+                case TimespanTextFormat.SingleLettersS:
+                    {
+                        BetterStringBuilder.New()
+                         .Append(this.seconds).Append("s")
+                         .Set(this.text);
+
+                        break;
+                    }
+
+                default:
+                    {
+                        Debug.LogErrorFormat("Found Unknown Timespan Format {0}", this.GetFormat());
+                        break;
+                    }
             }
         }
     }

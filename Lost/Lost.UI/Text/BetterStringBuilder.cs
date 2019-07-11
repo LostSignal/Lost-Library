@@ -56,6 +56,23 @@ namespace Lost
             return this.Append((long)value, format);
         }
 
+        public BetterStringBuilder AppendTwoDigitNumber(int value)
+        {
+            if (value >= 100)
+            {
+                Debug.LogWarning("AppendTwoDigitNumber was given a number greater than 2 digits.");
+            }
+
+            if (value >= 10)
+            {
+                return this.Append((long)value, IntFormat.Plain);
+            }
+            else
+            {
+                return this.Append(0).Append((long)value, IntFormat.Plain);
+            }
+        }
+
         public BetterStringBuilder Append(long value, IntFormat format = IntFormat.Plain)
         {
             switch (format)
