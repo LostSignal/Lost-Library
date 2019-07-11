@@ -11,10 +11,14 @@ namespace Lost
     using System.Collections.Generic;
     using PlayFab.ClientModels;
 
+    ////
+    //// TODO [bgish]: Make sure to null out all the cached data when user is logged out
+    ////
     public class UserHelper
     {
         private UserAccountInfo userAccountInfo;
 
+        public UserTitleInfo TitleInfo { get; private set; }
         public string PlayFabId { get; private set; }
         public long PlayFabNumericId { get; private set; }
         public string DisplayName { get; private set; }
@@ -151,6 +155,7 @@ namespace Lost
             this.userAccountInfo = result?.InfoResultPayload?.AccountInfo;
 
             this.PlayFabId = this.userAccountInfo?.PlayFabId;
+            this.TitleInfo = this.userAccountInfo?.TitleInfo;
             this.DisplayName = this.userAccountInfo?.TitleInfo?.DisplayName;
             this.FacebookId = this.userAccountInfo?.FacebookInfo?.FacebookId;
             this.AvatarUrl = this.userAccountInfo?.TitleInfo?.AvatarUrl;
