@@ -13,10 +13,15 @@ namespace Lost
     {
         Plain,
         ThousandsSeperated,
+        Abbreviated = 100,
     }
 
     public struct BetterStringBuilder
     {
+        private const long Billion = 1000000000;
+        private const long Million = 1000000;
+        private const long Thousand = 1000;
+
         private static readonly char[] digits = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
         private static readonly char[] charBuffer = new char[512];
         private static int currentLength;
@@ -83,6 +88,9 @@ namespace Lost
                 case IntFormat.ThousandsSeperated:
                     return this.AppendLong(value, true);
 
+                case IntFormat.Abbreviated:
+                    return this.AppendAbbreviated(value);
+
                 default:
                     Debug.LogErrorFormat("Found Unknown IntFormat {0}", format);
                     return this.AppendLong(value, false);
@@ -130,6 +138,45 @@ namespace Lost
             }
 
             return this;
+        }
+
+        private BetterStringBuilder AppendAbbreviated(long value)
+        {
+            long number = value;
+            long remainder = 0;
+            string postfix = string.Empty;
+
+            if (value >= Billion)
+            {
+                number = value / Billion;
+                remainder = (value - (number * Billion)) / (Billion / 10);
+                postfix = "B";
+            }
+            else if (value >= Million)
+            {
+                number = value / Million;
+                remainder = (value - (number * Million)) / (Million / 10);
+                postfix = "M";
+            }
+            else if (value >= Thousand)
+            {
+                number = value / Thousand;
+                remainder = (value - (number * Thousand)) / (Thousand / 10);
+                postfix = "K";
+            }
+
+            if (remainder != 0)
+            {
+                return BetterStringBuilder.New()
+                    .Append(number)
+                    .Append(Localization.Localization.GetDecimalPointSeperator())
+                    .Append(remainder)
+                    .Append(postfix);
+            }
+            else
+            {
+                return BetterStringBuilder.New().Append(number).Append(postfix);
+            }
         }
     }
 }
