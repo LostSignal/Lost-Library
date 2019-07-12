@@ -43,8 +43,13 @@ namespace Lost
             return null;
         }
 
-        public UnityTask<List<StoreItem>> GetStore(string storeId)
+        public UnityTask<List<StoreItem>> GetStore(string storeId, bool forceRefresh = false)
         {
+            if (forceRefresh)
+            {
+                this.cachedStores.Remove(storeId);
+            }
+
             if (this.cachedStores.ContainsKey(storeId))
             {
                 return UnityTask<List<StoreItem>>.Run(this.GetCachedStore(storeId));
