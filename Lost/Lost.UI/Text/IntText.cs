@@ -39,14 +39,7 @@ namespace Lost
         private int intValue = int.MinValue;
         private int goalValue = int.MinValue;
 
-        public Text Text
-        {
-            get
-            {
-                this.UpdateTextField();
-                return this.text;
-            }
-        }
+        public Text Text => this.text;
 
         public bool HasValueBeenSet
         {
@@ -113,8 +106,6 @@ namespace Lost
         // NOTE [bgish]: has zero references bcause AnimateToGoal refers to this function by string name
         private IEnumerator AnimateToGoalCoroutine()
         {
-            this.UpdateTextField();
-
             if (this.HasValueBeenSet == false)
             {
                 this.intValue = 0;
@@ -149,11 +140,13 @@ namespace Lost
 
         private void OnValidate()
         {
-            this.UpdateTextField();
+            this.AssertGetComponent(ref this.text);
         }
 
         private void Awake()
         {
+            this.OnValidate();
+
             Localization.Localization.LanguagedChanged += this.UpdateText;
         }
 
@@ -167,15 +160,8 @@ namespace Lost
             Localization.Localization.LanguagedChanged -= this.UpdateText;
         }
 
-        private void UpdateTextField()
-        {
-            this.AssertGetComponent<Text>(ref this.text);
-        }
-
         private void UpdateText()
         {
-            this.UpdateTextField();
-
             if (this.text != null)
             {
                 if (this.intValue == int.MinValue)
