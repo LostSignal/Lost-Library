@@ -21,6 +21,15 @@ namespace Lost
     public class LazySpriteAtlas : LazyAsset<object>
     #endif
     {
+        #if UNITY_2018_3_OR_NEWER
+        public LazySpriteAtlas()
+        {
+        }
+
+        public LazySpriteAtlas(string guid) : base(guid)
+        {
+        }
+        #endif
     }
 }
 

@@ -27,7 +27,7 @@ namespace Lost
             get { return typeof(T); }
         }
 
-        public bool IsLoaded => this.operation.IsValid();
+        public bool IsLoaded => this.operation.IsValid() && this.operation.IsDone;
 
         public LazyAsset()
         {
