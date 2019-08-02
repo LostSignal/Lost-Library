@@ -96,7 +96,9 @@ namespace Lost
         {
             if (Platform.IsUnityCloudBuild == false)
             {
-                return 0;
+                // NOTE [bgish]: Gradle Build will fail if build number is 0, so returning 1
+                // android.defaultConfig.versionCode is set to 0, but it should be a positive integer.
+                return 1; 
             }
 
             var cloudBuildManifest = CloudBuildManifest.Find();
