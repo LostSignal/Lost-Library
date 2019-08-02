@@ -18,6 +18,14 @@ namespace Lost
 
     public static class Platform
     {
+        public enum UnityEditorPlatform
+        {
+            Windows,
+            Mac,
+            Linux,
+            Unknown,
+        }
+
         // TODO [bgish] - make sure <uses-permission android:name="android.permission.VIBRATE"/> is in the AndroidManifest.xml file
         #if UNITY_ANDROID && !UNITY_EDITOR
         private static AndroidJavaClass UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
@@ -109,6 +117,22 @@ namespace Lost
                 ////     default:
                 ////         break;
                 //// }
+            }
+        }
+
+        public static UnityEditorPlatform EditorPlatform
+        {
+            get
+            {
+                #if UNITY_EDITOR_WIN
+                return UnityEditorPlatform.Windows;
+                #elif UNITY_EDITOR_OSX
+                return UnityEditorPlatform.Mac;
+                #elif UNITY_EDITOR_LINUX
+                return UnityEditorPlatform.Linux;
+                #else
+                return UnityEditorPlatform.Unknown;
+                #endif
             }
         }
 
