@@ -7,48 +7,109 @@
 namespace Lost
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    using UnityEngine.AddressableAssets;
     using UnityEngine.U2D;
 
-    public class SpriteAtlasLoader : MonoBehaviour
+    public class SpriteAtlasLoader : SingletonResource<SpriteAtlasLoader>
     {
         #pragma warning disable 0649
         [SerializeField] private List<Atlas> atlases = new List<Atlas>();
         #pragma warning restore 0649
 
+        private Dictionary<string, Action<SpriteAtlas>> unknownAtlasRequests = new Dictionary<string, Action<SpriteAtlas>>();
+        private Dictionary<string, Atlas> atlasesMap = null;
+
+        #if UNITY_EDITOR
         public List<Atlas> Atlases => this.atlases;
+        #endif
+
+        public void RegisterAtlas(string tag, string guid)
+        {
+            Dictionary<string, Atlas> atlasMap = this.GetAtlasMap();
+            atlasMap.Add(tag, new Atlas(tag, guid));
+
+            if (this.unknownAtlasRequests.ContainsKey(tag))
+            {
+                this.RequestAtlas(tag, this.unknownAtlasRequests[tag]);
+                this.unknownAtlasRequests.Remove(tag);
+            }
+        }
+
+        public void LoadAtlasTag(string tag)
+        {
+            if (this.GetAtlasMap().TryGetValue(tag, out Atlas atlas))
+            {
+                atlas.SpriteAtlas.Load();
+            }
+        }
+
+        public void UnloadAtlas(string tag)
+        {
+            if (this.GetAtlasMap().TryGetValue(tag, out Atlas atlas))
+            {
+                if (atlas.SpriteAtlas.IsLoaded)
+                {
+                    atlas.SpriteAtlas.Release();
+                }
+            }
+        }
 
         private void OnEnable()
         {
-            SpriteAtlasManager.atlasRequested += RequestAtlas;
+            SpriteAtlasManager.atlasRequested += this.RequestAtlas;
         }
 
         private void OnDisable()
         {
-            SpriteAtlasManager.atlasRequested -= RequestAtlas;
+            SpriteAtlasManager.atlasRequested -= this.RequestAtlas;
+        }
+
+        private Dictionary<string, Atlas> GetAtlasMap()
+        {
+            if (this.atlasesMap == null)
+            {
+                this.atlasesMap = new Dictionary<string, Atlas>();
+
+                foreach (var atlas in this.atlases)
+                {
+                    this.atlasesMap.Add(atlas.Tag, atlas);
+                }
+            }
+
+            return this.atlasesMap;
         }
 
         private void RequestAtlas(string tag, Action<SpriteAtlas> callback)
         {
-            foreach (var atlas in atlases)
-            {
-                if (atlas.Tag == tag)
-                {
-                    Addressables.LoadAssetAsync<SpriteAtlas>(atlas.Guid).Completed += (operation) =>
-                    {
-                        if (operation.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded)
-                        {
-                            callback(operation.Result);
-                        }
-                    };
+            Dictionary<string, Atlas> atlasMap = this.GetAtlasMap();
 
-                    return;
+            if (atlasMap.TryGetValue(tag, out Atlas atlas))
+            {
+                if (atlas.SpriteAtlas.IsLoaded)
+                {
+                    callback?.Invoke(atlas.SpriteAtlas.Load().Value);
+                }
+                else
+                {
+                    CoroutineRunner.Instance.StartCoroutine(LoadSpriteAtlasCoroutine());
+                }
+            }
+            else
+            {
+                if (this.unknownAtlasRequests.ContainsKey(tag) == false)
+                {
+                    this.unknownAtlasRequests.Add(tag, callback);
                 }
             }
 
-            Debug.LogErrorFormat("Unable to find atlas with tag {0}!", tag);
+            IEnumerator LoadSpriteAtlasCoroutine()
+            {
+                var loadAtlas = atlas.SpriteAtlas.Load();
+                yield return loadAtlas;
+                callback?.Invoke(loadAtlas.Value);
+            }
         }
 
         [Serializable]
@@ -56,19 +117,25 @@ namespace Lost
         {
             #pragma warning disable 0649
             [SerializeField] private string tag;
-            [SerializeField] private string guid;
+            [SerializeField] private LazySpriteAtlas spriteAtlas;
             #pragma warning restore 0649
+
+            public Atlas(string tag, string guid)
+            {
+                this.tag = tag;
+                this.spriteAtlas = new LazySpriteAtlas(guid);
+            }
+
+            public LazySpriteAtlas SpriteAtlas
+            {
+                get { return this.spriteAtlas; }
+                set { this.spriteAtlas = value; }
+            }
 
             public string Tag
             {
                 get { return this.tag; }
                 set { this.tag = value; }
-            }
-
-            public string Guid
-            {
-                get { return this.guid; }
-                set { this.guid = value; }
             }
         }
     }

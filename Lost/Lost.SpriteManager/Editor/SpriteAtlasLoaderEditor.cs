@@ -36,11 +36,7 @@ namespace Lost
 
                     if (includeInBuild == false)
                     {
-                        spriteAtlasManager.Atlases.Add(new Lost.SpriteAtlasLoader.Atlas
-                        {
-                            Tag = atlas.tag,
-                            Guid = atlasGuid,
-                        });
+                        spriteAtlasManager.Atlases.Add(new Lost.SpriteAtlasLoader.Atlas(atlas.tag, atlasGuid));
                     }
                 }
 
