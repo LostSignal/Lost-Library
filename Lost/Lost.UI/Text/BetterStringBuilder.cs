@@ -118,7 +118,7 @@ namespace Lost
             }
 
             int digitCount = 1;
-            int divisor = 10;
+            long divisor = 10;
 
             while (value / divisor != 0)
             {
