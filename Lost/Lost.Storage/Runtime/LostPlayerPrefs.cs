@@ -27,21 +27,9 @@ namespace Lost
             PlayerPrefs.DeleteKey(key);
         }
 
-        public static T GetEnum<T>(string key, T defaultValue) where T : System.Enum
-        {
-            int defaultInt = Convert.ToInt32(defaultValue);
-            int enumInt = PlayerPrefs.GetInt(key, defaultInt);
-            return (T)Enum.ToObject(typeof(T), enumInt);
-        }
-
         public static int GetInt(string key, int defaultValue)
         {
             return PlayerPrefs.GetInt(key, defaultValue);
-        }
-
-        public static bool GetBool(string key, bool defaultValue)
-        {
-            return HasKey(key) ? GetString(key, FalseString) == TrueString : defaultValue;
         }
 
         public static string GetString(string key, string defaultValue)
@@ -49,10 +37,28 @@ namespace Lost
             return PlayerPrefs.GetString(key, defaultValue);
         }
 
-        public static void SetEnum<T>(string key, T value) where T : Enum
+        public static T GetEnum<T>(string key, T defaultValue) where T : System.Enum
         {
-            isDirty = true;
-            PlayerPrefs.SetInt(key, Convert.ToInt32(value));
+            int defaultInt = Convert.ToInt32(defaultValue);
+            int enumInt = PlayerPrefs.GetInt(key, defaultInt);
+            return (T)Enum.ToObject(typeof(T), enumInt);
+        }
+
+        public static long GetLong(string key, long defaultValue)
+        {
+            string longAsString = GetString(key, null);
+            return long.TryParse(longAsString, out long value) ? value : defaultValue;
+        }
+
+        public static DateTime GetDateTimeUTC(string key, DateTime defaultValue)
+        {
+            long fileTime = GetLong(key, defaultValue.ToFileTimeUtc());
+            return DateTime.FromFileTimeUtc(fileTime);
+        }
+
+        public static bool GetBool(string key, bool defaultValue)
+        {
+            return HasKey(key) ? GetString(key, FalseString) == TrueString : defaultValue;
         }
 
         public static void SetInt(string key, int value)
@@ -61,15 +67,30 @@ namespace Lost
             PlayerPrefs.SetInt(key, value);
         }
 
-        public static void SetBool(string key, bool value)
-        {
-            SetString(key, value ? TrueString : FalseString);
-        }
-
         public static void SetString(string key, string value)
         {
             isDirty = true;
             PlayerPrefs.SetString(key, value);
+        }
+
+        public static void SetEnum<T>(string key, T value) where T : Enum
+        {
+            SetInt(key, Convert.ToInt32(value));
+        }
+
+        public static void SetLong(string key, long value)
+        {
+            SetString(key, BetterStringBuilder.New().Append(value).ToString());
+        }
+
+        public static void SetDateTimeUTC(string key, DateTime value)
+        {
+            SetLong(key, value.ToFileTimeUtc());
+        }
+
+        public static void SetBool(string key, bool value)
+        {
+            SetString(key, value ? TrueString : FalseString);
         }
 
         public static void Save()
