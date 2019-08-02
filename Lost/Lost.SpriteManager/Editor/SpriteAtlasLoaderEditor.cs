@@ -4,6 +4,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+#if USING_UNITY_ADDRESSABLES
+
 namespace Lost
 {
     using UnityEditor;
@@ -45,3 +47,5 @@ namespace Lost
         }
     }
 }
+
+#endif
