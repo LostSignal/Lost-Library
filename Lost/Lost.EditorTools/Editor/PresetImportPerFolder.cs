@@ -23,6 +23,12 @@ namespace Lost
             {
                 // Get the current imported asset folder.
                 var path = Path.GetDirectoryName(assetPath);
+
+                if (path == "ProjectSettings")
+                {
+                    return;
+                }
+
                 while (!string.IsNullOrEmpty(path))
                 {
                     // Find all Preset assets in this folder.
