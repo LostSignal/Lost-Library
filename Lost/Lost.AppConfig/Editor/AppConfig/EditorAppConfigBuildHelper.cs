@@ -11,6 +11,9 @@ namespace Lost.AppConfig
     using UnityEngine.SceneManagement;
 
     public class EditorAppConfigBuildHelper : IPreprocessBuildWithReport, IPostprocessBuildWithReport, IProcessSceneWithReport
+        #if UNITY_ANDROID
+        , UnityEditor.Android.IPostGenerateGradleAndroidProject
+        #endif
     {
         int IOrderedCallback.callbackOrder => 1000;
 
@@ -43,5 +46,17 @@ namespace Lost.AppConfig
                 settings.OnProcessScene(activeConfig, scene, report);
             }
         }
+
+        #if UNITY_ANDROID
+        void UnityEditor.Android.IPostGenerateGradleAndroidProject.OnPostGenerateGradleAndroidProject(string gradlePath)
+        {
+            var activeConfig = EditorAppConfig.ActiveAppConfig;
+
+            foreach (var settings in EditorAppConfig.GetActiveConfigSettings())
+            {
+                settings.OnPostGenerateGradleAndroidProject(activeConfig, gradlePath);
+            }
+        }
+        #endif
     }
 }

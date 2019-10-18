@@ -4,8 +4,6 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-#if USING_UNITY_ADDRESSABLES
-
 namespace Lost
 {
     using System;
@@ -39,12 +37,24 @@ namespace Lost
             }
         }
 
-        public void LoadAtlasTag(string tag)
+        public bool IsAtlasTagLoaded(string tag)
         {
             if (this.GetAtlasMap().TryGetValue(tag, out Atlas atlas))
             {
-                atlas.SpriteAtlas.Load();
+                return atlas.SpriteAtlas.IsLoaded;
             }
+
+            return false;
+        }
+
+        public UnityTask<SpriteAtlas> LoadAtlasTag(string tag)
+        {
+            if (this.GetAtlasMap().TryGetValue(tag, out Atlas atlas))
+            {
+                return atlas.SpriteAtlas.Load();
+            }
+
+            return null;
         }
 
         public void UnloadAtlas(string tag)
@@ -142,5 +152,3 @@ namespace Lost
         }
     }
 }
-
-#endif

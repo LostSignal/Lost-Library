@@ -28,8 +28,11 @@ namespace Lost
 
         public void InvalidateUserInventory()
         {
-            this.usersInventory = null;
-            this.InventoryChanged?.Invoke();
+            if (this.getInventoryCoroutineRunning == false)
+            {
+                this.usersInventory = null;
+                this.InventoryChanged?.Invoke();
+            }            
         }
 
         public UnityTask<List<ItemInstance>> GetInventoryItems()
@@ -85,18 +88,22 @@ namespace Lost
                     yield return default(int);
                 }
 
-                List<ItemInstance> items = inventory.Value;
                 int count = 0;
 
-                for (int i = 0; i < items.Count; i++)
+                if (inventory.HasError == false)
                 {
-                    if (items[i].ItemId == itemId)
-                    {
-                        int? remainingUses = items[i].RemainingUses;
+                    List<ItemInstance> items = inventory.Value;
 
-                        if (remainingUses.HasValue)
+                    for (int i = 0; i < items.Count; i++)
+                    {
+                        if (items[i].ItemId == itemId)
                         {
-                            count += remainingUses.Value;
+                            int? remainingUses = items[i].RemainingUses;
+
+                            if (remainingUses.HasValue)
+                            {
+                                count += remainingUses.Value;
+                            }
                         }
                     }
                 }

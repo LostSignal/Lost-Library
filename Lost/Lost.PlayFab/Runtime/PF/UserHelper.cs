@@ -47,9 +47,9 @@ namespace Lost
             return UnityTask<bool>.Run(this.ChangeDisplayNameWithPopupCoroutine());
         }
 
-        #if USING_FACEBOOK_SDK
         public bool HasFacebookPermission(string permission)
         {
+            #if USING_FACEBOOK_SDK
             var facebookPermissions = Facebook.Unity.AccessToken.CurrentAccessToken?.Permissions;
 
             if (facebookPermissions != null)
@@ -62,12 +62,14 @@ namespace Lost
                     }
                 }
             }
+            #endif
 
             return false;
         }
 
         public bool HasFacebookPermissions(List<string> permissions)
         {
+            #if USING_FACEBOOK_SDK
             if (permissions.IsNullOrEmpty() == false)
             {
                 foreach (var permission in permissions)
@@ -80,8 +82,12 @@ namespace Lost
             }
 
             return true;
+            #else
+
+            return false;
+
+            #endif
         }
-        #endif
 
         private IEnumerator<bool> ChangeDisplayNameCoroutine(string newDisplayName)
         {
@@ -169,9 +175,9 @@ namespace Lost
 
         private void PlayfabEvents_OnLinkFacebookAccountResultEvent1(LinkFacebookAccountResult result)
         {
-            #if USING_FACEBOOK_SDK
+#if USING_FACEBOOK_SDK
             this.FacebookId = PF.Login.FacebookLoginResult?.AccessToken?.UserId;
-            #endif
+#endif
         }
 
         private void PlayfabEvents_OnUnlinkFacebookAccountResultEvent1(UnlinkFacebookAccountResult result)

@@ -33,6 +33,10 @@ namespace Lost.AppConfig
         {
         }
 
+        public virtual void OnPostGenerateGradleAndroidProject(AppConfig appConfig, string gradlePath)
+        {
+        }
+
         public virtual void InitializeOnLoad(AppConfig appConfig)
         {
         }

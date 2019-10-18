@@ -27,12 +27,16 @@ namespace Lost
             //if (PF.IsLoggedIn)
             {
                 PlayFab.PlayFabClientAPI.WritePlayerEvent(new PlayFab.ClientModels.WriteClientPlayerEventRequest
-                {
-                    EventName = eventName,
-                    Body = (Dictionary<string, object>)eventData
-                },
-                response => { },
-                error => { });
+                    {
+                        EventName = eventName,
+                        Body = (Dictionary<string, object>)eventData
+                    },
+                    response =>
+                    {
+                    },
+                    error =>
+                    {
+                    });
             }
         }
 

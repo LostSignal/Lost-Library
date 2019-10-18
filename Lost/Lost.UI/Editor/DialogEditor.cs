@@ -63,6 +63,11 @@ namespace Lost
                 bool visible = !content.gameObject.activeSelf;
                 content.SafeSetActive(visible);
                 blocker.SafeSetActive(visible);
+
+                if (Application.isPlaying == false)
+                {
+                    EditorUtility.SetDirty(this.target);
+                }
             }
 
             // Drawing the Show/Hide components button

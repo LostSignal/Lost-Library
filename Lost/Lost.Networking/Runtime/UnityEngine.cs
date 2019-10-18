@@ -21,6 +21,20 @@ namespace UnityEngine
         }
     }
 
+    public class SpaceAttribute : System.Attribute
+    {
+        public SpaceAttribute(float space)
+        {
+        }
+    }
+
+    public class ContextMenuAttribute : System.Attribute
+    {
+        public ContextMenuAttribute(string menuName)
+        {
+        }
+    }
+
     public static class Debug
     {
         public static Action<string> OnLog;
