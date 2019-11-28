@@ -26,6 +26,7 @@ namespace Lost
         #pragma warning disable 0649
         [SerializeField] private string server;
         [SerializeField] private BuildNumberType buildNumberType;
+        [SerializeField] private int incrementBuildNumberBy;
         [SerializeField] private bool autosetVersionControlToPerforce;
 
         [Header("Build User Info")]
@@ -114,7 +115,7 @@ namespace Lost
             else if (settings.buildNumberType == BuildNumberType.BuildNumber)
             {
                 Debug.LogFormat("PerforceSettings setting application build number to unity cloud BuildNumber {0}!", cloudBuildManifest.BuildNumber);
-                return cloudBuildManifest.BuildNumber;
+                return cloudBuildManifest.BuildNumber + settings.incrementBuildNumberBy;
             }
             else if (settings.buildNumberType == BuildNumberType.CommitNumber)
             {
@@ -123,7 +124,7 @@ namespace Lost
                 if (int.TryParse(commitId, out int commitNumber))
                 {
                     Debug.LogFormat("PerforceSettings setting application build number to ScmCommitId {0}!", commitId);
-                    return commitNumber;
+                    return commitNumber + settings.incrementBuildNumberBy;
                 }
                 else
                 {

@@ -38,7 +38,7 @@ namespace Lost
 
         public bool IsLoggedIn
         {
-            get { return forceRelogin == false && PlayFabClientAPI.IsClientLoggedIn(); }
+            get { return this.forceRelogin == false && PlayFabClientAPI.IsClientLoggedIn(); }
         }
 
         public void Logout()
@@ -319,17 +319,29 @@ namespace Lost
             {
                 bool initializationFinished = false;
 
-                Debug.Log("Calling Facebook.Unity.FB.Init()...");
                 Facebook.Unity.FB.Init(() => { initializationFinished = true; });
 
-                // waiting for FB to initialize
+                // HACK [bgish]: If you call FB.Init, then immediately switch scenes, the facebook loading object
+                //               will get destroyed and you'll never finish initialization.  The will ensure the
+                //               object stays alive.
+                var facebookObjectName = "UnityFacebookSDKPlugin";
+                var facebookGameObject = GameObject.Find(facebookObjectName);
+
+                if (facebookGameObject != null)
+                {
+                    GameObject.DontDestroyOnLoad(facebookGameObject);
+                }
+                else
+                {
+                    Debug.LogWarning($"Unable to find facebook loading object {facebookObjectName}");
+                }
+
+                // Waiting for FB to initialize
                 while (initializationFinished == false)
                 {
                     yield return null;
                 }
             }
-
-            this.PrintFacebookInfo();
 
             if (Facebook.Unity.FB.IsInitialized == false)
             {
@@ -339,18 +351,15 @@ namespace Lost
             {
                 this.FacebookLoginResult = null;
 
-                Debug.Log("Calling Facebook.Unity.FB.LogInWithReadPermissions(...)");
                 Facebook.Unity.FB.LogInWithReadPermissions(this.FacebookPermissions, (loginResult) => { this.FacebookLoginResult = loginResult; });
 
-                // waiting for FB login to complete
+                // Waiting for FB login to complete
                 while (this.FacebookLoginResult == null)
                 {
                     yield return null;
                 }
 
-                this.PrintFacebookInfo();
-
-                // checking for errors
+                // Checking for errors
                 if (this.FacebookLoginResult.Cancelled)
                 {
                     throw new FacebookException("User Canceled");

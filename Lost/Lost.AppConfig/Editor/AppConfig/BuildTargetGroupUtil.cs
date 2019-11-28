@@ -21,6 +21,7 @@ namespace Lost.AppConfig
             BuildTargetGroup.PS4,
             BuildTargetGroup.XboxOne,
             BuildTargetGroup.tvOS,
+            BuildTargetGroup.Facebook,
             BuildTargetGroup.Switch,
 
             #if UNITY_2018_3_OR_NEWER

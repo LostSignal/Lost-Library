@@ -142,6 +142,7 @@ namespace Lost
         {
             if (error.Error == PlayFabErrorCode.InvalidSessionTicket)
             {
+                Debug.Log("ServerNeedsRelogin");
                 ServerNeedsRelogin?.Invoke();
             }
         }

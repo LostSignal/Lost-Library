@@ -28,8 +28,6 @@ namespace Lost
 
         public UserHelper()
         {
-            PF.PlayfabEvents.OnLinkFacebookAccountResultEvent += PlayfabEvents_OnLinkFacebookAccountResultEvent1;
-            PF.PlayfabEvents.OnUnlinkFacebookAccountResultEvent += PlayfabEvents_OnUnlinkFacebookAccountResultEvent1;
             PF.PlayfabEvents.OnLoginResultEvent += PlayfabEvents_OnLoginResultEvent;
             PF.PlayfabEvents.OnUpdateAvatarUrlResultEvent += PlayfabEvents_OnUpdateAvatarUrlResultEvent;
             PF.PlayfabEvents.OnUpdateUserTitleDisplayNameResultEvent += PlayfabEvents_OnUpdateUserTitleDisplayNameResultEvent;
@@ -173,14 +171,14 @@ namespace Lost
             // TODO [bgish]: Fire a FacebookChanged event
         }
 
-        private void PlayfabEvents_OnLinkFacebookAccountResultEvent1(LinkFacebookAccountResult result)
+        private void PlayfabEvents_OnLinkFacebookAccountResultEvent(LinkFacebookAccountResult result)
         {
-#if USING_FACEBOOK_SDK
+            #if USING_FACEBOOK_SDK
             this.FacebookId = PF.Login.FacebookLoginResult?.AccessToken?.UserId;
-#endif
+            #endif
         }
 
-        private void PlayfabEvents_OnUnlinkFacebookAccountResultEvent1(UnlinkFacebookAccountResult result)
+        private void PlayfabEvents_OnUnlinkFacebookAccountResultEvent(UnlinkFacebookAccountResult result)
         {
             this.FacebookId = null;
         }
@@ -193,16 +191,6 @@ namespace Lost
         private void PlayfabEvents_OnUpdateUserTitleDisplayNameResultEvent(UpdateUserTitleDisplayNameResult result)
         {
             // TODO [bgish]: Update DisplayName and fire a DisplayNameChanged event
-        }
-
-        private void PlayfabEvents_OnLinkFacebookAccountResultEvent(LinkFacebookAccountResult result)
-        {
-            // TODO [bgish]: Update FacebookId and fire a FacebookChanged event
-        }
-
-        private void PlayfabEvents_OnUnlinkFacebookAccountResultEvent(UnlinkFacebookAccountResult result)
-        {
-            // TODO [bgish]: Update FacebookId and fire a FacebookChanged event
         }
     }
 }
