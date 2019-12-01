@@ -222,6 +222,23 @@ namespace Lost
             }
         }
 
+        public static void GoToStore()
+        {
+            switch (CurrentDevicePlatform)
+            {
+                case DevicePlatform.Android:
+                    Application.OpenURL(string.Format("market://details?id={0}", Application.identifier));
+                    break;
+
+                case DevicePlatform.iOS:
+                    Application.OpenURL(string.Format("itms-apps://itunes.apple.com/app/{0}", Application.identifier));
+                    break;
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
         public static void RateApp()
         {
             switch (CurrentDevicePlatform)

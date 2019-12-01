@@ -84,6 +84,16 @@ namespace Lost
             User = new UserHelper();
         }
 
+        public static void OverrideCatalogVersion(string catalogVersion)
+        {
+            CatalogVersion = catalogVersion;
+        }
+
+        public static void OverrideCloudScriptRevision(int cloudScriptRevision)
+        {
+            CloudScriptRevision = cloudScriptRevision;
+        }
+
         public static long ConvertPlayFabIdToLong(string playfabId)
         {
             return System.Convert.ToInt64(playfabId, 16);
